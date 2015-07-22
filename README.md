@@ -1,4 +1,4 @@
-# reactivesocket
+# ReactiveSocket Protocol
 
 ReactiveSocket is (being developed to be a) network protocol with client and server implementations following <a href="http://reactive-streams.org">Reactive Streams</a> semantics.
 
