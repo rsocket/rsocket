@@ -23,7 +23,7 @@ Need to handle:
 
 Prefer stateless, but statefulness is an optimization.
 
-Subscription assumes idempotent redondent delivery!
+Subscription assumes idempotent redundent delivery!
 
 We are assumming polyglot libraries, we target:
 - Java
