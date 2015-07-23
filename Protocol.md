@@ -131,15 +131,15 @@ Contents
 
 Contents
 
+1. __Initial Request N__: initial Request N value. 64-bit integer.
 1. __Header Data__: identification of the service being requested along with parameters for the request.
-1. __Initial Request N__: initial Request N value.
 
 ### Request Subscription
 
 Contents
 
+1. __Initial Request N__: initial Request N value. 64-bit integer.
 1. __Header Data__: identification of the service being requested along with parameters for the request.
-1. __Initial Request N__: initial Request N value.
 
 ### Request N
 
@@ -155,9 +155,10 @@ Contents (NONE)
 
 Contents
 
+1. 1 Byte Fragment Information:
+    1. __Begin Bit__: bit to indicate beginning of a fragmented element.
+    1. __End Bit__: bit to indicate end of a fragmented element.
 1. __Header Data__: payload for onNext.
-1. __Begin Bit__: bit to indicate beginning of a fragmented element.
-1. __End Bit__: bit to indicate end of a fragmented element.
 
 ### Error
 
