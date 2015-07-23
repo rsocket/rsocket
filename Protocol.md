@@ -76,7 +76,7 @@ the Type and Header Length fields.
 
 |  Type                              | Value  | Description |
 |:-----------------------------------|:-------|:------------|
-| __HDR_RESERVED                     | 0x00 | __Reserved__ |
+| __HDR_RESERVED __                  | 0x00 | __Reserved__ |
 | __HDR_SUBSCRIBE_REQUEST_RESPONSE__ | 0x01 | __SUBSCRIBE_REQUEST_RESPONSE__: |
 | __HDR_SUBSCRIBE_STREAM__           | 0x02 | __SUBSCRIBE_STREAM__: |
 | __HDR_STREAM_REQUEST__             | 0x03 | __STREAM_REQUEST__: |
@@ -158,12 +158,12 @@ the Type, Extension Type, and Header Length fields.
 
 ### Subscribe Request Response
 
-To Server: SUBSCRIBE_REQUEST_RESPONSE
-To Client: DATA? (once?)
-To Server: DISPOSE | NEXT_COMPLETE | ERROR
+1. To Server: SUBSCRIBE_REQUEST_RESPONSE
+1. To Client: DATA? (once?)
+1. To Server: DISPOSE | NEXT_COMPLETE | ERROR
 
 ### Subscribe Stream
 
-To Server: SUBSCRIBE_STREAM
-To Client: DATA?
-To Server: DISPOSE | NEXT | COMPLETE | ERROR
+1. To Server: SUBSCRIBE_STREAM
+1. To Client: DATA?
+1. To Server: DISPOSE | NEXT | COMPLETE | ERROR
