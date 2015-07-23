@@ -104,6 +104,8 @@ the Type and Header Length fields.
 | __HDR_ERROR__                      | 0x24 | __Error__: |
 | __HDR_EXT__                        | 0xFF | __Extension Header__: Used to extend more options as well as extensions. |
 
+__NOTE__: Headers sent by Requesters fall into the 0x10 - 0x1F range. Headers sent by Responders fall into the 0x20 - 0x2F range.
+
 ### Setup
 
 Setup headers must always use Stream ID 0 as they pertain to the connection.
@@ -154,6 +156,8 @@ Contents (NONE)
 Contents
 
 1. __Header Data__: payload for onNext.
+1. __Begin Bit__: bit to indicate beginning of a fragmented element.
+1. __End Bit__: bit to indicate end of a fragmented element.
 
 ### Error
 
@@ -197,6 +201,12 @@ If the server does NOT accept the contents of the Setup header, the server MUST 
 and then close the connection.
 
 __NOTE__: The semantics are similar to [TLS False Start](https://tools.ietf.org/html/draft-bmoeller-tls-falsestart-00).
+
+## Fragmentation And Reassembly
+
+NEXT headers may respresent a large object and MAY need to be fragmented to fit within the Header Data size. When this
+occurs, the NEXT headers Begin and End bits must be used to indicate a begin fragment and an end fragment. Or, when
+both bits set, the contents represent a complete NEXT header.
 
 ## Stream Sequences and Lifetimes
 
@@ -277,7 +287,7 @@ or
 
 or
 
-1. RQ -> RS: REQUEST_STREAM
+1. RQ -> RS: REQUEST_SUBSCRIPTION
 1. RS -> RQ: NEXT*
 1. RQ -> RS: CANCEL
 
