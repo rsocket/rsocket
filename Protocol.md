@@ -98,7 +98,7 @@ the Type and Header Length fields.
 | __HDR_REQUEST_STREAM__             | 0x13 | __Request Stream__: |
 | __HDR_REQUEST_SUBSCRIPTION__       | 0x14 | __Request Subscription__: |
 | __HDR_REQUEST_N__                  | 0x15 | __Request N__: Request N more items |
-| __HDR_CANCEL__                     | 0x21 | __Cancel Request__: |
+| __HDR_CANCEL__                     | 0x11 | __Cancel Request__: |
 | __HDR_NEXT__                       | 0x22 | __Next__: |
 | __HDR_COMPLETE__                   | 0x23 | __Complete__: |
 | __HDR_ERROR__                      | 0x24 | __Error__: |
