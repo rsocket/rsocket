@@ -134,6 +134,18 @@ Contents
 1. __Initial Request N__: initial Request N value. 64-bit integer.
 1. __Header Data__: identification of the service being requested along with parameters for the request.
 
+```
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |     Type      |I|                Header Length                |
+    +---------------+-+---------------------------------------------+
+    |                         Initial Request N                     |
+    |                                                               |
+    +---------------------------------------------------------------+
+                                Header Data
+```
+
 ### Request Subscription
 
 Contents
@@ -141,11 +153,34 @@ Contents
 1. __Initial Request N__: initial Request N value. 64-bit integer.
 1. __Header Data__: identification of the service being requested along with parameters for the request.
 
+```
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |     Type      |I|                Header Length                |
+    +---------------+-+---------------------------------------------+
+    |                         Initial Request N                     |
+    |                                                               |
+    +---------------------------------------------------------------+
+                               Header Data
+```
+
 ### Request N
 
 Contents
 
 1. __N__: 64-bit integer value of items to request.
+
+```
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |     Type      |I|                Header Length                |
+    +---------------+-+---------------------------------------------+
+    |                       Request N                               |
+    |                                                               |
+    +---------------------------------------------------------------+
+```
 
 ### Cancel
 
@@ -159,6 +194,16 @@ Contents
     1. __Begin Bit__: bit to indicate beginning of a fragmented element.
     1. __End Bit__: bit to indicate end of a fragmented element.
 1. __Header Data__: payload for onNext.
+
+```
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |     Type      |I|                Header Length                |
+    +-+-+-----------+-+---------------------------------------------+
+    |B|E|  Reserved |          Header Data (Depends on Type)       ...
+    +-+-+-----------+
+```
 
 ### Error
 
