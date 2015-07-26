@@ -347,4 +347,33 @@ Upon receiving a ERROR, the stream is terminated on the Requester.
 
 Upon sending a ERROR, the stream is terminated on the Responder.
 
+### Per Stream State
+
+#### Requester
+
+1. CLOSED: implicit starting/ending state of all stream IDs
+1. Requested (sent REQUEST_*)
+1. CLOSED (received COMPLETE or sent REQUEST_FNF)
+1. CLOSED (received ERROR)
+
+#### Responder
+
+1. CLOSED: implicit starting/ending state of all stream IDs
+1. Responding: sending NEXTs and processing REQUEST_N
+1. CLOSED (received CANCEL)
+1. CLOSED (sent COMPLETE or received REQUEST_FNF)
+1. CLOSED (sent ERROR)
+
+#### Handling the Unexpected
+
+* Recieving a header in a state that is not specified means it is ignored (or causes termination?)
+* Should StreamIDs be timedout after inactivity?
+    * if so, need keepalive semantics
+
 ### TODO
+
+1. REQUEST_N needs to return point in stream in some way. Or even a new header type REQUEST_N_POSITIONED, or POSITION header, e.g.
+    * object (NEXT) counter
+1. Protocol instance
+    * Requester instance
+    * Responder instance
