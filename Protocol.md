@@ -1,5 +1,7 @@
 ## Introduction
 
+Key words used by this document conform to the meanings in [RFC 2119](https://tools.ietf.org/html/rfc2119).
+
 ## Terminology
 
 * __Frame__: A frame of data containing 1 or more headers chained together that contain data, control,
@@ -239,15 +241,41 @@ the Type, Extension Type, and Header Length fields.
 
 ## Connection Establishment
 
-Immediately upon successful connection, the client should send a frame containing a single Setup header with
-Stream ID of 0. The client may send requests immediately if it so desires.
+__NOTE__: The semantics are similar to [TLS False Start](https://tools.ietf.org/html/draft-bmoeller-tls-falsestart-00).
 
-If the server accepts the contents of the Setup header, it does nothing special.
+Immediately upon successful connection, the client MUST send a frame containing a single SETUP header with
+Stream ID of 0. The client-side Requester may send requests immediately if it so desires without waiting for
+a response from the server.
 
-If the server does NOT accept the contents of the Setup header, the server MUST send back an ERROR on Stream ID 0
+If the server accepts the contents of the SETUP header, it does nothing special. The server-side Requester may send requests immediately
+upon receiving a SETUP header that it accepts.
+
+If the server does NOT accept the contents of the SETUP header, the server MUST send back an ERROR on Stream ID 0
 and then close the connection.
 
-__NOTE__: The semantics are similar to [TLS False Start](https://tools.ietf.org/html/draft-bmoeller-tls-falsestart-00).
+A client assumes a SETUP is accepted if it receives a response to a request or if it sees a REQUEST type.
+
+A client assumes a SETUP is rejected if it receives an ERROR with stream ID 0. 
+
+### Negotiation
+
+The assumption is that the client will be dictating to the server what it desires to do. The server will decide to support
+that SETUP (accept it) or not (reject it).
+
+### Sequences
+
+1. Client-side Request, Server-side __accepts__ SETUP
+    * Client connects & sends SETUP & sends REQUEST
+    * Server accepts SETUP, handles REQUEST, sends back normal sequence based on REQUEST type
+1. Client-side Request, Server-side __rejects__ SETUP
+    * Client connects & sends SETUP & sends REQUEST
+    * Server rejects SETUP, sends back ERROR stream ID 0, closes connection
+1. Server-side Request, Server-side __accepts__ SETUP
+    * Client connects & sends SETUP
+    * Server accepts SETUP, sends back REQUEST type
+1. Server-side Request, Server-side __rejects__ SETUP
+    * Client connects & sends SETUP
+    * Server rejects SETUP, sends back ERROR stream ID 0, closes connection
 
 ## Fragmentation And Reassembly
 
@@ -292,6 +320,8 @@ Upon receiving a COMPLETE or ERROR, the stream is terminated on the Requester.
 Upon reception, the stream is terminated by the Responder.
 
 Upon being sent, the stream is terminated by the Requester.
+
+REQUEST_FNF are assumed to be best effort and MAY not be processed due to: (1) SETUP rejection, (2) mis-formatting, (3) etc.
 
 ### Request Stream
 
@@ -378,3 +408,5 @@ Upon sending a ERROR, the stream is terminated on the Responder.
 1. Protocol instance
     * Requester instance
     * Responder instance
+1. Exlicit METADATA header needed?
+    * need metadata semantics

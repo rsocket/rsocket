@@ -23,6 +23,8 @@ Need to handle:
 
 Prefer stateless, but statefulness is an optimization.
 
+Prefer false start semantics to reduce round-trip time.
+
 Subscription assumes idempotent redundent delivery!
 
 We are assumming polyglot libraries, we target:
