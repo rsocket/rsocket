@@ -269,7 +269,7 @@ Frame Contents
                               Error Data
 ```
 
-1. __Error Data__: error information.
+* __Error Data__: error information.
 
 An ERROR frame is used for dual purposes:
 * As a means for a server to reject a SETUP frame.
@@ -465,12 +465,12 @@ Upon sending a ERROR, the stream is terminated on the Responder.
 
 ### TODO
 
-1. REQUEST_N needs to return point in stream in some way. Or even a new header type REQUEST_N_POSITIONED, or POSITION header, e.g.
-    * object (NEXT) counter kept as Requester stat for the stream
-1. Connection instance
+- [ ] REQUEST_N needs to return point in stream in some way. Or even a new header type REQUEST_N_POSITIONED, or POSITION header, e.g.
+    * object (NEXT) counter (and/or RESPONSE byte counter) kept as Requester stat for the stream
+- Connection instance
     * Requester instance
     * Responder instance
-1. Exlicit METADATA needed?
+- [ ] Exlicit METADATA needed?
     * need to understand metadata semantics
     * could be flag or explicit frame type or if needed to be attached to specific NEXT, could be option header
-1. Handling the unexpected questions
+- [ ] Handling the unexpected questions
