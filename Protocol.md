@@ -247,7 +247,7 @@ Frame Contents
     1. __Complete Bit__: bit to indicate COMPLETE.
 1. __Response Data__: payload for onNext.
 
-A Response is general referred to as a NEXT.
+A Response is generally referred to as a NEXT.
 
 A Response with the Complete Bit set is referred to as a COMPLETE.
 
