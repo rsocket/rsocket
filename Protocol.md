@@ -40,7 +40,7 @@ For transports that do not provide framing, such as TCP, the Frame Length MUST b
 * __Frame Length__: (31 = max 2,147,483,647 bytes) Length of Frame. Including header. Only used for TCP.
 * __Version__: (8) Current version is 0.
 * __Flags__:
-     * __I__gnore: Ignore frame if not understood
+     * (__I__)gnore: Ignore frame if not understood
 * __Frame Type__: (16) Type of Frame.
 * __Stream ID__: (64) Stream Identifier for this frame.
 
@@ -79,9 +79,6 @@ Setup headers must always use Stream ID 0 as they pertain to the connection.
 
 Frame Contents
 
-1. __Setup Data__: includes payload describing connection capabilities of the endpoint sending the
-Setup header.
-
 ```
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -96,11 +93,12 @@ Setup header.
                                Setup Data
 ```
 
+* __Setup Data__: includes payload describing connection capabilities of the endpoint sending the
+Setup header.
+
 ### Request Response Frame
 
 Frame Contents
-
-1. __Request Data__: identification of the service being requested along with parameters for the request.
 
 ```
      0                   1                   2                   3
@@ -116,11 +114,11 @@ Frame Contents
                               Request Data
 ```
 
+* __Request Data__: identification of the service being requested along with parameters for the request.
+
 ### Request Fire-n-Forget Frame
 
 Frame Contents
-
-1. __Request Data__: identification of the service being requested along with parameters for the request.
 
 ```
      0                   1                   2                   3
@@ -136,12 +134,11 @@ Frame Contents
                                Request Data
 ```
 
+* __Request Data__: identification of the service being requested along with parameters for the request.
+
 ### Request Stream Frame
 
 Frame Contents
-
-1. __Initial Request N__: initial Request N value. 64-bit integer.
-1. __Request Data__: identification of the service being requested along with parameters for the request.
 
 ```
      0                   1                   2                   3
@@ -160,12 +157,12 @@ Frame Contents
                                 Request Data
 ```
 
+* __Initial Request N__: initial Request N value. 64-bit integer.
+* __Request Data__: identification of the service being requested along with parameters for the request.
+
 ### Request Subscription Frame
 
 Frame Contents
-
-1. __Initial Request N__: initial Request N value. 64-bit integer.
-1. __Request Data__: identification of the service being requested along with parameters for the request.
 
 ```
      0                   1                   2                   3
@@ -184,11 +181,12 @@ Frame Contents
                                Request Data
 ```
 
+* __Initial Request N__: initial Request N value. 64-bit integer.
+* __Request Data__: identification of the service being requested along with parameters for the request.
+
 ### Request N Frame
 
 Frame Contents
-
-1. __Request N__: 64-bit integer value of items to request.
 
 ```
      0                   1                   2                   3
@@ -205,6 +203,8 @@ Frame Contents
     |                                                               |
     +---------------------------------------------------------------+
 ```
+
+* __Request N__: 64-bit integer value of items to request.
 
 ### Cancel Frame
 
@@ -241,11 +241,11 @@ Frame Contents
                               Response Data
 ```
 
-1. Flag Fragment Information:
-    1. __Begin Bit__: bit to indicate beginning of a fragmented response.
-    1. __End Bit__: bit to indicate end of a fragmented response.
-    1. __Complete Bit__: bit to indicate COMPLETE.
-1. __Response Data__: payload for onNext.
+* __Flags__:
+    * (__B__)egin: bit to indicate beginning of a fragmented response.
+    * (__E__)nd: bit to indicate end of a fragmented response.
+    * (__C__)omplete: bit to indicate COMPLETE.
+* __Response Data__: payload for onNext.
 
 A Response is generally referred to as a NEXT.
 
