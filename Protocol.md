@@ -4,11 +4,11 @@ Key words used by this document conform to the meanings in [RFC 2119](https://to
 
 ## Terminology
 
-* __Frame__: A frame of data containing 1 or more headers chained together that contain data, control,
-and metadata.
+* __Frame__: A frame of data containing a request or a response.
 * __Transport__: Protocol used to carry ReactiveSockets protocol. Such as WebSockets, TCP, Aeron, etc.
 * __Stream__: Unit of operation (request/response, etc.). See [Design Principles](DesignPrinciples.md).
 * __Request__: A stream request. May be one of four types.
+* __Response__: A stream response. Comprised of 1 or more headers chained together that contain data, control, and metadata.
 * __Client__: The side connecting to a server.
 * __Server__: The side accepting connections from clients.
 * __Connection__: The instance of a transport session between client and server.
@@ -28,17 +28,20 @@ For transports that do not provide framing, such as TCP, the Frame Length MUST b
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                 Frame Length (for TCP only)                 |
-    +---------------+-----------------------------------------------+
-    |    Version    |                  Reserved                     |
-    +---------------+-----------------------------------------------+
+    +---------------+-+-------------+-------------------------------+
+    |    Version    |I|   Flags     |         Frame Type            |
+    +---------------+-+-------------+-------------------------------+
     |                           Stream ID                           |
     |                                                               |
     +---------------------------------------------------------------+
-                                  Headers
+                           Depends on Frame Type
 ```
 
 * __Frame Length__: (31 = max 2,147,483,647 bytes) Length of Frame. Including header. Only used for TCP.
 * __Version__: (8) Current version is 0.
+* __Flags__:
+     * __I__gnore: Ignore frame if not understood
+* __Frame Type__: (16) Type of Frame.
 * __Stream ID__: (64) Stream Identifier for this frame.
 
 ### Stream Identifiers
@@ -52,10 +55,27 @@ Stream ID value of 0 is reserved for any operation involving the connection.
 
 A stream ID must be locally unique for a Requester in a connection.
 
+### Frame Types
+
+|  Type                          | Value  | Description |
+|:-------------------------------|:-------|:------------|
+| __RESERVED__                   | 0x0000 | __Reserved__ |
+| __SETUP__                      | 0x0001 | __Setup__: Capabilities Of Side Sending The Frame. |
+| __REQUEST_RESPONSE__           | 0x0011 | __Request Response__: |
+| __REQUEST_FNF__                | 0x0012 | __Fire And Forget__: |
+| __REQUEST_STREAM__             | 0x0013 | __Request Stream__: |
+| __REQUEST_SUB__                | 0x0014 | __Request Subscription__: |
+| __REQUEST_N__                  | 0x0015 | __Request N__: Request N more items |
+| __CANCEL__                     | 0x0016 | __Cancel Request__: |
+| __RESPONSE__                   | 0x0020 | __Response__: Response to a request. |
+| __EXT__                        | 0xFFFF | __Extension Header__: Used To Extend More Options As Well As Extensions. |
+
 ### Header Chains
 
 ReactiveSocket uses IPv6-style header chains to provide flexibility. The general layout of a ReactiveSocket
-frame is a Frame Header followed by 1 or more Headers.
+frame is a Frame Header followed by 0 or more Headers.
+
+__Note__: Currently, only RESPONSEs use header chains.
 
 ```
      +----------------------------------------+
@@ -90,87 +110,132 @@ The general format for a header is given below.
 * __Header Length__: (23) Length of current header in bytes (23 = max 8,388,608 bytes). Includes
 the Type and Header Length fields.
 
-### Header Types
+#### Header Types
 
 |  Type                              | Value  | Description |
 |:-----------------------------------|:-------|:------------|
 | __HDR_RESERVED__                   | 0x00 | __Reserved__ |
-| __HDR_SETUP__                      | 0x01 | __Setup__: Capabilities of side sending the frame. |
-| __HDR_REQUEST_RESPONSE__           | 0x11 | __Request Response__: |
-| __HDR_REQUEST_FNF__                | 0x12 | __Fire and Forget__: |
-| __HDR_REQUEST_STREAM__             | 0x13 | __Request Stream__: |
-| __HDR_REQUEST_SUBSCRIPTION__       | 0x14 | __Request Subscription__: |
-| __HDR_REQUEST_N__                  | 0x15 | __Request N__: Request N more items |
-| __HDR_CANCEL__                     | 0x16 | __Cancel Request__: |
 | __HDR_NEXT__                       | 0x22 | __Next__: |
 | __HDR_COMPLETE__                   | 0x23 | __Complete__: |
 | __HDR_ERROR__                      | 0x24 | __Error__: |
-| __HDR_EXT__                        | 0xFF | __Extension Header__: Used to extend more options as well as extensions. |
+| __HDR_EXT__                        | 0xFF | __Extension Header__: Used To Extend More Options As Well As Extensions. |
 
-__NOTE__: Headers sent by Requesters fall into the 0x10 - 0x1F range. Headers sent by Responders fall into the 0x20 - 0x2F range.
+__Note__: Headers Sent By Requesters Fall Into The 0x10 - 0x1F Range. Headers Sent By Responders Fall Into The 0x20 - 0x2F Range.
 
-### Setup
+### Setup Frame
 
 Setup headers must always use Stream ID 0 as they pertain to the connection.
 
-Contents
+Frame Contents
 
-1. __Header Data__: includes payload describing connection capabilities of the endpoint sending the
+1. __Setup Data__: includes payload describing connection capabilities of the endpoint sending the
 Setup header.
 
-### Request Response
+```
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |R|                 Frame Length (for TCP only)                 |
+    +---------------+-+-------------+-------------------------------+
+    |    Version    |0|   Flags     |     Frame Type = SETUP        |
+    +---------------+-+-------------+-------------------------------+
+    |                           Stream ID                           |
+    |                                                               |
+    +---------------------------------------------------------------+
+                               Setup Data
+```
 
-Contents
+### Request Response Frame
 
-1. __Header Data__: identification of the service being requested along with parameters for the request.
+Frame Contents
 
-### Request Fire-n-Forget
-
-Contents
-
-1. __Header Data__: identification of the service being requested along with parameters for the request.
-
-### Request Stream
-
-Contents
-
-1. __Initial Request N__: initial Request N value. 64-bit integer.
-1. __Header Data__: identification of the service being requested along with parameters for the request.
+1. __Request Data__: identification of the service being requested along with parameters for the request.
 
 ```
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |     Type      |I|                Header Length                |
-    +---------------+-+---------------------------------------------+
-    |                         Initial Request N                     |
+    |R|                 Frame Length (for TCP only)                 |
+    +---------------+-+-------------+-------------------------------+
+    |    Version    |0|   Flags     | Frame Type = REQUEST_RESPONSE |
+    +---------------+-+-------------+-------------------------------+
+    |                           Stream ID                           |
     |                                                               |
     +---------------------------------------------------------------+
-                                Header Data
+                              Request Data
 ```
 
-### Request Subscription
+### Request Fire-n-Forget Frame
 
-Contents
+Frame Contents
 
-1. __Initial Request N__: initial Request N value. 64-bit integer.
-1. __Header Data__: identification of the service being requested along with parameters for the request.
+1. __Request Data__: identification of the service being requested along with parameters for the request.
 
 ```
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |     Type      |I|                Header Length                |
-    +---------------+-+---------------------------------------------+
-    |                         Initial Request N                     |
+    |R|                 Frame Length (for TCP only)                 |
+    +---------------+-+-------------+-------------------------------+
+    |    Version    |0|   Flags     |    Frame Type = REQUEST_FNF   |
+    +---------------+-+-------------+-------------------------------+
+    |                           Stream ID                           |
     |                                                               |
     +---------------------------------------------------------------+
-                               Header Data
+                               Request Data
 ```
 
-### Request N
+### Request Stream Frame
 
-Contents
+Frame Contents
+
+1. __Initial Request N__: initial Request N value. 64-bit integer.
+1. __Request Data__: identification of the service being requested along with parameters for the request.
+
+```
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |R|                 Frame Length (for TCP only)                 |
+    +---------------+-+-------------+-------------------------------+
+    |    Version    |I|   Flags     |  Frame Type = REQUEST_STREAM  |
+    +---------------+-+-------------+-------------------------------+
+    |                           Stream ID                           |
+    |                                                               |
+    +---------------------------------------------------------------+
+    |                        Initial Request N                      |
+    |                                                               |
+    +---------------------------------------------------------------+
+                                Request Data
+```
+
+### Request Subscription Frame
+
+Frame Contents
+
+1. __Initial Request N__: initial Request N value. 64-bit integer.
+1. __Request Data__: identification of the service being requested along with parameters for the request.
+
+```
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |R|                 Frame Length (for TCP only)                 |
+    +---------------+-+-------------+-------------------------------+
+    |    Version    |I|   Flags     |    Frame Type = REQUEST_SUB   |
+    +---------------+-+-------------+-------------------------------+
+    |                           Stream ID                           |
+    |                                                               |
+    +---------------------------------------------------------------+
+    |                       Initial Request N                       |
+    |                                                               |
+    +---------------------------------------------------------------+
+                               Request Data
+```
+
+### Request N Frame
+
+Frame Contents
 
 1. __Request N__: 64-bit integer value of items to request.
 
@@ -178,18 +243,63 @@ Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |     Type      |I|                Header Length                |
-    +---------------+-+---------------------------------------------+
-    |                       Request N                               |
+    |R|                 Frame Length (for TCP only)                 |
+    +---------------+-+-------------+-------------------------------+
+    |    Version    |I|   Flags     |     Frame Type = SETUP        |
+    +---------------+-+-------------+-------------------------------+
+    |                           Stream ID                           |
+    |                                                               |
+    +---------------------------------------------------------------+
+    |                           Request N                           |
     |                                                               |
     +---------------------------------------------------------------+
 ```
 
-### Cancel
+### Cancel Frame
 
-Contents (NONE)
+Frame Contents
 
-### Next
+```
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |R|                 Frame Length (for TCP only)                 |
+    +---------------+-+-------------+-------------------------------+
+    |    Version    |I|   Flags     |     Frame Type = CANCEL       |
+    +---------------+-+-------------+-------------------------------+
+    |                           Stream ID                           |
+    |                                                               |
+    +---------------------------------------------------------------+
+```
+
+### Response Frame
+
+Frame Contents
+
+```
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |R|                 Frame Length (for TCP only)                 |
+    +---------------+-+-------------+-------------------------------+
+    |    Version    |I|   Flags     |    Frame Type = RESPONSE      |
+    +---------------+-+-------------+-------------------------------+
+    |                           Stream ID                           |
+    |                                                               |
+    +---------------------------------------------------------------+
+    |                            Header                             |
+    +---------------------------------------------------------------+
+    |                            Header                             |
+    +---------------------------------------------------------------+
+    |                              ...                              |
+    +---------------------------------------------------------------+
+    |                            Header                             |
+    +---------------------------------------------------------------+
+```
+
+RESPONSE frames have a chain of headers that contains payload.
+
+#### Next Header
 
 Contents
 
@@ -208,49 +318,85 @@ Contents
     +-+-+-----------+
 ```
 
-### Error
+#### Error Header
 
 Contents
 
 1. __Header Data__: error information.
 
-### Complete
+```
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |     Type      |I|                Header Length                |
+    +-+-+-----------+-+---------------------------------------------+
+                              Header Data
+```
 
-Contents (NONE)
+#### Complete Header
 
-### Extension Header
-
-The general format for a header is given below.
+Contents
 
 ```
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |     0xFF      |1|             Extension Type                  |
+    |     Type      |I|                Header Length                |
+    +-+-+-----------+-+---------------------------------------------+
+```
+
+#### Extension Header
+
+```
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |     0xFF      |I|                Extended Type                |
     +---------------+-+---------------------------------------------+
     |                         Header Length                         |
     +---------------------------------------------------------------+
-                          Depends on Extension Type...
+                          Depends on Extended Type...
 ```
 
-* __Type__: (8) 0xFF for Extension Header.
+* __Frame Type__: (8) 0xFF for Extension Header.
 * __Flags__:
     * (__I__)gnore: Can be ignored.
-* __Header Length__: (24) Length of current header in bytes (32 = max 4,294,967,296 bytes). Includes
-the Type, Extension Type, and Header Length fields.
+* __Extended Type__: Extended type information
+
+### Extension Frame
+
+The general format for an extension frame is given below.
+
+```
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |R|                 Frame Length (for TCP only)                 |
+    +---------------+-+-------------+-------------------------------+
+    |    Version    |I|   Flags     |     Frame Type = EXT          |
+    +---------------+-+-------------+-------------------------------+
+    |                        Extended Type                          |
+    +---------------------------------------------------------------+
+                          Depends on Extended Type...
+```
+
+* __Frame Type__: (16) 0xFFFF for Extension Header.
+* __Flags__:
+    * (__I__)gnore: Can be ignored.
+* __Extended Type__: Extended type information
 
 ## Connection Establishment
 
 __NOTE__: The semantics are similar to [TLS False Start](https://tools.ietf.org/html/draft-bmoeller-tls-falsestart-00).
 
-Immediately upon successful connection, the client MUST send a frame containing a single SETUP header with
+Immediately upon successful connection, the client MUST send a SETUP frame with
 Stream ID of 0. The client-side Requester may send requests immediately if it so desires without waiting for
 a response from the server.
 
-If the server accepts the contents of the SETUP header, it does nothing special. The server-side Requester may send requests immediately
-upon receiving a SETUP header that it accepts.
+If the server accepts the contents of the SETUP frame, it does nothing special. The server-side Requester may send requests immediately
+upon receiving a SETUP frame that it accepts.
 
-If the server does NOT accept the contents of the SETUP header, the server MUST send back an ERROR on Stream ID 0
+If the server does NOT accept the contents of the SETUP frame, the server MUST send back an ERROR on Stream ID 0
 and then close the connection.
 
 A client assumes a SETUP is accepted if it receives a response to a request or if it sees a REQUEST type.
@@ -279,7 +425,7 @@ that SETUP (accept it) or not (reject it).
 
 ## Fragmentation And Reassembly
 
-NEXT headers may respresent a large object and MAY need to be fragmented to fit within the Header Data size. When this
+RESPONSE frames with NEXT headers may respresent a large object and MAY need to be fragmented to fit within the Header Data size. When this
 occurs, the NEXT headers Begin and End bits must be used to indicate a begin fragment and an end fragment. Or, when
 both bits set, the contents represent a complete NEXT header.
 
@@ -293,17 +439,17 @@ In the section below, "*" refers to 0 or more and "+" refers to 1 or more.
 ### Request Response
 
 1. RQ -> RS: REQUEST_RESPONSE
-1. RS -> RQ: NEXT and COMPLETE
+1. RS -> RQ: RESPONSE with NEXT and COMPLETE
 
 or
 
 1. RQ -> RS: REQUEST_RESPONSE
-1. RS -> RQ: ERROR
+1. RS -> RQ: RESPONSE with ERROR
 
 or
 
 1. RQ -> RS: REQUEST_RESPONSE
-1. RQ -> RS: CANCEL
+1. RQ -> RS: RESPONSE with CANCEL
 
 Upon sending a response, the stream is terminated on the Responder.
 
@@ -326,19 +472,19 @@ REQUEST_FNF are assumed to be best effort and MAY not be processed due to: (1) S
 ### Request Stream
 
 1. RQ -> RS: REQUEST_STREAM
-1. RS -> RQ: NEXT*
-1. RS -> RQ: ERROR
+1. RS -> RQ: RESPONSE with 0 or more NEXTs
+1. RS -> RQ: RESPONSE with ERROR
 
 or
 
 1. RQ -> RS: REQUEST_STREAM
-1. RS -> RQ: NEXT+
-1. RS -> RQ: COMPLETE
+1. RS -> RQ: RESPONSE with 1 or more NEXTs
+1. RS -> RQ: RESPONSE with COMPLETE
 
 or 
 
 1. RQ -> RS: REQUEST_STREAM
-1. RS -> RQ: NEXT*
+1. RS -> RQ: RESPONSE with 0 or more NEXTs
 1. RQ -> RS: CANCEL
 
 At any time, a client may send REQUEST_N frames.
@@ -354,18 +500,18 @@ Upon sending a COMPLETE or ERROR, the stream is terminated on the Responder.
 ### Request Subscription
 
 1. RQ -> RS: REQUEST_SUBSCRIPTION
-1. RS -> RQ: NEXT*
+1. RS -> RQ: RESPONSE with 0 or more NEXTs
 
 or
 
 1. RQ -> RS: REQUEST_SUBSCRIPTION
-1. RS -> RQ: NEXT*
-1. RS -> RQ: ERROR
+1. RS -> RQ: RESPONSE with 0 or more NEXTs
+1. RS -> RQ: RESPONSE with ERROR
 
 or
 
 1. RQ -> RS: REQUEST_SUBSCRIPTION
-1. RS -> RQ: NEXT*
+1. RS -> RQ: RESPONSE with 0 or more NEXTs
 1. RQ -> RS: CANCEL
 
 At any time, a client may send REQUEST_N frames.
@@ -411,20 +557,8 @@ Upon sending a ERROR, the stream is terminated on the Responder.
 1. Exlicit METADATA header needed?
     * need metadata semantics
 1. Explore
-    * Moving all Request headers into frame header (Frame Type = 16-bit?) as they should not compose with others and makes
-    things more explicit.
-        * SETUP Frame
-        * REQUEST_RESPONSE Frame
-        * REQUEST_FNF Frame
-        * REQUEST_STREAM Frame
-        * REQUEST_SUBSCRIPTION Frame
-        * REQUEST_N Frame
-        * CANCEL Frame
-        * RESPONSE Frame
-            * has chain of NEXTs, ERROR (must be terminal), etc.
-            * only frame type with chains.
-            * remove header type and bring BE flags byte into header type location. Keep length.
-        * add __I__gnore flag to frame header to ignore frame types that are not understood.
+    * RESPONSE Frame
+        * remove header type and bring BE flags byte into header type location. Keep length.
     * remove COMPLETE and add C bit to NEXT (COMPLETE is a NEXT header with C bit set and no data)
     * remove ERROR and add R bit to NEXT (ERROR is a NEXT header with R bit set and optionally data)
     * keep extension header and add 0xF after BECR flags to extend to new types.
