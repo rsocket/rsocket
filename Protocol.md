@@ -7,9 +7,9 @@ Key words used by this document conform to the meanings in [RFC 2119](https://to
 * __Frame__: A frame of data containing a request or a response.
 * __Transport__: Protocol used to carry ReactiveSockets protocol. Such as WebSockets, TCP, Aeron, etc.
 * __Stream__: Unit of operation (request/response, etc.). See [Design Principles](DesignPrinciples.md).
-* __Request__: A stream request. May be one of four types.
-* __Response__: A stream response. Comprised of 1 or more headers chained together that contain data, control, and metadata.
-* __Client__: The side connecting to a server.
+* __Request__: A stream request. May be one of four types. As well as request for more items or cancellation of previous request.
+* __Response__: A stream response. Contains data associated with previous request.
+* __Client__: The side connecting to a server. i.e. initiating a connection.
 * __Server__: The side accepting connections from clients.
 * __Connection__: The instance of a transport session between client and server.
 * __Requester__: The side sending a request. A connection has at most 2 Requesters. One in each direction.
@@ -337,9 +337,9 @@ that SETUP (accept it) or not (reject it).
 
 ## Fragmentation And Reassembly
 
-RESPONSE frames with NEXT headers may respresent a large object and MAY need to be fragmented to fit within the Header Data size. When this
-occurs, the NEXT headers Begin and End bits must be used to indicate a begin fragment and an end fragment. Or, when
-both bits set, the contents represent a complete NEXT header.
+RESPONSE frames may respresent a large object and MAY need to be fragmented to fit within the Frame Data size. When this
+occurs, the RESPONSE Begin and End bits must be used to indicate a begin fragment and an end fragment. Or, when
+both bits set, the contents represent a reassembled RESPONSE.
 
 ## Stream Sequences and Lifetimes
 
@@ -466,10 +466,11 @@ Upon sending a ERROR, the stream is terminated on the Responder.
 ### TODO
 
 1. REQUEST_N needs to return point in stream in some way. Or even a new header type REQUEST_N_POSITIONED, or POSITION header, e.g.
-    * object (NEXT) counter
+    * object (NEXT) counter kept as Requester stat for the stream
 1. Connection instance
     * Requester instance
     * Responder instance
-1. Exlicit METADATA header needed?
-    * need metadata semantics
+1. Exlicit METADATA needed?
+    * need to understand metadata semantics
+    * could be flag or explicit frame type or if needed to be attached to specific NEXT, could be option header
 1. Handling the unexpected questions
