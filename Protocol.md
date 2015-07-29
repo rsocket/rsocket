@@ -172,7 +172,7 @@ Contents
 
 Contents
 
-1. __N__: 64-bit integer value of items to request.
+1. __Request N__: 64-bit integer value of items to request.
 
 ```
      0                   1                   2                   3
@@ -405,8 +405,26 @@ Upon sending a ERROR, the stream is terminated on the Responder.
 
 1. REQUEST_N needs to return point in stream in some way. Or even a new header type REQUEST_N_POSITIONED, or POSITION header, e.g.
     * object (NEXT) counter
-1. Protocol instance
+1. Connection instance
     * Requester instance
     * Responder instance
 1. Exlicit METADATA header needed?
     * need metadata semantics
+1. Explore
+    * Moving all Request headers into frame header (Frame Type = 16-bit?) as they should not compose with others and makes
+    things more explicit.
+        * SETUP Frame
+        * REQUEST_RESPONSE Frame
+        * REQUEST_FNF Frame
+        * REQUEST_STREAM Frame
+        * REQUEST_SUBSCRIPTION Frame
+        * REQUEST_N Frame
+        * CANCEL Frame
+        * RESPONSE Frame
+            * has chain of NEXTs, ERROR (must be terminal), etc.
+            * only frame type with chains.
+            * remove header type and bring BE flags byte into header type location. Keep length.
+        * add __I__gnore flag to frame header to ignore frame types that are not understood.
+    * remove COMPLETE and add C bit to NEXT (COMPLETE is a NEXT header with C bit set and no data)
+    * remove ERROR and add R bit to NEXT (ERROR is a NEXT header with R bit set and optionally data)
+    * keep extension header and add 0xF after BECR flags to extend to new types.
