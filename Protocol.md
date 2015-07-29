@@ -68,59 +68,10 @@ A stream ID must be locally unique for a Requester in a connection.
 | __REQUEST_N__                  | 0x0015 | __Request N__: Request N more items |
 | __CANCEL__                     | 0x0016 | __Cancel Request__: |
 | __RESPONSE__                   | 0x0020 | __Response__: Response to a request. |
+| __ERROR__                      | 0x0021 | __Error__: Response that is an error. |
 | __EXT__                        | 0xFFFF | __Extension Header__: Used To Extend More Options As Well As Extensions. |
 
-### Header Chains
-
-ReactiveSocket uses IPv6-style header chains to provide flexibility. The general layout of a ReactiveSocket
-frame is a Frame Header followed by 0 or more Headers.
-
-__Note__: Currently, only RESPONSEs use header chains.
-
-```
-     +----------------------------------------+
-     |       Frame Length (for TCP only)      |
-     +----------------------------------------+
-     | Frame Header (version, Stream ID, etc.)|
-     +----------------------------------------+
-     |                 Header                 |
-     +----------------------------------------+
-     |                 Header                 |
-     +----------------------------------------+
-     |                 ......                 |
-     +----------------------------------------+
-     |                 Header                 |
-     +----------------------------------------+
-```
-
-The general format for a header is given below.
-
-```
-     0                   1                   2                   3
-     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |     Type      |I|                Header Length                |
-    +---------------+-+---------------------------------------------+
-                        Header Data (Depends on Type)
-```
-
-* __Type__: (8) Type of header.
-* __Flags__:
-    * (__I__)gnore: ignore current header if not understood.
-* __Header Length__: (23) Length of current header in bytes (23 = max 8,388,608 bytes). Includes
-the Type and Header Length fields.
-
-#### Header Types
-
-|  Type                              | Value  | Description |
-|:-----------------------------------|:-------|:------------|
-| __HDR_RESERVED__                   | 0x00 | __Reserved__ |
-| __HDR_NEXT__                       | 0x22 | __Next__: |
-| __HDR_COMPLETE__                   | 0x23 | __Complete__: |
-| __HDR_ERROR__                      | 0x24 | __Error__: |
-| __HDR_EXT__                        | 0xFF | __Extension Header__: Used To Extend More Options As Well As Extensions. |
-
-__Note__: Headers Sent By Requesters Fall Into The 0x10 - 0x1F Range. Headers Sent By Responders Fall Into The 0x20 - 0x2F Range.
+__NOTE__: In general Requesters send types 0x0010 to 0x001F and Responders send types 0x0020 to 0x002F.
 
 ### Setup Frame
 
@@ -281,87 +232,48 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                 Frame Length (for TCP only)                 |
+    +---------------+-+-+-+-+-------+-------------------------------+
+    |    Version    |I|B|E|C| Resvd |    Frame Type = RESPONSE      |
+    +---------------+-+-+-+-+-------+-------------------------------+
+    |                           Stream ID                           |
+    |                                                               |
+    +---------------------------------------------------------------+
+                              Response Data
+```
+
+1. Flag Fragment Information:
+    1. __Begin Bit__: bit to indicate beginning of a fragmented response.
+    1. __End Bit__: bit to indicate end of a fragmented response.
+    1. __Complete Bit__: bit to indicate COMPLETE.
+1. __Response Data__: payload for onNext.
+
+A Response is general referred to as a NEXT.
+
+A Response with the Complete Bit set is referred to as a COMPLETE.
+
+#### Error Frame
+
+Frame Contents
+
+```
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |R|                 Frame Length (for TCP only)                 |
     +---------------+-+-------------+-------------------------------+
-    |    Version    |I|   Flags     |    Frame Type = RESPONSE      |
+    |    Version    |I|  Reserved   |      Frame Type = ERROR       |
     +---------------+-+-------------+-------------------------------+
     |                           Stream ID                           |
     |                                                               |
     +---------------------------------------------------------------+
-    |                            Header                             |
-    +---------------------------------------------------------------+
-    |                            Header                             |
-    +---------------------------------------------------------------+
-    |                              ...                              |
-    +---------------------------------------------------------------+
-    |                            Header                             |
-    +---------------------------------------------------------------+
+                              Error Data
 ```
 
-RESPONSE frames have a chain of headers that contains payload.
+1. __Error Data__: error information.
 
-#### Next Header
-
-Contents
-
-1. 1 Byte Fragment Information:
-    1. __Begin Bit__: bit to indicate beginning of a fragmented element.
-    1. __End Bit__: bit to indicate end of a fragmented element.
-1. __Header Data__: payload for onNext.
-
-```
-     0                   1                   2                   3
-     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |     Type      |I|                Header Length                |
-    +-+-+-----------+-+---------------------------------------------+
-    |B|E|  Reserved |          Header Data (Depends on Type)       ...
-    +-+-+-----------+
-```
-
-#### Error Header
-
-Contents
-
-1. __Header Data__: error information.
-
-```
-     0                   1                   2                   3
-     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |     Type      |I|                Header Length                |
-    +-+-+-----------+-+---------------------------------------------+
-                              Header Data
-```
-
-#### Complete Header
-
-Contents
-
-```
-     0                   1                   2                   3
-     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |     Type      |I|                Header Length                |
-    +-+-+-----------+-+---------------------------------------------+
-```
-
-#### Extension Header
-
-```
-     0                   1                   2                   3
-     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |     0xFF      |I|                Extended Type                |
-    +---------------+-+---------------------------------------------+
-    |                         Header Length                         |
-    +---------------------------------------------------------------+
-                          Depends on Extended Type...
-```
-
-* __Frame Type__: (8) 0xFF for Extension Header.
-* __Flags__:
-    * (__I__)gnore: Can be ignored.
-* __Extended Type__: Extended type information
+An ERROR frame is used for dual purposes:
+* As a means for a server to reject a SETUP frame.
+* As a means of communicating a stream ERROR from a Responder to a Requester.
 
 ### Extension Frame
 
@@ -439,17 +351,17 @@ In the section below, "*" refers to 0 or more and "+" refers to 1 or more.
 ### Request Response
 
 1. RQ -> RS: REQUEST_RESPONSE
-1. RS -> RQ: RESPONSE with NEXT and COMPLETE
+1. RS -> RQ: RESPONSE with COMPLETE
 
 or
 
 1. RQ -> RS: REQUEST_RESPONSE
-1. RS -> RQ: RESPONSE with ERROR
+1. RS -> RQ: ERROR
 
 or
 
 1. RQ -> RS: REQUEST_RESPONSE
-1. RQ -> RS: RESPONSE with CANCEL
+1. RQ -> RS: CANCEL
 
 Upon sending a response, the stream is terminated on the Responder.
 
@@ -472,19 +384,19 @@ REQUEST_FNF are assumed to be best effort and MAY not be processed due to: (1) S
 ### Request Stream
 
 1. RQ -> RS: REQUEST_STREAM
-1. RS -> RQ: RESPONSE with 0 or more NEXTs
-1. RS -> RQ: RESPONSE with ERROR
+1. RS -> RQ: RESPONSE*
+1. RS -> RQ: ERROR
 
 or
 
 1. RQ -> RS: REQUEST_STREAM
-1. RS -> RQ: RESPONSE with 1 or more NEXTs
+1. RS -> RQ: RESPONSE*
 1. RS -> RQ: RESPONSE with COMPLETE
 
 or 
 
 1. RQ -> RS: REQUEST_STREAM
-1. RS -> RQ: RESPONSE with 0 or more NEXTs
+1. RS -> RQ: RESPONSE*
 1. RQ -> RS: CANCEL
 
 At any time, a client may send REQUEST_N frames.
@@ -500,18 +412,18 @@ Upon sending a COMPLETE or ERROR, the stream is terminated on the Responder.
 ### Request Subscription
 
 1. RQ -> RS: REQUEST_SUBSCRIPTION
-1. RS -> RQ: RESPONSE with 0 or more NEXTs
+1. RS -> RQ: RESPONSE*
 
 or
 
 1. RQ -> RS: REQUEST_SUBSCRIPTION
-1. RS -> RQ: RESPONSE with 0 or more NEXTs
-1. RS -> RQ: RESPONSE with ERROR
+1. RS -> RQ: RESPONSE*
+1. RS -> RQ: ERROR
 
 or
 
 1. RQ -> RS: REQUEST_SUBSCRIPTION
-1. RS -> RQ: RESPONSE with 0 or more NEXTs
+1. RS -> RQ: RESPONSE*
 1. RQ -> RS: CANCEL
 
 At any time, a client may send REQUEST_N frames.
@@ -536,7 +448,7 @@ Upon sending a ERROR, the stream is terminated on the Responder.
 #### Responder
 
 1. CLOSED: implicit starting/ending state of all stream IDs
-1. Responding: sending NEXTs and processing REQUEST_N
+1. Responding: sending RESPONSEs and processing REQUEST_N
 1. CLOSED (received CANCEL)
 1. CLOSED (sent COMPLETE or received REQUEST_FNF)
 1. CLOSED (sent ERROR)
@@ -547,6 +459,10 @@ Upon sending a ERROR, the stream is terminated on the Responder.
 * Should StreamIDs be timedout after inactivity?
     * if so, need keepalive semantics
 
+### ChangeLog
+
+1. Removed usage of header chains to discourage frames from being too large.
+
 ### TODO
 
 1. REQUEST_N needs to return point in stream in some way. Or even a new header type REQUEST_N_POSITIONED, or POSITION header, e.g.
@@ -556,9 +472,4 @@ Upon sending a ERROR, the stream is terminated on the Responder.
     * Responder instance
 1. Exlicit METADATA header needed?
     * need metadata semantics
-1. Explore
-    * RESPONSE Frame
-        * remove header type and bring BE flags byte into header type location. Keep length.
-    * remove COMPLETE and add C bit to NEXT (COMPLETE is a NEXT header with C bit set and no data)
-    * remove ERROR and add R bit to NEXT (ERROR is a NEXT header with R bit set and optionally data)
-    * keep extension header and add 0xF after BECR flags to extend to new types.
+1. Handling the unexpected questions
