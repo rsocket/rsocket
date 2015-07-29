@@ -470,7 +470,7 @@ Upon sending a ERROR, the stream is terminated on the Responder.
 - Connection instance
     * Requester instance
     * Responder instance
-- [ ] Exlicit METADATA needed?
+- [ ] Exlicit METADATA needed as mentioned in #3
     * need to understand metadata semantics
     * could be flag or explicit frame type or if needed to be attached to specific NEXT, could be option header
 - [ ] Handling the unexpected questions
