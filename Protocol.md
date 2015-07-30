@@ -478,3 +478,4 @@ new requests on command.
     * need to understand metadata semantics
     * could be flag or explicit frame type or if needed to be attached to specific NEXT, could be option header
 - [ ] Handling the unexpected questions
+- [ ] Can replace BE bits with a single __M__ore bit that indicates more fragments follow the current fragment
