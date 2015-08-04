@@ -467,13 +467,16 @@ Upon sending a ERROR, the stream is terminated on the Responder.
 
 - [ ] REQUEST_N needs to return point in stream in some way. Or even a new header type REQUEST_N_POSITIONED, or POSITION header, e.g.
     * object (NEXT) counter (and/or RESPONSE byte counter) kept as Requester stat for the stream
+    * without the point in the stream, the window location is unclear and can lead to over-saturation of a subscriber
 - [ ] Need request throttling and back pressure semantics. A new Requester may need to be controlled as to how many requests it can send. Also,
 it is probably necessary to throttle the amount of outstanding request a Requester can have outstanding. As well as make a Requester stop generating
 new requests on command.
+    * request throttling is a separation of concerns from flow control of a single stream/subscription
 - [ ] Stream ID should maybe be renamed to Request ID.
-- Connection instance
-    * Requester instance
-    * Responder instance
+- [ ] naming
+    - Connection instance
+        * Requester instance
+        * Responder instance
 - [ ] Exlicit METADATA needed as mentioned in #3
     * need to understand metadata semantics
     * could be flag or explicit frame type or if needed to be attached to specific NEXT, could be option header
