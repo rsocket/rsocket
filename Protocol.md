@@ -28,9 +28,9 @@ For transports that do not provide framing, such as TCP, the Frame Length MUST b
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                 Frame Length (for TCP only)                 |
-    +---------------+-+-------------+-------------------------------+
-    |    Version    |I|   Flags     |         Frame Type            |
-    +---------------+-+-------------+-------------------------------+
+    +---------------+-+-+-----------+-------------------------------+
+    |    Version    |I|M|  Flags    |         Frame Type            |
+    +---------------+-+-+-----------+-------------------------------+
     |                           Stream ID                           |
     |                                                               |
     +---------------------------------------------------------------+
@@ -41,8 +41,29 @@ For transports that do not provide framing, such as TCP, the Frame Length MUST b
 * __Version__: (8) Current version is 0.
 * __Flags__:
      * (__I__)gnore: Ignore frame if not understood
+     * (__M__)etadata: Metdadata present (or not)
 * __Frame Type__: (16) Type of Frame.
 * __Stream ID__: (64) Stream Identifier for this frame.
+
+#### Metadata Optional Header
+
+Specific Frame Types MAY contain an optional metadata header that provides metadata about a frame.
+This metadata header is between the Frame Header and any payload.
+
+```
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |       Type    |           Metadata Length                     |
+    +---------------+-----------------------------------------------+
+    |                       Metadata Payload                       ...
+    +---------------------------------------------------------------+
+    |                       Payload of Frame                       ...
+    +---------------------------------------------------------------+
+```
+
+* __Type__: Application-defined Type field for the metadata. Not interpretted by protocol.
+* __Metadata Length__: (24 = max 16,777,216 bytes) Length of Metadata. Including Metadata header.
 
 ### Stream Identifiers
 
@@ -61,6 +82,8 @@ A stream ID must be locally unique for a Requester in a connection.
 |:-------------------------------|:-------|:------------|
 | __RESERVED__                   | 0x0000 | __Reserved__ |
 | __SETUP__                      | 0x0001 | __Setup__: Capabilities Of Side Sending The Frame. |
+| __SETUP_ERROR__                | 0x0002 | __Setup Error__: Error from SETUP. |
+| __LEASE__                      | 0x0003 | __Lease__: |
 | __REQUEST_RESPONSE__           | 0x0011 | __Request Response__: |
 | __REQUEST_FNF__                | 0x0012 | __Fire And Forget__: |
 | __REQUEST_STREAM__             | 0x0013 | __Request Stream__: |
@@ -75,7 +98,7 @@ __NOTE__: In general Requesters send types 0x0010 to 0x001F and Responders send 
 
 ### Setup Frame
 
-Setup headers must always use Stream ID 0 as they pertain to the connection.
+Setup frames must always use Stream ID 0 as they pertain to the connection.
 
 Frame Contents
 
@@ -84,17 +107,80 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                 Frame Length (for TCP only)                 |
-    +---------------+-+-------------+-------------------------------+
-    |    Version    |0|   Flags     |     Frame Type = SETUP        |
-    +---------------+-+-------------+-------------------------------+
+    +---------------+-+-+-+---------+-------------------------------+
+    |    Version    |0|M|L| Flags   |     Frame Type = SETUP        |
+    +---------------+-+-+-+---------+-------------------------------+
     |                           Stream ID                           |
     |                                                               |
     +---------------------------------------------------------------+
-                               Setup Data
+                           Metadata & Setup Data
 ```
 
+* __Flags__:
+     * (__L__): Will honor LEASE (or not).
 * __Setup Data__: includes payload describing connection capabilities of the endpoint sending the
 Setup header.
+
+### Setup Error Frame
+
+Setup Error frames must always use Stream ID 0 as they pertain to the connection.
+
+Frame Contents
+
+```
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |R|                 Frame Length (for TCP only)                 |
+    +---------------+-+-+-----------+-------------------------------+
+    |    Version    |0|M|  Flags    |     Frame Type = SETUP ERROR  |
+    +---------------+-+-+-----------+-------------------------------+
+    |                           Stream ID                           |
+    |                                                               |
+    +---------------------------------------------------------------+
+    |                          Error Code                           |
+    +---------------------------------------------------------------+
+                        Metadata & Setup Error Data
+```
+
+* __Error Code__: Type of Error.
+* __Setup Error Data__: includes payload describing connection capabilities of the endpoint sending the
+Setup header.
+
+#### Error Codes
+
+|  Type                          | Value  | Description |
+|:-------------------------------|:-------|:------------|
+| __RESERVED__                   | 0x0000 | __Reserved__ |
+| __RESERVED__                   | 0xFFFF | __Reserved__ |
+
+### Lease Frame
+
+Lease frames must always use Stream ID 0 as they pertain to the Connection.
+
+Frame Contents
+
+```
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |R|                 Frame Length (for TCP only)                 |
+    +---------------+-+-+-----------+-------------------------------+
+    |    Version    |0|0|  Flags    |     Frame Type = LEASE        |
+    +---------------+-+-+-----------+-------------------------------+
+    |                           Stream ID                           |
+    |                                                               |
+    +---------------------------------------------------------------+
+    |                             Time                              |
+    |                                                               |
+    +---------------------------------------------------------------+
+    |                       Number of Requests                      |
+    |                                                               |
+    +---------------------------------------------------------------+
+```
+
+* __Time__: Time (in nanoseconds) for validity of LEASE
+* __Number of Requests__: Number of Requests that may be sent until next LEASE
 
 ### Request Response Frame
 
@@ -105,13 +191,13 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                 Frame Length (for TCP only)                 |
-    +---------------+-+-------------+-------------------------------+
-    |    Version    |0|   Flags     | Frame Type = REQUEST_RESPONSE |
-    +---------------+-+-------------+-------------------------------+
+    +---------------+-+-+-----------+-------------------------------+
+    |    Version    |0|M|  Flags    | Frame Type = REQUEST_RESPONSE |
+    +---------------+-+-+-----------+-------------------------------+
     |                           Stream ID                           |
     |                                                               |
     +---------------------------------------------------------------+
-                              Request Data
+                         Metadata & Request Data
 ```
 
 * __Request Data__: identification of the service being requested along with parameters for the request.
@@ -125,13 +211,13 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                 Frame Length (for TCP only)                 |
-    +---------------+-+-------------+-------------------------------+
-    |    Version    |0|   Flags     |    Frame Type = REQUEST_FNF   |
-    +---------------+-+-------------+-------------------------------+
+    +---------------+-+-+-----------+-------------------------------+
+    |    Version    |0|M|  Flags    |    Frame Type = REQUEST_FNF   |
+    +---------------+-+-+-----------+-------------------------------+
     |                           Stream ID                           |
     |                                                               |
     +---------------------------------------------------------------+
-                               Request Data
+                          Metadata & Request Data
 ```
 
 * __Request Data__: identification of the service being requested along with parameters for the request.
@@ -145,16 +231,16 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                 Frame Length (for TCP only)                 |
-    +---------------+-+-------------+-------------------------------+
-    |    Version    |I|   Flags     |  Frame Type = REQUEST_STREAM  |
-    +---------------+-+-------------+-------------------------------+
+    +---------------+-+-+-----------+-------------------------------+
+    |    Version    |0|M|  Flags    |  Frame Type = REQUEST_STREAM  |
+    +---------------+-+-+-----------+-------------------------------+
     |                           Stream ID                           |
     |                                                               |
     +---------------------------------------------------------------+
     |                        Initial Request N                      |
     |                                                               |
     +---------------------------------------------------------------+
-                                Request Data
+                          Metadata & Request Data
 ```
 
 * __Initial Request N__: initial Request N value. 64-bit integer.
@@ -169,16 +255,16 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                 Frame Length (for TCP only)                 |
-    +---------------+-+-------------+-------------------------------+
-    |    Version    |I|   Flags     |    Frame Type = REQUEST_SUB   |
-    +---------------+-+-------------+-------------------------------+
+    +---------------+-+-+-----------+-------------------------------+
+    |    Version    |0|M|  Flags    |    Frame Type = REQUEST_SUB   |
+    +---------------+-+-+-----------+-------------------------------+
     |                           Stream ID                           |
     |                                                               |
     +---------------------------------------------------------------+
     |                       Initial Request N                       |
     |                                                               |
     +---------------------------------------------------------------+
-                               Request Data
+                           Metadata & Request Data
 ```
 
 * __Initial Request N__: initial Request N value. 64-bit integer.
@@ -193,9 +279,9 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                 Frame Length (for TCP only)                 |
-    +---------------+-+-------------+-------------------------------+
-    |    Version    |I|   Flags     |     Frame Type = SETUP        |
-    +---------------+-+-------------+-------------------------------+
+    +---------------+-+-+-----------+-------------------------------+
+    |    Version    |0|0|   Flags   |     Frame Type = SETUP        |
+    +---------------+-+-+-----------+-------------------------------+
     |                           Stream ID                           |
     |                                                               |
     +---------------------------------------------------------------+
@@ -215,9 +301,9 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                 Frame Length (for TCP only)                 |
-    +---------------+-+-------------+-------------------------------+
-    |    Version    |I|   Flags     |     Frame Type = CANCEL       |
-    +---------------+-+-------------+-------------------------------+
+    +---------------+-+-+-----------+-------------------------------+
+    |    Version    |I|0|  Flags    |     Frame Type = CANCEL       |
+    +---------------+-+-+-----------+-------------------------------+
     |                           Stream ID                           |
     |                                                               |
     +---------------------------------------------------------------+
@@ -232,13 +318,13 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                 Frame Length (for TCP only)                 |
-    +---------------+-+-+-+-+-------+-------------------------------+
-    |    Version    |I|B|E|C| Resvd |    Frame Type = RESPONSE      |
-    +---------------+-+-+-+-+-------+-------------------------------+
+    +---------------+-+-+-+-+-+-----+-------------------------------+
+    |    Version    |I|M|B|E|C|     |    Frame Type = RESPONSE      |
+    +---------------+-+-+-+-+-+-----+-------------------------------+
     |                           Stream ID                           |
     |                                                               |
     +---------------------------------------------------------------+
-                              Response Data
+                         Metadata & Response Data
 ```
 
 * __Flags__:
@@ -253,6 +339,8 @@ A Response with the Complete Bit set is referred to as a COMPLETE.
 
 #### Error Frame
 
+An ERROR frame is used as a means of communicating a stream ERROR from a Responder to a Requester.
+
 Frame Contents
 
 ```
@@ -260,9 +348,9 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                 Frame Length (for TCP only)                 |
-    +---------------+-+-------------+-------------------------------+
-    |    Version    |I|  Reserved   |      Frame Type = ERROR       |
-    +---------------+-+-------------+-------------------------------+
+    +---------------+-+-+-----------+-------------------------------+
+    |    Version    |I|0| Reserved  |      Frame Type = ERROR       |
+    +---------------+-+-+-----------+-------------------------------+
     |                           Stream ID                           |
     |                                                               |
     +---------------------------------------------------------------+
@@ -270,10 +358,6 @@ Frame Contents
 ```
 
 * __Error Data__: error information.
-
-An ERROR frame is used for dual purposes:
-* As a means for a server to reject a SETUP frame.
-* As a means of communicating a stream ERROR from a Responder to a Requester.
 
 ### Extension Frame
 
@@ -284,9 +368,9 @@ The general format for an extension frame is given below.
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                 Frame Length (for TCP only)                 |
-    +---------------+-+-------------+-------------------------------+
-    |    Version    |I|   Flags     |     Frame Type = EXT          |
-    +---------------+-+-------------+-------------------------------+
+    +---------------+-+-+-----------+-------------------------------+
+    |    Version    |I|M|  Flags    |     Frame Type = EXT          |
+    +---------------+-+-+-----------+-------------------------------+
     |                        Extended Type                          |
     +---------------------------------------------------------------+
                           Depends on Extended Type...
@@ -295,6 +379,7 @@ The general format for an extension frame is given below.
 * __Frame Type__: (16) 0xFFFF for Extension Header.
 * __Flags__:
     * (__I__)gnore: Can be ignored.
+    * (__M__)etadata: Metadata present.
 * __Extended Type__: Extended type information
 
 ## Connection Establishment
@@ -302,25 +387,35 @@ The general format for an extension frame is given below.
 __NOTE__: The semantics are similar to [TLS False Start](https://tools.ietf.org/html/draft-bmoeller-tls-falsestart-00).
 
 Immediately upon successful connection, the client MUST send a SETUP frame with
-Stream ID of 0. The client-side Requester may send requests immediately if it so desires without waiting for
+Stream ID of 0. 
+
+A client-side Requester can inform the server-side Responder as to whether it will honor LEASEs or not based on the presence of
+the __L__ flag in the Frame Header.
+
+The client-side Requester that has NOT set the __L__ flag in the SETUP frame may send requests immediately if it so desires without waiting for
 a response from the server.
 
-If the server accepts the contents of the SETUP frame, it does nothing special. The server-side Requester may send requests immediately
-upon receiving a SETUP frame that it accepts.
+The client-side Requester that has set the __L__ flag in the SETUP frame MUST wait for the server-side Responder to send a LEASE frame
+before it can send Requests.
 
-If the server does NOT accept the contents of the SETUP frame, the server MUST send back an ERROR on Stream ID 0
+If the server accepts the contents of the SETUP frame, it MUST send a LEASE frame if the SETUP frame set the __L__ flag.
+The server-side Requester may send requests immediately upon receiving a SETUP frame that it accepts.
+
+If the server does NOT accept the contents of the SETUP frame, the server MUST send back a SETUP_ERROR
 and then close the connection.
 
-A client assumes a SETUP is accepted if it receives a response to a request or if it sees a REQUEST type.
+A client assumes a SETUP is accepted if it receives a response to a request, a LEASE frame, or if it sees a REQUEST type.
 
-A client assumes a SETUP is rejected if it receives an ERROR with stream ID 0. 
+A client assumes a SETUP is rejected if it receives a SETUP_ERROR.
 
 ### Negotiation
 
 The assumption is that the client will be dictating to the server what it desires to do. The server will decide to support
 that SETUP (accept it) or not (reject it).
 
-### Sequences
+### Sequences with no LEASE
+
+The possible sequences with no LEASE are below.
 
 1. Client-side Request, Server-side __accepts__ SETUP
     * Client connects & sends SETUP & sends REQUEST
@@ -468,10 +563,11 @@ Upon sending a ERROR, the stream is terminated on the Responder.
 - [ ] REQUEST_N needs to return point in stream in some way. Or even a new header type REQUEST_N_POSITIONED, or POSITION header, e.g.
     * object (NEXT) counter (and/or RESPONSE byte counter) kept as Requester stat for the stream
     * without the point in the stream, the window location is unclear and can lead to over-saturation of a subscriber
-- [ ] Need request throttling and back pressure semantics. A new Requester may need to be controlled as to how many requests it can send. Also,
+- [x] Need request throttling and back pressure semantics. A new Requester may need to be controlled as to how many requests it can send. Also,
 it is probably necessary to throttle the amount of outstanding request a Requester can have outstanding. As well as make a Requester stop generating
 new requests on command.
     * request throttling is a separation of concerns from flow control of a single stream/subscription
+    - [ ] LEASE frame type for Responders to Requesters
 - [ ] Stream ID should maybe be renamed to Request ID.
 - [ ] naming
     - Connection instance
@@ -480,5 +576,10 @@ new requests on command.
 - [ ] Exlicit METADATA needed as mentioned in #3
     * need to understand metadata semantics
     * could be flag or explicit frame type or if needed to be attached to specific NEXT, could be option header
+    * strawman
+        * MD bit in Frame header
+        * MD header contains length and application-set TYPE field (length = 24-bits (16,777,216 bytes), type = 8-bits)
+- [x] eplicit SETUP_ERROR frame type with error code field + payload
+- [x] add bit in SETUP for whether client expects response to SETUP
 - [ ] Handling the unexpected questions
 - [ ] Can replace BE bits with a single __M__ore bit that indicates more fragments follow the current fragment
