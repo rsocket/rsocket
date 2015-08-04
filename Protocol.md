@@ -610,7 +610,6 @@ new requests on command.
     * strawman
         * MD bit in Frame header
         * MD header contains length and application-set TYPE field (length = 24-bits (16,777,216 bytes), type = 8-bits)
-- [x] eplicit SETUP_ERROR frame type with error code field + payload
-- [x] add bit in SETUP for whether client expects response to SETUP
 - [ ] Handling the unexpected questions
-- [x] Can replace BE bits with a single __M__ore bit that indicates more fragments follow the current fragment
+- [ ] SETUP_ERROR error codes
+- [ ] SETUP details beyond MIME type
