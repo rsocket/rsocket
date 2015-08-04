@@ -94,11 +94,12 @@ A stream ID must be locally unique for a Requester in a connection.
 | __ERROR__                      | 0x0021 | __Error__: Response that is an error. |
 | __EXT__                        | 0xFFFF | __Extension Header__: Used To Extend More Options As Well As Extensions. |
 
-__NOTE__: In general Requesters send types 0x0010 to 0x001F and Responders send types 0x0020 to 0x002F.
+__NOTE__: In general Requesters send types 0x0010 to 0x001F and Responders send types 0x0020 to 0x002F. Types 0x0001 to 0x000F
+pertain to the entire connection.
 
 ### Setup Frame
 
-Setup frames must always use Stream ID 0 as they pertain to the connection.
+Setup frames MUST always use Stream ID 0 as they pertain to the connection.
 
 Frame Contents
 
@@ -112,18 +113,26 @@ Frame Contents
     +---------------+-+-+-+---------+-------------------------------+
     |                           Stream ID                           |
     |                                                               |
-    +---------------------------------------------------------------+
-                           Metadata & Setup Data
+    +---------------+-----------------------------------------------+
+    |  MIME Length  |     Data Encoding MIME Type                  ...
+    +---------------+-----------------------------------------------+
+                          Metadata & Setup Payload
 ```
 
 * __Flags__:
      * (__L__): Will honor LEASE (or not).
+* __MIME Length__: Encoding MIME Type Length in bytes.
+* __Data Encoding MIME Type__: MIME Type for encoding of Data and Metadata. This is a US-ASCII string
+that includes the [Internet media type](https://en.wikipedia.org/wiki/Internet_media_type) specified
+in [RFC 2045](https://tools.ietf.org/html/rfc2045). Many are registered with
+[IANA](https://www.iana.org/assignments/media-types/media-types.xhtml) such as
+[CBOR](https://www.iana.org/assignments/media-types/application/cbor)
 * __Setup Data__: includes payload describing connection capabilities of the endpoint sending the
 Setup header.
 
 ### Setup Error Frame
 
-Setup Error frames must always use Stream ID 0 as they pertain to the connection.
+Setup Error frames MUST always use Stream ID 0 as they pertain to the connection.
 
 Frame Contents
 
@@ -133,7 +142,7 @@ Frame Contents
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                 Frame Length (for TCP only)                 |
     +---------------+-+-+-----------+-------------------------------+
-    |    Version    |0|M|  Flags    |     Frame Type = SETUP ERROR  |
+    |    Version    |0|M|  Flags    |     Frame Type = SETUP_ERROR  |
     +---------------+-+-+-----------+-------------------------------+
     |                           Stream ID                           |
     |                                                               |
@@ -156,7 +165,10 @@ Setup header.
 
 ### Lease Frame
 
-Lease frames must always use Stream ID 0 as they pertain to the Connection.
+Lease frames MUST always use Stream ID 0 as they pertain to the Connection.
+
+Lease frames MAY be sent by the client-side or server-side Responders and inform the
+Requester that it may send Requests for a period of time and how many it may send.
 
 Frame Contents
 
@@ -179,7 +191,7 @@ Frame Contents
     +---------------------------------------------------------------+
 ```
 
-* __Time__: Time (in nanoseconds) for validity of LEASE
+* __Time__: Time (in nanoseconds) for validity of LEASE from time of reception
 * __Number of Requests__: Number of Requests that may be sent until next LEASE
 
 ### Request Response Frame
@@ -302,7 +314,7 @@ Frame Contents
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                 Frame Length (for TCP only)                 |
     +---------------+-+-+-----------+-------------------------------+
-    |    Version    |I|0|  Flags    |     Frame Type = CANCEL       |
+    |    Version    |0|0|  Flags    |     Frame Type = CANCEL       |
     +---------------+-+-+-----------+-------------------------------+
     |                           Stream ID                           |
     |                                                               |
@@ -318,9 +330,9 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                 Frame Length (for TCP only)                 |
-    +---------------+-+-+-+-+-+-----+-------------------------------+
-    |    Version    |I|M|B|E|C|     |    Frame Type = RESPONSE      |
-    +---------------+-+-+-+-+-+-----+-------------------------------+
+    +---------------+-+-+-+-+-------+-------------------------------+
+    |    Version    |0|M|F|C|       |    Frame Type = RESPONSE      |
+    +---------------+-+-+-+-+-------+-------------------------------+
     |                           Stream ID                           |
     |                                                               |
     +---------------------------------------------------------------+
@@ -328,8 +340,8 @@ Frame Contents
 ```
 
 * __Flags__:
-    * (__B__)egin: bit to indicate beginning of a fragmented response.
-    * (__E__)nd: bit to indicate end of a fragmented response.
+    * (__M__)etadata: Metadata Present.
+    * (__F__)ollows: More fragments follow this fragment.
     * (__C__)omplete: bit to indicate COMPLETE.
 * __Response Data__: payload for onNext.
 
@@ -349,7 +361,7 @@ Frame Contents
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                 Frame Length (for TCP only)                 |
     +---------------+-+-+-----------+-------------------------------+
-    |    Version    |I|0| Reserved  |      Frame Type = ERROR       |
+    |    Version    |0|0| Reserved  |      Frame Type = ERROR       |
     +---------------+-+-+-----------+-------------------------------+
     |                           Stream ID                           |
     |                                                               |
@@ -378,8 +390,8 @@ The general format for an extension frame is given below.
 
 * __Frame Type__: (16) 0xFFFF for Extension Header.
 * __Flags__:
-    * (__I__)gnore: Can be ignored.
-    * (__M__)etadata: Metadata present.
+    * (__I__)gnore: Can be frame be ignored if not understood?
+    * (__M__)etadata: Metadata Present.
 * __Extended Type__: Extended type information
 
 ## Connection Establishment
@@ -389,22 +401,28 @@ __NOTE__: The semantics are similar to [TLS False Start](https://tools.ietf.org/
 Immediately upon successful connection, the client MUST send a SETUP frame with
 Stream ID of 0. 
 
-A client-side Requester can inform the server-side Responder as to whether it will honor LEASEs or not based on the presence of
-the __L__ flag in the Frame Header.
+The client-side Requester can inform the server-side Responder as to whether it will
+honor LEASEs or not based on the presence of the __L__ flag in the SETUP frame.
 
-The client-side Requester that has NOT set the __L__ flag in the SETUP frame may send requests immediately if it so desires without waiting for
-a response from the server.
+The client-side Requester that has NOT set the __L__ flag in the SETUP frame may send
+requests immediately if it so desires without waiting for a LEASE from the server.
 
-The client-side Requester that has set the __L__ flag in the SETUP frame MUST wait for the server-side Responder to send a LEASE frame
-before it can send Requests.
+The client-side Requester that has set the __L__ flag in the SETUP frame MUST wait
+for the server-side Responder to send a LEASE frame before it can send Requests.
 
-If the server accepts the contents of the SETUP frame, it MUST send a LEASE frame if the SETUP frame set the __L__ flag.
-The server-side Requester may send requests immediately upon receiving a SETUP frame that it accepts.
+If the server accepts the contents of the SETUP frame, it MUST send a LEASE frame if
+the SETUP frame set the __L__ flag. The server-side Requester may send requests
+immediately upon receiving a SETUP frame that it accepts.
 
-If the server does NOT accept the contents of the SETUP frame, the server MUST send back a SETUP_ERROR
-and then close the connection.
+If the server does NOT accept the contents of the SETUP frame, the server MUST send
+back a SETUP_ERROR and then close the connection.
 
-A client assumes a SETUP is accepted if it receives a response to a request, a LEASE frame, or if it sees a REQUEST type.
+The client-side Responder implicitly gives a LEASE to the server-side Requester by sending
+a SETUP frame. Thus, server-side Requesters MAY send Requests immediately upon receiving
+a SETUP frame if the SETUP is accepted.
+
+A client assumes a SETUP is accepted if it receives a response to a request, a LEASE
+frame, or if it sees a REQUEST type.
 
 A client assumes a SETUP is rejected if it receives a SETUP_ERROR.
 
@@ -413,28 +431,45 @@ A client assumes a SETUP is rejected if it receives a SETUP_ERROR.
 The assumption is that the client will be dictating to the server what it desires to do. The server will decide to support
 that SETUP (accept it) or not (reject it).
 
-### Sequences with no LEASE
+### Sequences without LEASE
 
-The possible sequences with no LEASE are below.
+The possible sequences without LEASE are below.
 
 1. Client-side Request, Server-side __accepts__ SETUP
     * Client connects & sends SETUP & sends REQUEST
     * Server accepts SETUP, handles REQUEST, sends back normal sequence based on REQUEST type
 1. Client-side Request, Server-side __rejects__ SETUP
     * Client connects & sends SETUP & sends REQUEST
-    * Server rejects SETUP, sends back ERROR stream ID 0, closes connection
+    * Server rejects SETUP, sends back SETUP_ERROR, closes connection
 1. Server-side Request, Server-side __accepts__ SETUP
     * Client connects & sends SETUP
     * Server accepts SETUP, sends back REQUEST type
 1. Server-side Request, Server-side __rejects__ SETUP
     * Client connects & sends SETUP
-    * Server rejects SETUP, sends back ERROR stream ID 0, closes connection
+    * Server rejects SETUP, sends back SETUP_ERROR, closes connection
+
+### Sequences with LEASE
+
+The possible sequences with LEASE are below.
+
+1. Client-side Request, Server-side __accepts__ SETUP
+    * Client connects & sends SETUP with __L__ flag
+    * Server accepts SETUP, sends back LEASE frame
+    * Client-side sends REQUEST
+1. Client-side Request, Server-side __rejects__ SETUP
+    * Client connects & sends SETUP with __L__ flag
+    * Server rejects SETUP, sends back SETUP_ERROR, closes connection
+1. Server-side Request, Server-side __accepts__ SETUP
+    * Client connects & sends SETUP with __L__ flag
+    * Server accepts SETUP, sends back REQUEST type
+1. Server-side Request, Server-side __rejects__ SETUP
+    * Client connects & sends SETUP with __L__ flag
+    * Server rejects SETUP, sends back SETUP_ERROR, closes connection
 
 ## Fragmentation And Reassembly
 
 RESPONSE frames may respresent a large object and MAY need to be fragmented to fit within the Frame Data size. When this
-occurs, the RESPONSE Begin and End bits must be used to indicate a begin fragment and an end fragment. Or, when
-both bits set, the contents represent a reassembled RESPONSE.
+occurs, the RESPONSE __F__ flag indicates if more fragments follow this frame.
 
 ## Stream Sequences and Lifetimes
 
@@ -554,11 +589,7 @@ Upon sending a ERROR, the stream is terminated on the Responder.
 * Should StreamIDs be timedout after inactivity?
     * if so, need keepalive semantics
 
-### ChangeLog
-
-1. Removed usage of header chains to discourage frames from being too large.
-
-### TODO
+## TODO
 
 - [ ] REQUEST_N needs to return point in stream in some way. Or even a new header type REQUEST_N_POSITIONED, or POSITION header, e.g.
     * object (NEXT) counter (and/or RESPONSE byte counter) kept as Requester stat for the stream
@@ -567,7 +598,7 @@ Upon sending a ERROR, the stream is terminated on the Responder.
 it is probably necessary to throttle the amount of outstanding request a Requester can have outstanding. As well as make a Requester stop generating
 new requests on command.
     * request throttling is a separation of concerns from flow control of a single stream/subscription
-    - [ ] LEASE frame type for Responders to Requesters
+    - [x] LEASE frame type for Responders to Requesters
 - [ ] Stream ID should maybe be renamed to Request ID.
 - [ ] naming
     - Connection instance
@@ -582,4 +613,4 @@ new requests on command.
 - [x] eplicit SETUP_ERROR frame type with error code field + payload
 - [x] add bit in SETUP for whether client expects response to SETUP
 - [ ] Handling the unexpected questions
-- [ ] Can replace BE bits with a single __M__ore bit that indicates more fragments follow the current fragment
+- [x] Can replace BE bits with a single __M__ore bit that indicates more fragments follow the current fragment
