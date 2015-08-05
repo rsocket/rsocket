@@ -41,7 +41,7 @@ For transports that do not provide framing, such as TCP, the Frame Length MUST b
 * __Version__: (8) Current version is 0.
 * __Flags__:
      * (__I__)gnore: Ignore frame if not understood
-     * (__M__)etadata: Metdadata present (or not)
+     * (__M__)etadata: Metdadata present
 * __Frame Type__: (16) Type of Frame.
 * __Stream ID__: (64) Stream Identifier for this frame.
 
@@ -92,6 +92,7 @@ A stream ID must be locally unique for a Requester in a connection.
 | __CANCEL__                     | 0x0016 | __Cancel Request__: |
 | __RESPONSE__                   | 0x0020 | __Response__: Response to a request. |
 | __ERROR__                      | 0x0021 | __Error__: Response that is an error. |
+| __METADATA__                   | 0x0031 | __Metadata__: Asynchronous Metadata frame |
 | __EXT__                        | 0xFFFF | __Extension Header__: Used To Extend More Options As Well As Extensions. |
 
 __NOTE__: In general Requesters send types 0x0010 to 0x001F and Responders send types 0x0020 to 0x002F. Types 0x0001 to 0x000F
@@ -100,6 +101,8 @@ pertain to the entire connection.
 ### Setup Frame
 
 Setup frames MUST always use Stream ID 0 as they pertain to the connection.
+
+The encoding format for Data and Metadata are included seperately in the SETUP.
 
 Frame Contents
 
@@ -114,21 +117,28 @@ Frame Contents
     |                           Stream ID                           |
     |                                                               |
     +---------------+-----------------------------------------------+
+    |  MIME Length  |   Metadata Encoding MIME Type                ...
+    +---------------+-----------------------------------------------+
     |  MIME Length  |     Data Encoding MIME Type                  ...
     +---------------+-----------------------------------------------+
                           Metadata & Setup Payload
 ```
 
 * __Flags__:
+     * (__M__)etadata: Metdadata present
      * (__L__): Will honor LEASE (or not).
 * __MIME Length__: Encoding MIME Type Length in bytes.
-* __Data Encoding MIME Type__: MIME Type for encoding of Data and Metadata. This is a US-ASCII string
+* __Encoding MIME Type__: MIME Type for encoding of Data and Metadata. This is a US-ASCII string
 that includes the [Internet media type](https://en.wikipedia.org/wiki/Internet_media_type) specified
 in [RFC 2045](https://tools.ietf.org/html/rfc2045). Many are registered with
 [IANA](https://www.iana.org/assignments/media-types/media-types.xhtml) such as
 [CBOR](https://www.iana.org/assignments/media-types/application/cbor)
 * __Setup Data__: includes payload describing connection capabilities of the endpoint sending the
 Setup header.
+
+__NOTE__: [Suffix](http://www.iana.org/assignments/media-type-structured-suffix/media-type-structured-suffix.xml)
+rules SHOULD be used for handling layout. For example, `application/x.netflix+cbor` or 
+`application/x.reactivesocket+cbor` or `application/x.netflix+json`.
 
 ### Setup Error Frame
 
@@ -152,6 +162,8 @@ Frame Contents
                         Metadata & Setup Error Data
 ```
 
+* __Flags__:
+     * (__M__)etadata: Metdadata present
 * __Error Code__: Type of Error.
 * __Setup Error Data__: includes payload describing connection capabilities of the endpoint sending the
 Setup header.
@@ -178,7 +190,7 @@ Frame Contents
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                 Frame Length (for TCP only)                 |
     +---------------+-+-+-----------+-------------------------------+
-    |    Version    |0|0|  Flags    |     Frame Type = LEASE        |
+    |    Version    |0|M|  Flags    |     Frame Type = LEASE        |
     +---------------+-+-+-----------+-------------------------------+
     |                           Stream ID                           |
     |                                                               |
@@ -189,8 +201,11 @@ Frame Contents
     |                       Number of Requests                      |
     |                                                               |
     +---------------------------------------------------------------+
+                                Metadata
 ```
 
+* __Flags__:
+     * (__M__)etadata: Metdadata present
 * __Time__: Time (in nanoseconds) for validity of LEASE from time of reception
 * __Number of Requests__: Number of Requests that may be sent until next LEASE
 
@@ -212,6 +227,8 @@ Frame Contents
                          Metadata & Request Data
 ```
 
+* __Flags__:
+     * (__M__)etadata: Metdadata present
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
 ### Request Fire-n-Forget Frame
@@ -232,6 +249,8 @@ Frame Contents
                           Metadata & Request Data
 ```
 
+* __Flags__:
+     * (__M__)etadata: Metdadata present
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
 ### Request Stream Frame
@@ -255,6 +274,8 @@ Frame Contents
                           Metadata & Request Data
 ```
 
+* __Flags__:
+     * (__M__)etadata: Metdadata present
 * __Initial Request N__: initial Request N value. 64-bit integer.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
@@ -279,6 +300,8 @@ Frame Contents
                            Metadata & Request Data
 ```
 
+* __Flags__:
+     * (__M__)etadata: Metdadata present
 * __Initial Request N__: initial Request N value. 64-bit integer.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
@@ -292,7 +315,7 @@ Frame Contents
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                 Frame Length (for TCP only)                 |
     +---------------+-+-+-----------+-------------------------------+
-    |    Version    |0|0|   Flags   |     Frame Type = SETUP        |
+    |    Version    |0|M|   Flags   |     Frame Type = SETUP        |
     +---------------+-+-+-----------+-------------------------------+
     |                           Stream ID                           |
     |                                                               |
@@ -300,8 +323,11 @@ Frame Contents
     |                           Request N                           |
     |                                                               |
     +---------------------------------------------------------------+
+                                Metadata
 ```
 
+* __Flags__:
+     * (__M__)etadata: Metdadata present
 * __Request N__: 64-bit integer value of items to request.
 
 ### Cancel Frame
@@ -314,12 +340,16 @@ Frame Contents
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                 Frame Length (for TCP only)                 |
     +---------------+-+-+-----------+-------------------------------+
-    |    Version    |0|0|  Flags    |     Frame Type = CANCEL       |
+    |    Version    |0|M|  Flags    |     Frame Type = CANCEL       |
     +---------------+-+-+-----------+-------------------------------+
     |                           Stream ID                           |
     |                                                               |
     +---------------------------------------------------------------+
+                                Metadata
 ```
+
+* __Flags__:
+     * (__M__)etadata: Metdadata present
 
 ### Response Frame
 
@@ -361,15 +391,45 @@ Frame Contents
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                 Frame Length (for TCP only)                 |
     +---------------+-+-+-----------+-------------------------------+
-    |    Version    |0|0| Reserved  |      Frame Type = ERROR       |
+    |    Version    |0|M| Reserved  |      Frame Type = ERROR       |
     +---------------+-+-+-----------+-------------------------------+
     |                           Stream ID                           |
     |                                                               |
     +---------------------------------------------------------------+
-                              Error Data
+                           Metadata & Error Data
 ```
 
+* __Flags__:
+     * (__M__)etadata: Metdadata present
 * __Error Data__: error information.
+
+### Metadata Frame
+
+A Metadata frame can be used to send asynchronous metadata notifications from a Requester or
+Responder to its peer. Metadata may be scoped to the connection when Stream ID is set to 0
+or to a particular stream when Stream ID is NOT set to 0. Metadata tied to a particular Request,
+Reponse, etc. uses the individual frames Metadata flag.
+
+Frame Contents
+
+```
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |R|                 Frame Length (for TCP only)                 |
+    +---------------+-+-+-----------+-------------------------------+
+    |    Version    |0|1| Reserved  |     Frame Type = METADATA     |
+    +---------------+-+-+-----------+-------------------------------+
+    |                           Stream ID                           |
+    |                                                               |
+    +---------------------------------------------------------------+
+                                Metadata
+```
+
+* __Flags__:
+     * (__M__)etadata: Metdadata _always_ present
+* __Stream ID__: May be 0 to pertain to the entire connection or non-0 value to
+pertain to just that Stream.
 
 ### Extension Frame
 
@@ -585,31 +645,16 @@ Upon sending a ERROR, the stream is terminated on the Responder.
 
 #### Handling the Unexpected
 
-* Recieving a header in a state that is not specified means it is ignored (or causes termination?)
-* Should StreamIDs be timedout after inactivity?
-    * if so, need keepalive semantics
+TBD
 
 ## TODO
 
-- [ ] REQUEST_N needs to return point in stream in some way. Or even a new header type REQUEST_N_POSITIONED, or POSITION header, e.g.
-    * object (NEXT) counter (and/or RESPONSE byte counter) kept as Requester stat for the stream
-    * without the point in the stream, the window location is unclear and can lead to over-saturation of a subscriber
-- [x] Need request throttling and back pressure semantics. A new Requester may need to be controlled as to how many requests it can send. Also,
-it is probably necessary to throttle the amount of outstanding request a Requester can have outstanding. As well as make a Requester stop generating
-new requests on command.
-    * request throttling is a separation of concerns from flow control of a single stream/subscription
-    - [x] LEASE frame type for Responders to Requesters
 - [ ] Stream ID should maybe be renamed to Request ID.
 - [ ] naming
     - Connection instance
         * Requester instance
         * Responder instance
-- [ ] Exlicit METADATA needed as mentioned in #3
-    * need to understand metadata semantics
-    * could be flag or explicit frame type or if needed to be attached to specific NEXT, could be option header
-    * strawman
-        * MD bit in Frame header
-        * MD header contains length and application-set TYPE field (length = 24-bits (16,777,216 bytes), type = 8-bits)
-- [ ] Handling the unexpected questions
-- [ ] SETUP_ERROR error codes
-- [ ] SETUP details beyond MIME type
+- [ ] Handling the unexpected section
+    - [ ] request timeouts?
+    - [ ] stream keepalives?
+
