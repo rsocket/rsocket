@@ -173,6 +173,9 @@ Setup header.
 |  Type                          | Value  | Description |
 |:-------------------------------|:-------|:------------|
 | __RESERVED__                   | 0x0000 | __Reserved__ |
+| __INVALID_SETUP__              | 0x0001 | The Setup frame is invalid for the server (it could be that the client is too recent for the old server) |
+| __UNSUPPORTED_SETUP__          | 0x0010 | Some (or all) of the parameters specified by the client are unsupported by the server |
+| __REJECTED_SETUP__             | 0x0100 | The server rejected the setup, it can specify the reason in the payload |
 | __RESERVED__                   | 0xFFFF | __Reserved__ |
 
 ### Lease Frame
