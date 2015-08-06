@@ -92,7 +92,7 @@ A stream ID must be locally unique for a Requester in a connection.
 | __CANCEL__                     | 0x0016 | __Cancel Request__: |
 | __RESPONSE__                   | 0x0020 | __Response__: Response to a request. |
 | __ERROR__                      | 0x0021 | __Error__: Response that is an error. |
-| __METADATA__                   | 0x0031 | __Metadata__: Asynchronous Metadata frame |
+| __METADATA_PUSH__              | 0x0031 | __Metadata__: Asynchronous Metadata frame |
 | __EXT__                        | 0xFFFF | __Extension Header__: Used To Extend More Options As Well As Extensions. |
 
 __NOTE__: In general Requesters send types 0x0010 to 0x001F and Responders send types 0x0020 to 0x002F. Types 0x0001 to 0x000F
@@ -403,12 +403,13 @@ Frame Contents
      * (__M__)etadata: Metdadata present
 * __Error Data__: error information.
 
-### Metadata Frame
+### Metadata Push Frame
 
-A Metadata frame can be used to send asynchronous metadata notifications from a Requester or
+A Metadata Push frame can be used to send asynchronous metadata notifications from a Requester or
 Responder to its peer. Metadata may be scoped to the connection when Stream ID is set to 0
 or to a particular stream when Stream ID is NOT set to 0. Metadata tied to a particular Request,
 Reponse, etc. uses the individual frames Metadata flag.
+Metadata push frame are garanteed to be processed in order, for instance a requester receiving [Response1, MetadataPush, Response2] garantee that MetadataPush will be processed before processing Response2.
 
 Frame Contents
 
