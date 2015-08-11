@@ -1,7 +1,8 @@
 ## Motivations
 
-- Defines application layer semantics usable over multiple network transports. 
+- Define application layer semantics usable over multiple network transports. 
 - Reduce perceived latency and increase system efficiency by supporting non-blocking, duplex, async application communication with flow control over multiple transports from any language.
+- Improve polyglot interaction through formal network protocol.
 
 ## Why?
 
@@ -48,9 +49,8 @@
 
 ## Comparisons
 
-- ReactiveSocket is an OSI Layer 5 and 6 protocol, or TCP Application Layer protocol. 
+- ReactiveSocket is an OSI Layer 5/6, or TCP/IP Application Layer protocol. 
 - It is intended for use over duplex, binary transport protocols.
-
 
 #### TCP & QUIC
 
@@ -60,7 +60,7 @@
 
 - No application semantics, just framing. Must provide a protocol.
 
-HTTP/1 & HTTP/2
+#### HTTP/1 & HTTP/2
 
 - Provides transport mechanisms equivalent to ReactiveSocket Schema (URI, errors, metadata). 
 - Limited application semantics. Requires application protocol to define:
@@ -72,6 +72,8 @@ HTTP/1 & HTTP/2
   - Use of SSE as persistent channel from server to client to allow server to make requests to client
 - No defined mechanism for flow control from responder (typically server) to requestor (typically client)
 - No defined mechanism for communicating requestor (typically server) availability other than failing a request (503)
+- No fire-and-forget.
+- REST alone is insufficient and inappropriate for defining application semantics.
 
 #### MQTT, AMQP, ZMTP
 
