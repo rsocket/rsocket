@@ -50,6 +50,9 @@ For transports that do not provide framing, such as TCP, the Frame Length MUST b
 Specific Frame Types MAY contain an optional metadata header that provides metadata about a frame.
 This metadata header is between the Frame Header and any payload.
 
+Metadata Length MUST be less than or equal to the Frame Length minus the length of the Frame Header.
+If Metadata Length is greater than this value, the entire frame MUST be ignored.
+
 ```
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -500,7 +503,8 @@ The general format for an extension frame is given below.
 __NOTE__: The semantics are similar to [TLS False Start](https://tools.ietf.org/html/draft-bmoeller-tls-falsestart-00).
 
 Immediately upon successful connection, the client MUST send a SETUP frame with
-Stream ID of 0. 
+Stream ID of 0. Any other frame received that is NOT a SETUP frame or a SETUP frame with
+a non-0 Stream ID, MUST cause the server to send a SETUP_ERROR (with INVALID_SETUP) and close connection.
 
 The client-side Requester can inform the server-side Responder as to whether it will
 honor LEASEs or not based on the presence of the __L__ flag in the SETUP frame.
@@ -694,6 +698,9 @@ Upon sending a ERROR, the stream is terminated on the Responder.
 
 Requester MUST respect the LEASE contract. The Requester MUST NOT send more than __Number of Requests__ specified
 in the LEASE frame within the __Time__ value in the LEASE.
+
+A Responder that receives a REQUEST that it can not honor due to LEASE restrictions MUST ignore the REQUEST. This includes
+an initial LEASE sent as part of [Connection Establishment](#connection-establishment).
 
 #### Handling the Unexpected
 
