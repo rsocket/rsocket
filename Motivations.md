@@ -1,6 +1,7 @@
 ## Motivations
 
-Reduce perceived latency and increase system efficiency by supporting non-blocking, duplex, async application communication with flow control over multiple transports from any language.
+- Defines application layer semantics usable over multiple network transports. 
+- Reduce perceived latency and increase system efficiency by supporting non-blocking, duplex, async application communication with flow control over multiple transports from any language.
 
 ## Why?
 
@@ -45,3 +46,43 @@ Reduce perceived latency and increase system efficiency by supporting non-blocki
 - Design for the data center where a client communicates with many servers via optional support to control flow of requests from requestor to responder using leasing strategy. This enables client-side load balancing for sending messages only to servers that have signalled capacity. 
 - Control flow of emission from responder to requestor using Reactive Stream semantics at the application level. This enables use of bounded buffers so rate of flow adjusts to application consumption and not rely solely on transport and network buffering.
 
+## Comparisons
+
+- ReactiveSocket is an OSI Layer 5 and 6 protocol, or TCP Application Layer protocol. 
+- It is intended for use over duplex, binary transport protocols.
+
+
+#### TCP & QUIC
+
+- No framing or application semantics. Must provide a protocol.
+
+#### WebSockets
+
+- No application semantics, just framing. Must provide a protocol.
+
+HTTP/1 & HTTP/2
+
+- Provides transport mechanisms equivalent to ReactiveSocket Schema (URI, errors, metadata). 
+- Limited application semantics. Requires application protocol to define:
+  - Use of GET, POST or PUT for request
+  - Use of Normal, Chunked or SSE for response
+  - MimeType of payload
+  - error messaging along with standard status codes
+  - how client should behave with status codes
+  - Use of SSE as persistent channel from server to client to allow server to make requests to client
+- No defined mechanism for flow control from responder (typically server) to requestor (typically client)
+- No defined mechanism for communicating requestor (typically server) availability other than failing a request (503)
+
+#### MQTT, AMQP, ZMTP
+
+- Limited or no application semantics, just messaging. Must provide a protocol.
+
+#### STOMP
+
+- No application semantics, just framing. Must provide a protocol.
+- ASCII protocol, not binary.
+
+#### Thrift
+
+- Coupled with encoding, RPC, etc
+- Synchronous request/response, no multiplexing
