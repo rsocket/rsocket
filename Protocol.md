@@ -189,6 +189,8 @@ Lease frames MUST always use Stream ID 0 as they pertain to the Connection.
 Lease frames MAY be sent by the client-side or server-side Responders and inform the
 Requester that it may send Requests for a period of time and how many it may send.
 
+The last received LEASE frame overrides all previous LEASE frame values.
+
 Frame Contents
 
 ```
@@ -215,6 +217,10 @@ Frame Contents
      * (__M__)etadata: Metdadata present
 * __Time__: Time (in nanoseconds) for validity of LEASE from time of reception
 * __Number of Requests__: Number of Requests that may be sent until next LEASE
+
+A Responder implementation MAY stop all further requests by sending a LEASE with a value of 0 for __Number of Requests__.
+
+When a LEASE expires due to time, the value of the __Number of Requests__ that a Requester may make is implicitly 0.
 
 ### Kepalive Frame
 
@@ -522,9 +528,10 @@ immediately upon receiving a SETUP frame that it accepts.
 If the server does NOT accept the contents of the SETUP frame, the server MUST send
 back a SETUP_ERROR and then close the connection.
 
-The client-side Responder implicitly gives a LEASE to the server-side Requester by sending
-a SETUP frame. Thus, server-side Requesters MAY send Requests immediately upon receiving
-a SETUP frame if the SETUP is accepted.
+The server-side Requester mirrors the LEASE requests of the client-side Requester. If a client-side
+Requester sets the __L__ flag in the SETUP frame, the server side Requester MUST wait for a LEASE
+frame from the client-side Responder before it can send a request. The client-side Responder MUST
+send a LEASE frame after a SETUP frame with the __L__ flag set.
 
 A client assumes a SETUP is accepted if it receives a response to a request, a LEASE
 frame, or if it sees a REQUEST type.
@@ -716,10 +723,11 @@ under [Keepalive Frame](#keepalive-frame). The decision to close a connection du
 assume it is set and act accordingly.
 1. Reassembly of RESPONSES MUST assume the possibility of an infinite stream.
 1. Stream ID values MAY be re-used after completion or error of a stream.
+1. A RESPONSE with both __F__ and __C__ flags set, implicitly ignores the __F__ flag.
 1. All other received frames that are not accounted for in previous sections MUST be ignored. Thus, for example:
     1. Receiving a Request frame on a Stream ID that is already in use MUST be ignored.
     1. Receiving a CANCEL on an unknown Stream ID (including 0) MUST be ignored.
-    1. Receiving an ERROR on an unknown Stream ID MUST be ignored.
+    1. Receiving an ERROR on an unknown Stream ID (including 0) MUST be ignored.
     1. Receiving a RESPONSE on an unknown Stream ID (including 0) MUST be ignored.
     1. Receiving a METADATA_PUSH on an unknown Stream ID MUST be ignored.
 
