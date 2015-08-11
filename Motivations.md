@@ -1,34 +1,44 @@
 ## Motivations
 
-Support non-blocking, duplex, async application communication with flow control over multiple transports from any language.
+Reduce perceived latency and increase system efficiency by supporting non-blocking, duplex, async application communication with flow control over multiple transports from any language.
 
 ## Why?
 
 #### Scalability & Performance
 
-- CPU efficiency
-- Memory efficiency
-- Use binary encoding to reduce computation and byte size.
-- Resource efficiency by allowing persistent connections.
-- Reduce user latency by eliminating round-trip cost of handshakes (such as SSL/TLS) for each request/response over persistent connections.
+- Reduce hardware footprint (and thus cost and operational complexity) by:
+   - increasing CPU efficiency
+   - increasing memory efficiency
+   - using binary encoding to reduce computation and byte size
+   - allowing persistent connections
 
-#### Transport Layer Flexibility
-
-- Support multiple transport protocols (HTTP/2, WebSockets, TCP, Aeron, QUIC, etc) with a single application protocol to allow swapping based on environment, device capabilities and performance needs. 
-- Support WebSockets which needs an application protocol.
-- Support TCP which needs an application protocol.
+- Reduce perceived user latency by:
+   - eliminating round-trip cost of handshakes (such as SSL/TLS) for each request/response over persistent connections.
+   - reducing computation time by using binary encoding
+   - allocating less memory and reducing garbage collection cost
 
 #### Interaction Models
 
 - Support the following interaction models:
-  - request/response (single-response)
-  - request/stream (multi-response, finite)
-  - fire-and-forget
-  - topic subscription (multi-response, infinite)
+  - Request/Response (single-response)
+  - Request/Stream (multi-response, finite) to support collection/stream based responses.
+  - Fire-and-Forget to support efficient, lossy messaging. 
+  - Topic subscription (multi-response, infinite) to enable push notifications and event stream processing.
 
-- Support bi-directional requests. Both client and server can act as requestor or responder. This allows a client (such as a user device) to act as a responder to requests from the server. 
+- Support bi-directional requests where both client and server can act as requestor or responder. This allows a client (such as a user device) to act as a responder to requests from the server. 
+  - For example, a server could query clients for trace debug information, state, etc. 
+  - This future proofs infrastructure for scalability to allow server-side to query when needed instead of having millions/billions of clients constantly submitting data that may only occasionally be needed.
+  - This also opens up future interaction models currently not envisioned between client and server without restricting use of legacy client/server models and enabling peer-to-peer interactions.
 
-- Support cancellation of any request.
+- Support cancellation of any request to allow efficient cleanup of server (responder) resources.
+
+#### Transport Layer Flexibility
+
+- Allow swapping transport layer based on environment, device capabilities and performance needs by supporting multiple transport protocols (HTTP/2, WebSockets, TCP, Aeron, QUIC, etc) with a single application protocol. 
+- Allow use of WebSockets which needs an application protocol.
+- Allow use of TCP which needs an application protocol.
+- Allow use of HTTP/2 which needs a mapping of application behavior to the HTTP semantics.
+- Allow interchangeable use of HTTP/1, HTTP/2, WebSockets, TCP (and other duplex transports) with same application behavior.
 
 #### Flow Control
 
