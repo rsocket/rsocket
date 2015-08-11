@@ -1,8 +1,10 @@
-### Schema
+## Schema
 
 A default schema for use with ReactiveSocket.
 
-### Data
+### Version 0
+
+#### Data
 
 Requests must contain fields used for routing:
 
@@ -22,7 +24,7 @@ MimeTypes for the above schema:
 - application/x.reactivesocket.v0+cbor (schema above encoded with CBOR)
 
 
-### Metadata
+#### Metadata
 
 There is no specific schema so it is expected to use JSON, CBOR, etc as is.
 
