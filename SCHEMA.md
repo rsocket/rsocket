@@ -2,7 +2,7 @@
 
 A default schema for use with ReactiveSocket.
 
-### Version 0
+### Version 0 – application/x.reactivesocket.v0+xxx
 
 #### Data
 
