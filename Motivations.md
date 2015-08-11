@@ -63,6 +63,7 @@
 #### HTTP/1 & HTTP/2
 
 - Provides transport mechanisms equivalent to ReactiveSocket Schema (URI, errors, metadata). 
+- HTTP itself is insufficient in defining application semantics. ([GRPC from Google](https://github.com/grpc/grpc-common/blob/master/PROTOCOL-HTTP2.md) is an example of a protocol being built on top of HTTP/2 to add these type of semantics)
 - Limited application semantics. Requires application protocol to define:
   - Use of GET, POST or PUT for request
   - Use of Normal, Chunked or SSE for response
