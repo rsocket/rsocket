@@ -76,6 +76,8 @@
 - No fire-and-forget.
 - REST alone is insufficient and inappropriate for defining application semantics.
 
+In other words, HTTP provides barely sufficient raw capabilities for application protocols to be built with, but an application protocol still needs to be defined on top of it.
+
 #### MQTT, AMQP, ZMTP
 
 - Limited or no application semantics, just messaging. Must provide a protocol.
