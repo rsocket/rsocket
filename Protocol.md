@@ -541,7 +541,7 @@ A client assumes a SETUP is rejected if it receives a SETUP_ERROR.
 ### Negotiation
 
 The assumption is that the client will be dictating to the server what it desires to do. The server will decide to support
-that SETUP (accept it) or not (reject it).
+that SETUP (accept it) or not (reject it). The SETUP_ERROR error code indicates the reason for the rejection.
 
 ### Sequences without LEASE
 
@@ -573,7 +573,9 @@ The possible sequences with LEASE are below.
     * Server rejects SETUP, sends back SETUP_ERROR, closes connection
 1. Server-side Request, Server-side __accepts__ SETUP
     * Client connects & sends SETUP with __L__ flag
-    * Server accepts SETUP, sends back REQUEST type
+    * Server accepts SETUP, sends back LEASE frame
+    * Client sends LEASE frame
+    * Server sends REQUEST
 1. Server-side Request, Server-side __rejects__ SETUP
     * Client connects & sends SETUP with __L__ flag
     * Server rejects SETUP, sends back SETUP_ERROR, closes connection
@@ -607,7 +609,7 @@ or
 
 Upon sending a response, the stream is terminated on the Responder.
 
-Upon receiving a CANCEL, the stream is terminated on the Responder and the response should not be sent.
+Upon receiving a CANCEL, the stream is terminated on the Responder and the response SHOULD not be sent.
 
 Upon sending a CANCEL, the stream is terminated on the Requester.
 
@@ -712,7 +714,7 @@ an initial LEASE sent as part of [Connection Establishment](#connection-establis
 #### Handling the Unexpected
 
 This protocol attempts to be very lenient in processing of received frames and SHOULD ignore
-conditions that do not make sense given the current context. Exceptions are:
+conditions that do not make sense given the current context. Clarifications are given below:
 
 1. TCP half-open connections (and WebSockets) or other dead transports are detectable by lack of KEEPALIVE frames as specified
 under [Keepalive Frame](#keepalive-frame). The decision to close a connection due to inactivity is the applications choice.
