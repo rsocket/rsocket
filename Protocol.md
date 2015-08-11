@@ -9,7 +9,7 @@ Key words used by this document conform to the meanings in [RFC 2119](https://to
 * __Stream__: Unit of operation (request/response, etc.). See [Design Principles](DesignPrinciples.md).
 * __Request__: A stream request. May be one of four types. As well as request for more items or cancellation of previous request.
 * __Response__: A stream response. Contains data associated with previous request.
-* __Client__: The side connecting to a server. i.e. initiating a connection.
+* __Client__: The side initiating a connection.
 * __Server__: The side accepting connections from clients.
 * __Connection__: The instance of a transport session between client and server.
 * __Requester__: The side sending a request. A connection has at most 2 Requesters. One in each direction.
@@ -84,6 +84,7 @@ A stream ID must be locally unique for a Requester in a connection.
 | __SETUP__                      | 0x0001 | __Setup__: Capabilities Of Side Sending The Frame. |
 | __SETUP_ERROR__                | 0x0002 | __Setup Error__: Error from SETUP. |
 | __LEASE__                      | 0x0003 | __Lease__: |
+| __KEEPALIVE__                  | 0x0004 | __Keepalive__: Connection keepalive. |
 | __REQUEST_RESPONSE__           | 0x0011 | __Request Response__: |
 | __REQUEST_FNF__                | 0x0012 | __Fire And Forget__: |
 | __REQUEST_STREAM__             | 0x0013 | __Request Stream__: |
@@ -96,7 +97,7 @@ A stream ID must be locally unique for a Requester in a connection.
 | __EXT__                        | 0xFFFF | __Extension Header__: Used To Extend More Options As Well As Extensions. |
 
 __NOTE__: In general Requesters send types 0x0010 to 0x001F and Responders send types 0x0020 to 0x002F. Types 0x0001 to 0x000F
-pertain to the entire connection.
+pertain to the entire connection. Types 0x0030 to 0x003F pertain to all levels depending on context.
 
 ### Setup Frame
 
@@ -211,6 +212,40 @@ Frame Contents
      * (__M__)etadata: Metdadata present
 * __Time__: Time (in nanoseconds) for validity of LEASE from time of reception
 * __Number of Requests__: Number of Requests that may be sent until next LEASE
+
+### Kepalive Frame
+
+KEEPALIVE frames MUST always use Stream ID 0 as they pertain to the Connection.
+
+KEEPALIVE frames MUST be initiated by the client and sent periodically.
+
+Reception of a KEEPALIVE frame on a server indicates the client is alive. A server
+MUST send a KEEPALIVE frame back to the client upon reception of a KEEPALIVE.
+
+A client may add data to a KEEPALIVE frame that is echoed back on the KEEPALIVE frame
+to the client.
+
+A reasonable time period between KEEPALIVE frames SHOULD be 500ms.
+
+Frame Contents
+
+```
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |R|                 Frame Length (for TCP only)                 |
+    +---------------+-+-+-----------+-------------------------------+
+    |    Version    |0|0|  Flags    |     Frame Type = KEEPALIVE    |
+    +---------------+-+-+-----------+-------------------------------+
+    |                           Stream ID                           |
+    |                                                               |
+    +---------------------------------------------------------------+
+                                  Data
+```
+
+* __Flags__:
+     * (__M__)etadata: Metdadata __never__ present
+* __Data__: Data attached to a KEEPALIVE from the client and echoed back by the server.
 
 ### Request Response Frame
 
@@ -412,7 +447,9 @@ A Metadata Push frame can be used to send asynchronous metadata notifications fr
 Responder to its peer. Metadata may be scoped to the connection when Stream ID is set to 0
 or to a particular stream when Stream ID is NOT set to 0. Metadata tied to a particular Request,
 Reponse, etc. uses the individual frames Metadata flag.
-Metadata push frame are garanteed to be processed in order, for instance a requester receiving [Response1, MetadataPush, Response2] garantee that MetadataPush will be processed before processing Response2.
+
+Metadata push frame are garanteed to be processed in order, for instance a requester receiving 
+[Response1, MetadataPush, Response2] garantee that MetadataPush will be processed before processing Response2.
 
 Frame Contents
 
@@ -422,7 +459,7 @@ Frame Contents
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                 Frame Length (for TCP only)                 |
     +---------------+-+-+-----------+-------------------------------+
-    |    Version    |0|1| Reserved  |     Frame Type = METADATA     |
+    |    Version    |0|1| Reserved  |   Frame Type = METADATA_PUSH  |
     +---------------+-+-+-----------+-------------------------------+
     |                           Stream ID                           |
     |                                                               |
@@ -647,9 +684,39 @@ Upon sending a ERROR, the stream is terminated on the Responder.
 1. CLOSED (sent COMPLETE or received REQUEST_FNF)
 1. CLOSED (sent ERROR)
 
+### Flow Control
+
+#### Reactive Stream Semantics
+
+[Reactive Stream](http://www.reactive-streams.org/) semantics for flow control of Streams and Subscriptions.
+
+#### Lease Semantics
+
+Requester MUST respect the LEASE contract. The Requester MUST NOT send more than __Number of Requests__ specified
+in the LEASE frame within the __Time__ value in the LEASE.
+
 #### Handling the Unexpected
 
-TBD
+This protocol attempts to be very lenient in processing of received frames and SHOULD ignore
+conditions that do not make sense given the current context. Exceptions are:
+
+1. TCP half-open connections (and WebSockets) or other dead transports are detectable by lack of KEEPALIVE frames as specified
+under [Keepalive Frame](#keepalive-frame). The decision to close a connection due to inactivity is the applications choice.
+1. Request keepalive and timeout semantics are the responsibility of the application.
+1. Lack of REQUEST_N frames that stops a stream is an application concern and SHALL NOT be handled by the protocol.
+1. Lack of LEASE frames that stops new Requests is an application concern and SHALL NOT be handled by the protocol.
+1. If a RESPONSE for a REQUEST_RESPONSE is received that does not have a COMPLETE flag set, the implementation MUST
+assume it is set and act accordingly.
+1. Reassembly of RESPONSES MUST assume the possibility of an infinite stream.
+1. Stream ID values MAY be re-used after completion or error of a stream.
+1. All other received frames that are not accounted for in previous sections MUST be ignored. Thus, for example:
+    1. Receiving a Request frame on a Stream ID that is already in use MUST be ignored.
+    1. Receiving a CANCEL on an unknown Stream ID (including 0) MUST be ignored.
+    1. Receiving an ERROR on an unknown Stream ID MUST be ignored.
+    1. Receiving a RESPONSE on an unknown Stream ID (including 0) MUST be ignored.
+    1. Receiving a METADATA_PUSH on an unknown Stream ID MUST be ignored.
+
+##### To Be Specified
 
 ## TODO
 
@@ -659,6 +726,3 @@ TBD
         * Requester instance
         * Responder instance
 - [ ] Handling the unexpected section
-    - [ ] request timeouts?
-    - [ ] stream keepalives?
-
