@@ -9,10 +9,10 @@ A default schema for use with ReactiveSocket.
 Requests must contain fields used for routing:
 
 ```
-Key: uri
+Key: uri [REQUIRED]
 Value: String
 
-Key: body
+Key: body [OPTIONAL]
 Value: Object
 ```
 
