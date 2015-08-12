@@ -4,8 +4,6 @@
 - Reduce perceived latency and increase system efficiency by supporting non-blocking, duplex, async application communication with flow control over multiple transports from any language.
 - Improve polyglot interaction through formal network protocol.
 
-## Why?
-
 #### Scalability & Performance
 
 - Reduce hardware footprint (and thus cost and operational complexity) by:
