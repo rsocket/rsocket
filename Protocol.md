@@ -5,7 +5,8 @@ Key words used by this document conform to the meanings in [RFC 2119](https://to
 ## Terminology
 
 * __Frame__: A frame of data containing a request or a response.
-* __Transport__: Protocol used to carry ReactiveSockets protocol. Such as WebSockets, TCP, Aeron, etc.
+* __Transport__: Protocol used to carry ReactiveSockets protocol. Such as WebSockets, TCP, Aeron, etc. The transport is assumed
+to provide [reliable delivery](https://en.wikipedia.org/wiki/Reliability_(computer_networking)).
 * __Stream__: Unit of operation (request/response, etc.). See [Design Principles](DesignPrinciples.md).
 * __Request__: A stream request. May be one of four types. As well as request for more items or cancellation of previous request.
 * __Response__: A stream response. Contains data associated with previous request.
@@ -37,9 +38,11 @@ For transports that do not provide framing, such as TCP, the Frame Length MUST b
                            Depends on Frame Type
 ```
 
-* __Frame Length__: (31 = max 2,147,483,647 bytes) Length of Frame. Including header. Only used for TCP.
+* __Frame Length__: (31 = max 2,147,483,647 bytes) Length of Frame. Including header. Only used for TCP. The __R__ bit
+is reserved.
 * __Version__: (8) Current version is 0.
-* __Flags__:
+* __Flags__: Any Flag bit not specifically indicated in the frame type should be set to 0 when sent and not interpretted on
+reception.
      * (__I__)gnore: Ignore frame if not understood
      * (__M__)etadata: Metdadata present
 * __Frame Type__: (16) Type of Frame.
@@ -120,6 +123,10 @@ Frame Contents
     +---------------+-+-+-+---------+-------------------------------+
     |                           Stream ID                           |
     |                                                               |
+    +---------------------------------------------------------------+
+    |                   Time Between KEEPALIVE Frames               |
+    +---------------------------------------------------------------+
+    |                         Max Lifetime                          |
     +---------------+-----------------------------------------------+
     |  MIME Length  |   Metadata Encoding MIME Type                ...
     +---------------+-----------------------------------------------+
@@ -131,6 +138,9 @@ Frame Contents
 * __Flags__:
      * (__M__)etadata: Metdadata present
      * (__L__): Will honor LEASE (or not).
+* __Time Between KEEPALIVE Frames__: Time (in nanoseconds) between KEEPALIVE frames that the client will send.
+* __Max Lifetime __: Time (in nanoseconds) that a client will allow a server to not respond to a KEEPALIVE before
+it is assumed to be dead.
 * __MIME Length__: Encoding MIME Type Length in bytes.
 * __Encoding MIME Type__: MIME Type for encoding of Data and Metadata. This is a US-ASCII string
 that includes the [Internet media type](https://en.wikipedia.org/wiki/Internet_media_type) specified
@@ -180,7 +190,7 @@ Setup header.
 | __INVALID_SETUP__              | 0x0001 | The Setup frame is invalid for the server (it could be that the client is too recent for the old server) |
 | __UNSUPPORTED_SETUP__          | 0x0010 | Some (or all) of the parameters specified by the client are unsupported by the server |
 | __REJECTED_SETUP__             | 0x0100 | The server rejected the setup, it can specify the reason in the payload |
-| __RESERVED__                   | 0xFFFF | __Reserved__ |
+| __RESERVED__                   | 0xFFFF | __Reserved for Extension Use__ |
 
 ### Lease Frame
 
@@ -204,7 +214,7 @@ Frame Contents
     |                           Stream ID                           |
     |                                                               |
     +---------------------------------------------------------------+
-    |                             Time                              |
+    |                         Time-To-Live                          |
     |                                                               |
     +---------------------------------------------------------------+
     |                       Number of Requests                      |
@@ -215,7 +225,7 @@ Frame Contents
 
 * __Flags__:
      * (__M__)etadata: Metdadata present
-* __Time__: Time (in nanoseconds) for validity of LEASE from time of reception
+* __Time-To-Live (TTL)__: Time (in nanoseconds) for validity of LEASE from time of reception
 * __Number of Requests__: Number of Requests that may be sent until next LEASE
 
 A Responder implementation MAY stop all further requests by sending a LEASE with a value of 0 for __Number of Requests__.
@@ -234,7 +244,7 @@ MUST send a KEEPALIVE frame back to the client upon reception of a KEEPALIVE.
 A client may add data to a KEEPALIVE frame that is echoed back on the KEEPALIVE frame
 to the client.
 
-A reasonable time period between KEEPALIVE frames SHOULD be 500ms.
+A reasonable time interval between KEEPALIVE frames SHOULD be 500ms.
 
 Frame Contents
 
@@ -706,7 +716,7 @@ Upon sending a ERROR, the stream is terminated on the Responder.
 #### Lease Semantics
 
 Requester MUST respect the LEASE contract. The Requester MUST NOT send more than __Number of Requests__ specified
-in the LEASE frame within the __Time__ value in the LEASE.
+in the LEASE frame within the __Time-To-Live__ value in the LEASE.
 
 A Responder that receives a REQUEST that it can not honor due to LEASE restrictions MUST ignore the REQUEST. This includes
 an initial LEASE sent as part of [Connection Establishment](#connection-establishment).
