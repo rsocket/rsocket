@@ -118,9 +118,9 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                 Frame Length (for TCP only)                 |
-    +---------------+-+-+-+---------+-------------------------------+
-    |    Version    |0|M|L| Flags   |     Frame Type = SETUP        |
-    +---------------+-+-+-+---------+-------------------------------+
+    +---------------+-+-+-+-+-------+-------------------------------+
+    |    Version    |0|M|L|S| Flags |     Frame Type = SETUP        |
+    +---------------+-+-+-+-+-------+-------------------------------+
     |                           Stream ID                           |
     |                                                               |
     +---------------------------------------------------------------+
@@ -138,6 +138,7 @@ Frame Contents
 * __Flags__:
      * (__M__)etadata: Metdadata present
      * (__L__): Will honor LEASE (or not).
+     * (__S__)trict: Adhere to strict interpretation of Data and Metadata.
 * __Time Between KEEPALIVE Frames__: Time (in nanoseconds) between KEEPALIVE frames that the client will send.
 * __Max Lifetime __: Time (in nanoseconds) that a client will allow a server to not respond to a KEEPALIVE before
 it is assumed to be dead.
@@ -537,6 +538,10 @@ immediately upon receiving a SETUP frame that it accepts.
 
 If the server does NOT accept the contents of the SETUP frame, the server MUST send
 back a SETUP_ERROR and then close the connection.
+
+The __S__ flag of the SETUP indicates the client requires the server to adhere to strict interpretation
+of the Data and Metadata of the SETUP. Anything in the Data and/or Metadata that is not understood or can
+be provided by the server should require the SETUP to be rejected.
 
 The server-side Requester mirrors the LEASE requests of the client-side Requester. If a client-side
 Requester sets the __L__ flag in the SETUP frame, the server side Requester MUST wait for a LEASE
