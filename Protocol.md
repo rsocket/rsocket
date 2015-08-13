@@ -548,6 +548,10 @@ frame, or if it sees a REQUEST type.
 
 A client assumes a SETUP is rejected if it receives a SETUP_ERROR.
 
+Until connection establishment is complete, a Requester MUST NOT send any Request frames.
+
+Until connection establishment is complete, a Responder MUST NOT emit any RESPONSE frames.
+
 ### Negotiation
 
 The assumption is that the client will be dictating to the server what it desires to do. The server will decide to support
@@ -742,6 +746,10 @@ assume it is set and act accordingly.
     1. Receiving an ERROR on an unknown Stream ID (including 0) MUST be ignored.
     1. Receiving a RESPONSE on an unknown Stream ID (including 0) MUST be ignored.
     1. Receiving a METADATA_PUSH on an unknown Stream ID MUST be ignored.
+	1. A server MUST ignore a SETUP frame after it has accepted a previous SETUP.
+	1. A server MUST ignore a SETUP_ERROR frame.
+	1. A client MUST ignore a SETUP_ERROR after it has completed connection establishment.
+	1. A client MUST ignore a SETUP frame.
 
 ##### To Be Specified
 
