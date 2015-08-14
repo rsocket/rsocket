@@ -109,7 +109,7 @@ pertain to the entire connection. Types 0x0030 to 0x003F pertain to all levels d
 
 Setup frames MUST always use Stream ID 0 as they pertain to the connection.
 
-The encoding format for Data and Metadata are included seperately in the SETUP.
+The encoding format for Data and Metadata are included separately in the SETUP.
 
 Frame Contents
 
