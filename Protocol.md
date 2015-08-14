@@ -44,7 +44,7 @@ is reserved.
 * __Flags__: Any Flag bit not specifically indicated in the frame type should be set to 0 when sent and not interpreted on
 reception.
      * (__I__)gnore: Ignore frame if not understood
-     * (__M__)etadata: Metdadata present
+     * (__M__)etadata: Metadata present
 * __Frame Type__: (16) Type of Frame.
 * __Stream ID__: (64) Stream Identifier for this frame.
 
