@@ -233,7 +233,7 @@ A Responder implementation MAY stop all further requests by sending a LEASE with
 
 When a LEASE expires due to time, the value of the __Number of Requests__ that a Requester may make is implicitly 0.
 
-### Kepalive Frame
+### Keepalive Frame
 
 KEEPALIVE frames MUST always use Stream ID 0 as they pertain to the Connection.
 
