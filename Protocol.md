@@ -601,7 +601,7 @@ The possible sequences with LEASE are below.
 
 ## Fragmentation And Reassembly
 
-RESPONSE frames may respresent a large object and MAY need to be fragmented to fit within the Frame Data size. When this
+RESPONSE frames may represent a large object and MAY need to be fragmented to fit within the Frame Data size. When this
 occurs, the RESPONSE __F__ flag indicates if more fragments follow this frame.
 
 ## Stream Sequences and Lifetimes
