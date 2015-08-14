@@ -41,7 +41,7 @@ For transports that do not provide framing, such as TCP, the Frame Length MUST b
 * __Frame Length__: (31 = max 2,147,483,647 bytes) Length of Frame. Including header. Only used for TCP. The __R__ bit
 is reserved.
 * __Version__: (8) Current version is 0.
-* __Flags__: Any Flag bit not specifically indicated in the frame type should be set to 0 when sent and not interpretted on
+* __Flags__: Any Flag bit not specifically indicated in the frame type should be set to 0 when sent and not interpreted on
 reception.
      * (__I__)gnore: Ignore frame if not understood
      * (__M__)etadata: Metdadata present
