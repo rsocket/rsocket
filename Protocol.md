@@ -16,6 +16,19 @@ to provide [reliable delivery](https://en.wikipedia.org/wiki/Reliability_(comput
 * __Requester__: The side sending a request. A connection has at most 2 Requesters. One in each direction.
 * __Responder__: The side receiving a request. A connection has at most 2 Responders. One in each direction.
 
+## Data And Metadata
+
+ReactiveSocket provides mechanisms for applications to distinguish payload into two types. Data and Metadata. The distinction
+between the types in an application is left to the application.
+
+The following are features of Data and Metadata.
+
+- Metadata can be encoded differently than Data.
+- Metadata can be "attached" (i.e. correlated) with the following entities:
+    - Connection via Metadata Push and Stream ID of 0
+    - Stream via Metadata Push and Stream ID of non-0
+    - Individual Response via Metadata header
+
 ## Operation
 
 ### Frame Header Format
