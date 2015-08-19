@@ -477,12 +477,9 @@ Frame Contents
 ### Metadata Push Frame
 
 A Metadata Push frame can be used to send asynchronous metadata notifications from a Requester or
-Responder to its peer. Metadata may be scoped to the connection when Stream ID is set to 0
-or to a particular stream when Stream ID is NOT set to 0. Metadata tied to a particular Request,
-Response, etc. uses the individual frames Metadata flag.
+Responder to its peer. Metadata MUST be scoped to the connection by setting Stream ID to 0.
 
-Metadata push frame are guaranteed to be processed in order, for instance a requester receiving 
-[Response1, MetadataPush, Response2] guarantee that MetadataPush will be processed before processing Response2.
+Metadata tied to a particular Request, Response, etc. uses the individual frames Metadata flag.
 
 Frame Contents
 
