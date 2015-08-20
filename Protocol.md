@@ -339,16 +339,14 @@ Frame Contents
     |                           Stream ID                           |
     |                                                               |
     +---------------------------------------------------------------+
-    |                        Initial Request N                      |
-    |                                                               |
-    +---------------------------------------------------------------+
                           Metadata & Request Data
 ```
 
 * __Flags__:
      * (__M__)etadata: Metdadata present
-* __Initial Request N__: initial Request N value. 64-bit integer.
 * __Request Data__: identification of the service being requested along with parameters for the request.
+
+__Note__: The Initial Request_N Value Is Sent As A Frame After This Frame.
 
 ### Request Subscription Frame
 
@@ -365,16 +363,14 @@ Frame Contents
     |                           Stream ID                           |
     |                                                               |
     +---------------------------------------------------------------+
-    |                       Initial Request N                       |
-    |                                                               |
-    +---------------------------------------------------------------+
                            Metadata & Request Data
 ```
 
 * __Flags__:
      * (__M__)etadata: Metdadata present
-* __Initial Request N__: initial Request N value. 64-bit integer.
 * __Request Data__: identification of the service being requested along with parameters for the request.
+
+__Note__: The Initial Request_N Value Is Sent As A Frame After This Frame.
 
 ### Request N Frame
 
@@ -386,7 +382,7 @@ Frame Contents
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                 Frame Length (for TCP only)                 |
     +---------------+-+-+-----------+-------------------------------+
-    |    Version    |0|M|   Flags   |     Frame Type = REQUEST_N    |
+    |    Version    |0|0|   Flags   |     Frame Type = REQUEST_N    |
     +---------------+-+-+-----------+-------------------------------+
     |                           Stream ID                           |
     |                                                               |
@@ -394,11 +390,10 @@ Frame Contents
     |                           Request N                           |
     |                                                               |
     +---------------------------------------------------------------+
-                                Metadata
 ```
 
 * __Flags__:
-     * (__M__)etadata: Metdadata present
+     * (__M__)etadata: Metdadata __NOT__ present
 * __Request N__: 64-bit integer value of items to request.
 
 ### Cancel Frame
