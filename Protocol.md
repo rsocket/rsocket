@@ -108,11 +108,12 @@ A stream ID must be locally unique for a Requester in a connection.
 | __REQUEST_FNF__                | 0x0012 | __Fire And Forget__: |
 | __REQUEST_STREAM__             | 0x0013 | __Request Stream__: |
 | __REQUEST_SUB__                | 0x0014 | __Request Subscription__: |
-| __REQUEST_N__                  | 0x0015 | __Request N__: Request N more items |
-| __CANCEL__                     | 0x0016 | __Cancel Request__: |
-| __RESPONSE__                   | 0x0020 | __Response__: Response to a request. |
-| __ERROR__                      | 0x0021 | __Error__: Response that is an error. |
-| __METADATA_PUSH__              | 0x0031 | __Metadata__: Asynchronous Metadata frame |
+| __REQUEST_CHANNEL__            | 0x0015 | __Request Channel__: |
+| __REQUEST_N__                  | 0x0020 | __Request N__: Request N more items |
+| __CANCEL__                     | 0x0021 | __Cancel Request__: |
+| __RESPONSE__                   | 0x0030 | __Response__: Response to a request. |
+| __ERROR__                      | 0x0031 | __Error__: Response that is an error. |
+| __METADATA_PUSH__              | 0x0041 | __Metadata__: Asynchronous Metadata frame |
 | __EXT__                        | 0xFFFF | __Extension Header__: Used To Extend More Options As Well As Extensions. |
 
 __NOTE__: In general Requesters send types 0x0010 to 0x001F and Responders send types 0x0020 to 0x002F. Types 0x0001 to 0x000F
