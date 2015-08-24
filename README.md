@@ -11,7 +11,7 @@ It enables the following symmetric interaction models via async message passing 
 
 Artifacts include:
 
-- [Motivation.md](https://github.com/ReactiveSocket/reactivesocket/blob/master/Motivation.md): Motivation for creating this protocol.
+- [Motivations.md](https://github.com/ReactiveSocket/reactivesocket/blob/master/Motivations.md): Motivation for creating this protocol.
 - [DesignPrinciples.md](https://github.com/ReactiveSocket/reactivesocket/blob/master/DesignPrinciples.md): Design and Architectural principles and context for the protocol and how it will be used.
 - [Protocol.md](https://github.com/ReactiveSocket/reactivesocket/blob/master/Protocol.md): The protocol definition.
 
