@@ -363,7 +363,7 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                 Frame Length (for TCP only)                 |
+    |R|                 Frame Length (For TCP Only)                 |
     +---------------+-+-+-----------+-------------------------------+
     |    Version    |0|M|  Flags    |    Frame Type = REQUEST_SUB   |
     +---------------+-+-+-----------+-------------------------------+
@@ -378,8 +378,37 @@ Frame Contents
 
 * __Flags__:
      * (__M__)etadata: Metdadata present
-* __Request Data__: identification of the service being requested along with parameters for the request.
+* __Request Data__: idientification of the service being requested along with parameters for the request.
 * __Initial Request N__: initial request N value for subscription.
+
+### Request Channel Frame
+
+Frame Contents
+
+```
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |R|                 Frame Length (For TCP Only)                 |
+    +---------------+-+-+-+-+-+-----+-------------------------------+
+    |    Version    |0|M|F|C|N|     |  Frame Type = REQUEST_CHANNEL |
+    +---------------+-+-+-+-+-+-----+-------------------------------+
+    |                           Stream Id                           |
+    |                                                               |
+    +---------------------------------------------------------------+
+    |              Initial Request N (only if N bit set)            |
+    |                                                               |
+    +---------------------------------------------------------------+
+                           Metadata & Request Data
+```
+
+* __Flags__:
+    * (__M__)etadata: Metdadata present
+    * (__F__)ollows: More fragments follow this fragment.
+    * (__C__)omplete: bit to indicate COMPLETE.
+    * (__N__): Is Initial Request N present or not
+* __Request Data__: idientification of the service being requested along with parameters for the request.
+* __Initial Request N__: initial request N value for channel.
 
 ### Request N Frame
 
@@ -712,6 +741,33 @@ Upon sending a CANCEL, the stream is terminated on the Requester.
 Upon receiving a ERROR, the stream is terminated on the Requester.
 
 Upon sending a ERROR, the stream is terminated on the Responder.
+
+### Request Channel
+
+1. RQ -> RS: REQUEST_CHANNEL* intermixed with
+1. RS -> RQ: RESPONSE*
+1. RS -> RQ: COMPLETE | ERROR
+
+or
+
+1. RQ -> RS: REQUEST_CHANNEL* intermixed with
+1. RS -> RQ: RESPONSE*
+1. RQ -> RS: CANCEL
+
+At any time, a Requester may send REQUEST_CHANNEL frames with F bit set to indicate fragmentation.
+
+At any time, a Requester may send REQUEST_N frames.
+
+A Requester may indicate end of REQUEST_CHANNEL frames by setting the C bit. A Requester MUST NOT
+send any additional REQUEST_CHANNEL frames after sending a frame with the C bit set.
+
+Upon receiving a CANCEL, the stream is terminated on the Responder.
+
+Upon sending a CANCEL, the stream is terminated on the Requester.
+
+Upon receiving a COMPLETE or ERROR, the stream is terminated on the Requester.
+
+Upon sending a COMPLETE or ERROR, the stream is terminated on the Responder.
 
 ### Per Stream State
 
