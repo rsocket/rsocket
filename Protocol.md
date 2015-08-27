@@ -344,14 +344,16 @@ Frame Contents
     |                           Stream ID                           |
     |                                                               |
     +---------------------------------------------------------------+
+    |                      Initial Request N                        |
+    |                                                               |
+    +---------------------------------------------------------------+
                           Metadata & Request Data
 ```
 
 * __Flags__:
      * (__M__)etadata: Metdadata present
 * __Request Data__: identification of the service being requested along with parameters for the request.
-
-__Note__: The Initial Request_N Value Is Sent As A Frame After This Frame.
+* __Initial Request N__: initial request N value for stream.
 
 ### Request Subscription Frame
 
@@ -365,7 +367,10 @@ Frame Contents
     +---------------+-+-+-----------+-------------------------------+
     |    Version    |0|M|  Flags    |    Frame Type = REQUEST_SUB   |
     +---------------+-+-+-----------+-------------------------------+
-    |                           Stream ID                           |
+    |                           Stream Id                           |
+    |                                                               |
+    +---------------------------------------------------------------+
+    |                      Initial Request N                        |
     |                                                               |
     +---------------------------------------------------------------+
                            Metadata & Request Data
@@ -374,8 +379,7 @@ Frame Contents
 * __Flags__:
      * (__M__)etadata: Metdadata present
 * __Request Data__: identification of the service being requested along with parameters for the request.
-
-__Note__: The Initial Request_N Value Is Sent As A Frame After This Frame.
+* __Initial Request N__: initial request N value for subscription.
 
 ### Request N Frame
 
