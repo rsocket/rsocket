@@ -756,7 +756,7 @@ or
 
 At any time, a Requester may send REQUEST_CHANNEL frames with F bit set to indicate fragmentation.
 
-At any time, a Requester may send REQUEST_N frames.
+At any time, a Requester, as well as a Responder, may send REQUEST_N frames.
 
 A Requester may indicate end of REQUEST_CHANNEL frames by setting the C bit. A Requester MUST NOT
 send any additional REQUEST_CHANNEL frames after sending a frame with the C bit set.
