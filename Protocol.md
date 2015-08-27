@@ -95,6 +95,10 @@ Stream ID value of 0 is reserved for any operation involving the connection.
 
 A stream ID must be locally unique for a Requester in a connection.
 
+A client MUST generate even Stream IDs.
+
+A server MUST generate odd Stream IDs.
+
 ### Frame Types
 
 |  Type                          | Value  | Description |
