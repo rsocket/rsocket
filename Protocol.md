@@ -198,8 +198,7 @@ Frame Contents
 * __Flags__:
      * (__M__)etadata: Metdadata present
 * __Error Code__: Type of Error.
-* __Setup Error Data__: includes payload describing connection capabilities of the endpoint sending the
-Setup header. Error Data MUST be a UTF-8 encoded string.
+* __Setup Error Data__: includes payload describing error information. Error Data MUST be a UTF-8 encoded string.
 
 #### Error Codes
 
