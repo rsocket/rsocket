@@ -5,7 +5,7 @@ Key words used by this document conform to the meanings in [RFC 2119](https://to
 ## Terminology
 
 * __Frame__: A frame of data containing a request or a response.
-* __Transport__: Protocol used to carry ReactiveSockets protocol. Such as WebSockets, TCP, Aeron, etc. The transport is assumed
+* __Transport__: Protocol used to carry ReactiveSockets protocol. One of WebSockets, TCP, or Aeron. The transport is assumed
 to provide [reliable delivery](https://en.wikipedia.org/wiki/Reliability_(computer_networking)).
 * __Stream__: Unit of operation (request/response, etc.). See [Design Principles](DesignPrinciples.md).
 * __Request__: A stream request. May be one of four types. As well as request for more items or cancellation of previous request.
