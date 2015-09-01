@@ -217,7 +217,9 @@ means the error pertains to a given stream.
 | __REJECTED_SETUP__             | 0x0003 | The server rejected the setup, it can specify the reason in the payload. Stream ID MUST be 0. |
 | __CONNECTION_ERROR__           | 0x0011 | The connection is being terminated. Stream ID MUST be 0. |
 | __APPLICATION_ERROR__          | 0x0021 | Application layer logic generating a Reactive Streams _onError_ event. Stream ID MUST be non-0. |
-| __LEASE_ERROR__                | 0x0022 | LEASE semantics indicate that the request can not be handled at this time. Stream ID MUST be non-0. |
+| __REJECTED__                   | 0x0022 | Despite being a valid request, the Responder decided to reject it. The Responder guarantees that it didn't process the request. The reason for the rejection is explained in the metadata section. Stream ID MUST be non-0. |
+| __CANCELED__                   | 0x0023 | The responder cancelled the request but potentially have started processing it (almost identical to REJECTED but doesn't garantee that no side-effect have been started). Stream ID MUST be non-0. |
+| __INVALID__                    | 0x0024 | The request is invalid. Stream ID MUST be non-0. |
 | __RESERVED__                   | 0xFFFF | __Reserved for Extension Use__ |
 
 __NOTE__: Values in the range of 0x0001 to 0x000F are reserved for use as SETUP_ERROR codes. Values in the range of
