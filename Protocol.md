@@ -555,7 +555,7 @@ for the server-side Responder to send a LEASE frame before it can send Requests.
 
 If the server accepts the contents of the SETUP frame, it MUST send a LEASE frame if
 the SETUP frame set the __L__ flag. The server-side Requester may send requests
-immediately upon receiving a SETUP frame that it accepts.
+immediately upon receiving a SETUP frame that it accepts if the __L__ flag is not set in the SETUP frame.
 
 If the server does NOT accept the contents of the SETUP frame, the server MUST send
 back a SETUP_ERROR and then close the connection.
@@ -565,7 +565,7 @@ of the Data and Metadata of the SETUP. Anything in the Data and/or Metadata that
 be provided by the server should require the SETUP to be rejected.
 
 The server-side Requester mirrors the LEASE requests of the client-side Requester. If a client-side
-Requester sets the __L__ flag in the SETUP frame, the server side Requester MUST wait for a LEASE
+Requester sets the __L__ flag in the SETUP frame, the server-side Requester MUST wait for a LEASE
 frame from the client-side Responder before it can send a request. The client-side Responder MUST
 send a LEASE frame after a SETUP frame with the __L__ flag set.
 
