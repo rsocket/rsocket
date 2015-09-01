@@ -499,12 +499,27 @@ Frame Contents
     |                           Stream ID                           |
     |                                                               |
     +---------------------------------------------------------------+
+    |                          Error Code                           |
+    +---------------------------------------------------------------+
                            Metadata & Error Data
 ```
 
 * __Flags__:
      * (__M__)etadata: Metdadata present
+* __Error Code__: Type of Error.
 * __Error Data__: error information. Error Data MUST be a UTF-8 encoded string.
+
+#### Error Codes
+
+|  Type                          | Value  | Description |
+|:-------------------------------|:-------|:------------|
+| __RESERVED__                   | 0x0000 | __Reserved__ |
+| __APPLICATION_ERROR__          | 0x0001 | The application on top of reactivesocket responded with an error |
+| __REJECTED__                   | 0x0010 | Despite being a valid request, the reactivesocket responder decided to reject it. The responder guarantees that it didn't process the request. The reason for the rejection is explained in the metadata section. |
+| __CANCELED__                   | 0x0011 | The responder cancelled the request but potentially have started processing it (almost identical to REJECTED but doesn't garantee that no side-effect have been started). |
+| __INVALID__                    | 0x8000 | The request is invalid in the context of this reactivesocket  |
+| __RESERVED__                   | 0xFFFF | __Reserved for Extension Use__ |
+
 
 ### Metadata Push Frame
 
