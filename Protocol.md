@@ -7,7 +7,7 @@ Key words used by this document conform to the meanings in [RFC 2119](https://to
 
 ## Terminology
 
-* __Frame__: A frame of data containing a request or a response.
+* __Frame__: A frame of data containing a request, response, or protocol processing.
 * __Fragment__: A portion of an application message that has been partitioned for inclusion in a Frame.
 See [Fragmentation and Reassembly](#fragmentation-and-reassembly).
 * __Transport__: Protocol used to carry ReactiveSockets protocol. One of WebSockets, TCP, or Aeron. The transport MUST
@@ -65,8 +65,8 @@ reception. Flags generally depend on Frame Type, but all frame types must provid
 
 #### Handling Ignore Flag
 
-The __I__gnore flag is used for extension of the protocol. A value of 0 in a frame for this flag indicates the protocol can't
-ignore this frame. An implementation MAY close the connection on reception of a frame that it does not understand with this
+The (__I__)gnore flag is used for extension of the protocol. A value of 0 in a frame for this flag indicates the protocol can't
+ignore this frame. An implementation MAY close the underlying transport connection on reception of a frame that it does not understand with this
 bit not set.
 
 #### Metadata Optional Header
@@ -110,7 +110,7 @@ to odd/even values. In other words, a client MUST generate even Stream IDs and a
 |  Type                          | Value  | Description |
 |:-------------------------------|:-------|:------------|
 | __RESERVED__                   | 0x0000 | __Reserved__ |
-| __SETUP__                      | 0x0001 | __Setup__: Capabilities Of Side Sending The Frame. |
+| __SETUP__                      | 0x0001 | __Setup__: Capabilities Of Client Sending The Frame. |
 | __LEASE__                      | 0x0002 | __Lease__: |
 | __KEEPALIVE__                  | 0x0003 | __Keepalive__: Connection keepalive. |
 | __REQUEST_RESPONSE__           | 0x0004 | __Request Response__: |
@@ -162,7 +162,7 @@ Frame Contents
      * (__S__)trict: Adhere to strict interpretation of Data and Metadata.
 * __Version__: Version of the protocol.
 * __Time Between KEEPALIVE Frames__: Time (in nanoseconds) between KEEPALIVE frames that the client will send.
-* __Max Lifetime __: Time (in nanoseconds) that a client will allow a server to not respond to a KEEPALIVE before
+* __Max Lifetime__: Time (in nanoseconds) that a client will allow a server to not respond to a KEEPALIVE before
 it is assumed to be dead.
 * __MIME Length__: Encoding MIME Type Length in bytes.
 * __Encoding MIME Type__: MIME Type for encoding of Data and Metadata. This is a US-ASCII string
@@ -217,7 +217,7 @@ means the error pertains to a given stream.
 | __REJECTED_SETUP__             | 0x0003 | The server rejected the setup, it can specify the reason in the payload. Stream ID MUST be 0. |
 | __CONNECTION_ERROR__           | 0x0011 | The connection is being terminated. Stream ID MUST be 0. |
 | __APPLICATION_ERROR__          | 0x0021 | Application layer logic generating a Reactive Streams _onError_ event. Stream ID MUST be non-0. |
-| __LEASE_ERROR__                | 0x0022 | LEASE semantics indicate that the request can not be handled at this time. |
+| __LEASE_ERROR__                | 0x0022 | LEASE semantics indicate that the request can not be handled at this time. Stream ID MUST be non-0. |
 | __RESERVED__                   | 0xFFFF | __Reserved for Extension Use__ |
 
 __NOTE__: Values in the range of 0x0001 to 0x000F are reserved for use as SETUP_ERROR codes. Values in the range of
@@ -620,15 +620,22 @@ The possible sequences with LEASE are below.
 
 ## Fragmentation And Reassembly
 
-RESPONSE frames may represent a large object and MAY need to be fragmented to fit within the Frame Data size. When this
-occurs, the RESPONSE __F__ flag indicates if more fragments follow this frame.
+RESPONSE frames and REQUEST_CHANNEL frames may represent a large object and MAY need to be fragmented to fit within the Frame Data size. When this
+occurs, the RESPONSE __F__ flag indicates if more fragments follow the current frame (or not).
 
 ## Stream Sequences and Lifetimes
+
+Streams exists for a specific period of time. So an implementation may assume that Stream IDs are valid for a finite period of time. This period
+of time is bound by, at most, the lifetime of the underlying transport protocol connection lifetime. Beyond that, each interaction pattern imposes
+lifetime based on a sequence of interactions between Requester and Responder.
 
 In the section below, "RQ -> RS" refers to Requester sending a frame to a Responder. And "RS -> RQ" refers to Responder sending
 a frame to a Requester.
 
 In the section below, "*" refers to 0 or more and "+" refers to 1 or more.
+
+Once a stream has "terminated", the Stream ID can be "forgotten" by the Requester and Responder. An implementation MAY re-use an ID at this
+time, but it is recommended that an implementation not aggressively re-use IDs.
 
 ### Request Response
 
