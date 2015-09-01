@@ -796,8 +796,7 @@ Upon sending a COMPLETE or ERROR, the stream is terminated on the Responder.
 Requester MUST respect the LEASE contract. The Requester MUST NOT send more than __Number of Requests__ specified
 in the LEASE frame within the __Time-To-Live__ value in the LEASE.
 
-A Responder that receives a REQUEST that it can not honor due to LEASE restrictions MUST ignore the REQUEST. This includes
-an initial LEASE sent as part of [Connection Establishment](#connection-establishment).
+A Responder that receives a REQUEST that it can not honor due to LEASE restrictions MUST either respond with an ERROR or decide to process the request (depending on the implementation). This includes an initial LEASE sent as part of [Connection Establishment](#connection-establishment).
 
 #### Handling the Unexpected
 
