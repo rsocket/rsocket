@@ -269,15 +269,18 @@ When a LEASE expires due to time, the value of the __Number of Requests__ that a
 
 KEEPALIVE frames MUST always use Stream ID 0 as they pertain to the Connection.
 
-KEEPALIVE frames MUST be initiated by the client and sent periodically.
+KEEPALIVE frames MUST be initiated by the client and sent periodically with the (__R__)espond flag set.
+A reasonable time interval between client KEEPALIVE frames SHOULD be 500ms.
 
-Reception of a KEEPALIVE frame on a server indicates the client is alive. A server
-MUST send a KEEPALIVE frame back to the client upon reception of a KEEPALIVE.
+KEEPALIVE frames MAY be initiated by the server and sent upon application request with the (__R__)espond flag set.
 
-A client may add data to a KEEPALIVE frame that is echoed back on the KEEPALIVE frame
-to the client.
+Reception of a KEEPALIVE frame with the (__R__)espond flag set MUST cause a client or server to send
+back a KEEPALIVE with the (__R__)espond flag __NOT__ set. The data in the received KEEPALIVE MUST be
+echoed back in the generated KEEPALIVE.
 
-A reasonable time interval between KEEPALIVE frames SHOULD be 500ms.
+Reception of a KEEPALIVE by a server indicates to the server that the client is alive.
+
+Reception of a KEEPALIVE by a client indicates to the client that the server is alive.
 
 Frame Contents
 
@@ -286,9 +289,9 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                 Frame Length (for TCP only)                 |
-    +-------------------------------+-+-+---------------------------+
-    |      Frame Type = KEEPALIVE   |0|0|        Flags              |
-    +-------------------------------+-+-+---------------------------+
+    +-------------------------------+-+-+-+-------------------------+
+    |      Frame Type = KEEPALIVE   |0|0|R|      Flags              |
+    +-------------------------------+-+-+-+-------------------------+
     |                           Stream ID                           |
     +---------------------------------------------------------------+
                                   Data
@@ -296,7 +299,8 @@ Frame Contents
 
 * __Flags__:
      * (__M__)etadata: Metdadata __never__ present
-* __Data__: Data attached to a KEEPALIVE from the client and echoed back by the server.
+     * (__R__)espond with KEEPALIVE or not
+* __Data__: Data attached to a KEEPALIVE.
 
 ### Request Response Frame
 
