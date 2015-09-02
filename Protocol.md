@@ -45,7 +45,7 @@ For transports that do not provide framing, such as TCP, the Frame Length MUST b
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                 Frame Length (for TCP only)                 |
+    |R|                    Frame Length (optional)                  |
     +-------------------------------+-+-+---------------------------+
     |         Frame Type            |I|M|        Flags              |
     +-------------------------------+-+-+---------------------------+
@@ -54,14 +54,28 @@ For transports that do not provide framing, such as TCP, the Frame Length MUST b
                            Depends on Frame Type
 ```
 
-* __Frame Length__: (31 = max 2,147,483,647 bytes) Length of Frame. Including header. Only used for TCP. The __R__ bit
-is reserved.
+* __Frame Length__: (31 = max 2,147,483,647 bytes) Length of Frame. Including header. Only used for specific transport
+protocols. The __R__ bit is reserved.
 * __Frame Type__: (16) Type of Frame.
 * __Flags__: Any Flag bit not specifically indicated in the frame type should be set to 0 when sent and not interpreted on
 reception. Flags generally depend on Frame Type, but all frame types must provide space for the following flags:
      * (__I__)gnore: Ignore frame if not understood
      * (__M__)etadata: Metadata present
 * __Stream ID__: (32) Stream Identifier for this frame or 0 to indicate the entire connection.
+
+#### Frame Length
+
+The presence of the Frame Length field is determined by the transport protocol being used. The frame length field
+may be safely omitted if the transport protocol provides framing or preserves message boundaries. If, however, 
+the transport protocol only provides a stream abstraction or can merge messages without preserving boundaries, then
+the frame length field must be used. If in doubt, then the frame length must be used.
+
+|  Transport Protocol            | Frame Length Field Required |
+|:-------------------------------|:----------------------------|
+| TCP                            | __YES__ |
+| WebSocket                      | __NO__  |
+| Aeron                          | __NO__  |
+| Other                          | __YES__ if transport does not already provide framing or preserve message boundaries. |
 
 #### Handling Ignore Flag
 
@@ -129,6 +143,15 @@ to odd/even values. In other words, a client MUST generate even Stream IDs and a
 
 Setup frames MUST always use Stream ID 0 as they pertain to the connection.
 
+The SETUP frame is sent by the client to inform the server of the parameters under which it desires
+to operate. The usage and message sequence used is shown in [Connection Establishment](#connection-establishment).
+
+One of the important parameters for a connection is the format, layout, and any schema of the data and metadata for
+frames. This is, for lack of a better term, referred to here as "MIME Type". An implementation MAY use typical MIME type
+values or can, alternatively, MAY decide to use specific non-MIME type values to indicate format, layout, and any schema
+for data and metadata. The protocol implementation MUST NOT interpret the MIME type itself. This is an application
+concern only.
+
 The encoding format for Data and Metadata are included separately in the SETUP.
 
 Frame Contents
@@ -137,7 +160,7 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                 Frame Length (for TCP only)                 |
+    |R|                    Frame Length (optional)                  |
     +-------------------------------+-+-+-+-+-----------------------+
     |     Frame Type = SETUP        |0|M|L|S|       Flags           |
     +-------------------------------+-+-+-+-+-----------------------+
@@ -165,17 +188,16 @@ Frame Contents
 * __Max Lifetime__: Time (in nanoseconds) that a client will allow a server to not respond to a KEEPALIVE before
 it is assumed to be dead.
 * __MIME Length__: Encoding MIME Type Length in bytes.
-* __Encoding MIME Type__: MIME Type for encoding of Data and Metadata. This is a US-ASCII string
+* __Encoding MIME Type__: MIME Type for encoding of Data and Metadata. This MAY be a US-ASCII string
 that includes the [Internet media type](https://en.wikipedia.org/wiki/Internet_media_type) specified
 in [RFC 2045](https://tools.ietf.org/html/rfc2045). Many are registered with
 [IANA](https://www.iana.org/assignments/media-types/media-types.xhtml) such as
-[CBOR](https://www.iana.org/assignments/media-types/application/cbor)
+[CBOR](https://www.iana.org/assignments/media-types/application/cbor).
+[Suffix](http://www.iana.org/assignments/media-type-structured-suffix/media-type-structured-suffix.xml)
+rules MAY be used for handling layout. For example, `application/x.netflix+cbor` or 
+`application/x.reactivesocket+cbor` or `application/x.netflix+json`.
 * __Setup Data__: includes payload describing connection capabilities of the endpoint sending the
 Setup header.
-
-__NOTE__: [Suffix](http://www.iana.org/assignments/media-type-structured-suffix/media-type-structured-suffix.xml)
-rules SHOULD be used for handling layout. For example, `application/x.netflix+cbor` or 
-`application/x.reactivesocket+cbor` or `application/x.netflix+json`.
 
 ### Error Frame
 
@@ -188,7 +210,7 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                 Frame Length (for TCP only)                 |
+    |R|                    Frame Length (optional)                  |
     +-------------------------------+-+-+---------------------------+
     |       Frame Type = ERROR      |0|M|        Flags              |
     +-------------------------------+-+-+---------------------------+
@@ -231,7 +253,8 @@ errors.
 Lease frames MUST always use Stream ID 0 as they pertain to the Connection.
 
 Lease frames MAY be sent by the client-side or server-side Responders and inform the
-Requester that it may send Requests for a period of time and how many it may send.
+Requester that it may send Requests for a period of time and how many it may send during that duration.
+See [Lease Semantics](#lease-semantics) for more information.
 
 The last received LEASE frame overrides all previous LEASE frame values.
 
@@ -241,7 +264,7 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                 Frame Length (for TCP only)                 |
+    |R|                    Frame Length (optional)                  |
     +-------------------------------+-+-+---------------------------+
     |     Frame Type = LEASE        |0|M|        Flags              |
     +-------------------------------+-+-+---------------------------+
@@ -288,7 +311,7 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                 Frame Length (for TCP only)                 |
+    |R|                    Frame Length (optional)                  |
     +-------------------------------+-+-+-+-------------------------+
     |      Frame Type = KEEPALIVE   |0|0|R|      Flags              |
     +-------------------------------+-+-+-+-------------------------+
@@ -310,7 +333,7 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                 Frame Length (for TCP only)                 |
+    |R|                    Frame Length (optional)                  |
     +-------------------------------+-+-+---------------------------+
     | Frame Type = REQUEST_RESPONSE |0|M|        Flags              |
     +-------------------------------+-+-+---------------------------+
@@ -331,7 +354,7 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                 Frame Length (for TCP only)                 |
+    |R|                    Frame Length (optional)                  |
     +-------------------------------+-+-+---------------------------+
     |    Frame Type = REQUEST_FNF   |0|M|        Flags              |
     +-------------------------------+-+-+---------------------------+
@@ -352,7 +375,7 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                 Frame Length (for TCP only)                 |
+    |R|                    Frame Length (optional)                  |
     +-------------------------------+-+-+---------------------------+
     |  Frame Type = REQUEST_STREAM  |0|M|        Flags              |
     +-------------------------------+-+-+---------------------------+
@@ -376,7 +399,7 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                 Frame Length (For TCP Only)                 |
+    |R|                    Frame Length (optional)                  |
     +-------------------------------+-+-+---------------------------+
     |     Frame Type = REQUEST_SUB  |0|M|        Flags              |
     +-------------------------------+-+-+---------------------------+
@@ -400,7 +423,7 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                 Frame Length (For TCP Only)                 |
+    |R|                    Frame Length (optional)                  |
     +-------------------------------+-+-+-+-+-+---------------------+
     |  Frame Type = REQUEST_CHANNEL |0|M|F|C|N|      Flags          |
     +-------------------------------+-+-+-+-+-+---------------------+
@@ -427,7 +450,7 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                 Frame Length (for TCP only)                 |
+    |R|                    Frame Length (optional)                  |
     +-------------------------------+-+-+---------------------------+
     |      Frame Type = REQUEST_N   |0|0|        Flags              |
     +-------------------------------+-+-+---------------------------+
@@ -449,7 +472,7 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                 Frame Length (for TCP only)                 |
+    |R|                    Frame Length (optional)                  |
     +-------------------------------+-+-+---------------------------+
     |       Frame Type = CANCEL     |0|M|        Flags              |
     +-------------------------------+-+-+---------------------------+
@@ -469,7 +492,7 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                 Frame Length (for TCP only)                 |
+    |R|                    Frame Length (optional)                  |
     +-------------------------------+-+-+-+-+-----------------------+
     |      Frame Type = RESPONSE    |0|M|F|C|        Flags          |
     +-------------------------------+-+-+-+-+-----------------------+
@@ -501,7 +524,7 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                 Frame Length (for TCP only)                 |
+    |R|                    Frame Length (optional)                  |
     +-------------------------------+-+-+---------------------------+
     |   Frame Type = METADATA_PUSH  |0|1|        Flags              |
     +-------------------------------+-+-+---------------------------+
@@ -522,7 +545,7 @@ The general format for an extension frame is given below.
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                 Frame Length (for TCP only)                 |
+    |R|                    Frame Length (optional)                  |
     +-------------------------------+-+-+---------------------------+
     |       Frame Type = EXT        |I|M|        Flags              |
     +-------------------------------+-+-+---------------------------+
@@ -777,11 +800,17 @@ Upon sending a COMPLETE or ERROR, the stream is terminated on the Responder.
 
 ### Flow Control
 
+There are multiple flow control mechanics provided by the protocol.
+
 #### Reactive Stream Semantics
 
 [Reactive Stream](http://www.reactive-streams.org/) semantics for flow control of Streams, Subscriptions, and Channels.
 
 #### Lease Semantics
+
+The LEASE semantics are to control the number of indivdiual requests (all types) that a Requester may send in a given period.
+The only responsibility the protocol implementation has for the LEASE is to honor it on the Requester side. The Responder application
+is responsible for the logic of generation and informing the Responder it should send a LEASE to the peer Requester.
 
 Requester MUST respect the LEASE contract. The Requester MUST NOT send more than __Number of Requests__ specified
 in the LEASE frame within the __Time-To-Live__ value in the LEASE.
