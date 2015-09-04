@@ -279,7 +279,7 @@ Frame Contents
 
 * __Flags__:
      * (__M__)etadata: Metdadata present
-* __Time-To-Live (TTL)__: Time (in nanoseconds) for validity of LEASE from time of reception
+* __Time-To-Live (TTL)__: Time (in milliseconds) for validity of LEASE from time of reception
 * __Number of Requests__: Number of Requests that may be sent until next LEASE
 
 A Responder implementation MAY stop all further requests by sending a LEASE with a value of 0 for __Number of Requests__.
