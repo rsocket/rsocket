@@ -184,8 +184,8 @@ Frame Contents
      * (__L__): Will honor LEASE (or not).
      * (__S__)trict: Adhere to strict interpretation of Data and Metadata.
 * __Version__: Version of the protocol.
-* __Time Between KEEPALIVE Frames__: Time (in nanoseconds) between KEEPALIVE frames that the client will send.
-* __Max Lifetime__: Time (in nanoseconds) that a client will allow a server to not respond to a KEEPALIVE before
+* __Time Between KEEPALIVE Frames__: Time (in milliseconds) between KEEPALIVE frames that the client will send.
+* __Max Lifetime__: Time (in milliseconds) that a client will allow a server to not respond to a KEEPALIVE before
 it is assumed to be dead.
 * __MIME Length__: Encoding MIME Type Length in bytes.
 * __Encoding MIME Type__: MIME Type for encoding of Data and Metadata. This MAY be a US-ASCII string
