@@ -42,7 +42,7 @@
 
 #### Flow Control
 
-- Design for the data center where a client communicates with many servers via optional support to control flow of requests from requestor to responder using leasing strategy. This enables client-side load balancing for sending messages only to servers that have signalled capacity. 
+- Design for the data center where a client communicates with many servers via optional support to control flow of requests from requestor to responder using leasing strategy. This enables application level client-side load balancing for sending messages only to servers that have signalled capacity. 
 - Control flow of emission from responder to requestor using Reactive Stream semantics at the application level. This enables use of bounded buffers so rate of flow adjusts to application consumption and not rely solely on transport and network buffering.
 
 ## Comparisons
