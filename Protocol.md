@@ -768,6 +768,9 @@ At any time, a Requester may send REQUEST_CHANNEL frames with F bit set to indic
 
 At any time, a Requester, as well as a Responder, may send REQUEST_N frames.
 
+An implementation MUST only send a single initial REQUEST_CHANNEL frame from the Requester to the Responder. And
+a Responder MUST respond to an initial REQUEST_CHANNEL frame with a REQUEST_N frame.
+
 A Requester may indicate end of REQUEST_CHANNEL frames by setting the C bit. A Requester MUST NOT
 send any additional REQUEST_CHANNEL frames after sending a frame with the C bit set.
 
