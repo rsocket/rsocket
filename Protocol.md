@@ -31,7 +31,7 @@ The following are features of Data and Metadata.
 - Metadata can be encoded differently than Data.
 - Metadata can be "attached" (i.e. correlated) with the following entities:
     - Connection via Metadata Push and Stream ID of 0
-    - Individual Response via Metadata header
+    - Individual Request or Response via Metadata header
 
 ## Operation
 
@@ -55,7 +55,7 @@ For transports that do not provide framing, such as TCP, the Frame Length MUST b
 ```
 
 * __Frame Length__: (31 = max 2,147,483,647 bytes) Length of Frame. Including header. Only used for specific transport
-protocols. The __R__ bit is reserved.
+protocols. The __R__ bit is reserved and must be set to 0.
 * __Frame Type__: (16) Type of Frame.
 * __Flags__: Any Flag bit not specifically indicated in the frame type should be set to 0 when sent and not interpreted on
 reception. Flags generally depend on Frame Type, but all frame types must provide space for the following flags:
@@ -65,10 +65,7 @@ reception. Flags generally depend on Frame Type, but all frame types must provid
 
 #### Frame Length
 
-The presence of the Frame Length field is determined by the transport protocol being used. The frame length field
-may be safely omitted if the transport protocol provides framing or preserves message boundaries. If, however, 
-the transport protocol only provides a stream abstraction or can merge messages without preserving boundaries, then
-the frame length field must be used. If in doubt, then the frame length must be used.
+The presence of the Frame Length field is determined by the transport protocol being used. The frame length field may be safely omitted if the transport protocol provides framing or preserves message boundaries. If, however, the transport protocol only provides a stream abstraction or can merge messages without preserving boundaries, or multiple transport protocols may be used, then the frame length field must be used. If in doubt, then the frame length must be used.
 
 |  Transport Protocol            | Frame Length Field Required |
 |:-------------------------------|:----------------------------|
@@ -103,7 +100,7 @@ If Metadata Length is greater than this value, the entire frame MUST be ignored.
     +---------------------------------------------------------------+
 ```
 
-* __Metadata Length__: Length of Metadata in bytes. Including Metadata header.
+* __Metadata Length__: (31 = max 2,147,483,647 bytes) Length of Metadata in bytes. Including Metadata header. The __R__ bit is reserved and must be set to 0.
 
 ### Stream Identifiers
 
@@ -181,7 +178,7 @@ Frame Contents
 
 * __Flags__:
      * (__M__)etadata: Metdadata present
-     * (__L__): Will honor LEASE (or not).
+     * (__L__)ease: Will honor LEASE (or not).
      * (__S__)trict: Adhere to strict interpretation of Data and Metadata.
 * __Version__: Version of the protocol.
 * __Time Between KEEPALIVE Frames__: Time (in milliseconds) between KEEPALIVE frames that the client will send.
@@ -282,7 +279,7 @@ Frame Contents
 * __Time-To-Live (TTL)__: Time (in milliseconds) for validity of LEASE from time of reception
 * __Number of Requests__: Number of Requests that may be sent until next LEASE
 
-A Responder implementation MAY stop all further requests by sending a LEASE with a value of 0 for __Number of Requests__.
+A Responder implementation MAY stop all further requests by sending a LEASE with a value of 0 for __Number of Requests__ or __Time-To-Live__.
 
 When a LEASE expires due to time, the value of the __Number of Requests__ that a Requester may make is implicitly 0.
 
