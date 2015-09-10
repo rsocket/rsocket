@@ -228,18 +228,18 @@ means the error pertains to a given stream.
 
 #### Error Codes
 
-|  Type                          | Value  | Description |
-|:-------------------------------|:-------|:------------|
-| __RESERVED__                   | 0x0000 | __Reserved__ |
-| __INVALID_SETUP__              | 0x0001 | The Setup frame is invalid for the server (it could be that the client is too recent for the old server). Stream ID MUST be 0. |
-| __UNSUPPORTED_SETUP__          | 0x0002 | Some (or all) of the parameters specified by the client are unsupported by the server. Stream ID MUST be 0. |
-| __REJECTED_SETUP__             | 0x0003 | The server rejected the setup, it can specify the reason in the payload. Stream ID MUST be 0. |
-| __CONNECTION_ERROR__           | 0x0011 | The connection is being terminated. Stream ID MUST be 0. |
-| __APPLICATION_ERROR__          | 0x0021 | Application layer logic generating a Reactive Streams _onError_ event. Stream ID MUST be non-0. |
-| __REJECTED__                   | 0x0022 | Despite being a valid request, the Responder decided to reject it. The Responder guarantees that it didn't process the request. The reason for the rejection is explained in the metadata section. Stream ID MUST be non-0. |
-| __CANCELED__                   | 0x0023 | The responder cancelled the request but potentially have started processing it (almost identical to REJECTED but doesn't garantee that no side-effect have been started). Stream ID MUST be non-0. |
-| __INVALID__                    | 0x0024 | The request is invalid. Stream ID MUST be non-0. |
-| __RESERVED__                   | 0xFFFF | __Reserved for Extension Use__ |
+|  Type                          | Value      | Description |
+|:-------------------------------|:-----------|:------------|
+| __RESERVED__                   | 0x00000000 | __Reserved__ |
+| __INVALID_SETUP__              | 0x00000001 | The Setup frame is invalid for the server (it could be that the client is too recent for the old server). Stream ID MUST be 0. |
+| __UNSUPPORTED_SETUP__          | 0x00000002 | Some (or all) of the parameters specified by the client are unsupported by the server. Stream ID MUST be 0. |
+| __REJECTED_SETUP__             | 0x00000003 | The server rejected the setup, it can specify the reason in the payload. Stream ID MUST be 0. |
+| __CONNECTION_ERROR__           | 0x00000011 | The connection is being terminated. Stream ID MUST be 0. |
+| __APPLICATION_ERROR__          | 0x00000021 | Application layer logic generating a Reactive Streams _onError_ event. Stream ID MUST be non-0. |
+| __REJECTED__                   | 0x00000022 | Despite being a valid request, the Responder decided to reject it. The Responder guarantees that it didn't process the request. The reason for the rejection is explained in the metadata section. Stream ID MUST be non-0. |
+| __CANCELED__                   | 0x00000023 | The responder cancelled the request but potentially have started processing it (almost identical to REJECTED but doesn't garantee that no side-effect have been started). Stream ID MUST be non-0. |
+| __INVALID__                    | 0x00000024 | The request is invalid. Stream ID MUST be non-0. |
+| __RESERVED__                   | 0xFFFFFFFF | __Reserved for Extension Use__ |
 
 __NOTE__: Values in the range of 0x0001 to 0x000F are reserved for use as SETUP_ERROR codes. Values in the range of
 0x0011 to 0x001F are reserved for connection errors. Values in the range of 0x0021 to 0x002F are reserved for application layer
