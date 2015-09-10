@@ -13,7 +13,7 @@
    - allowing persistent connections
 
 - Reduce perceived user latency by:
-   - eliminating round-trip cost of handshakes (such as SSL/TLS) for each request/response over persistent connections.
+   - avoiding handshakes and the associated round-trip network overhead
    - reducing computation time by using binary encoding
    - allocating less memory and reducing garbage collection cost
 

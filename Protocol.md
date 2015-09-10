@@ -192,7 +192,7 @@ in [RFC 2045](https://tools.ietf.org/html/rfc2045). Many are registered with
 [CBOR](https://www.iana.org/assignments/media-types/application/cbor).
 [Suffix](http://www.iana.org/assignments/media-type-structured-suffix/media-type-structured-suffix.xml)
 rules MAY be used for handling layout. For example, `application/x.netflix+cbor` or 
-`application/x.reactivesocket+cbor` or `application/x.netflix+json`.
+`application/x.reactivesocket+cbor` or `application/x.netflix+json`. The string may or may not be null terminated.
 * __Setup Data__: includes payload describing connection capabilities of the endpoint sending the
 Setup header.
 
@@ -221,7 +221,7 @@ Frame Contents
 * __Flags__:
      * (__M__)etadata: Metdadata present
 * __Error Code__: Type of Error.
-* __Setup Error Data__: includes payload describing error information. Error Data MUST be a UTF-8 encoded string.
+* __Setup Error Data__: includes payload describing error information. Error Data MUST be a UTF-8 encoded string. The string may or may not be null terminated.
 
 A Stream ID of 0 means the error pertains to the connection. Including connection establishment. A non-0 Stream ID
 means the error pertains to a given stream.
