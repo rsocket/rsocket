@@ -63,16 +63,26 @@ reception. Flags generally depend on Frame Type, but all frame types must provid
      * (__M__)etadata: Metadata present
 * __Stream ID__: (32) Stream Identifier for this frame or 0 to indicate the entire connection.
 
+#### Transport Protocol
+
+The ReactiveSocket protocol uses a lower level transport protocol to carry ReactiveSocket frames. A transport protocol MUST prvide the following:
+
+1. Unicast [Reliable Delivery](https://en.wikipedia.org/wiki/Reliability_(computer_networking)).
+1. Preservation of frame ordering. Frame A sent before Frame B must arrive in source order. i.e. if Frame A is sent by the same source as Frame B, then Frame A will always arrive before Frame B. No assumptions about ordering across sources is assumed.
+
+An implementation MAY "close" a transport connection due to protocol processing. When this occurs, it is assumed that that connection will
+have no further frames sent and all frames will be ignored.
+
 #### Frame Length
 
-The presence of the Frame Length field is determined by the transport protocol being used. The frame length field may be safely omitted if the transport protocol provides framing or preserves message boundaries. If, however, the transport protocol only provides a stream abstraction or can merge messages without preserving boundaries, or multiple transport protocols may be used, then the frame length field must be used. If in doubt, then the frame length must be used.
+The presence of the Frame Length field is determined by the transport protocol being used. The frame length field MUST be omitted if the transport protocol provides framing or preserves message boundaries. If, however, the transport protocol only provides a stream abstraction or can merge messages without preserving boundaries, or multiple transport protocols may be used, then the frame length field MUST be used. If in doubt, then the frame length MUST be used.
 
 |  Transport Protocol            | Frame Length Field Required |
 |:-------------------------------|:----------------------------|
 | TCP                            | __YES__ |
 | WebSocket                      | __NO__  |
 | Aeron                          | __NO__  |
-| Other                          | __YES__ if transport does not already provide framing or preserve message boundaries. |
+| Other                          | __YES__ |
 
 #### Handling Ignore Flag
 
@@ -121,20 +131,20 @@ to odd/even values. In other words, a client MUST generate even Stream IDs and a
 |  Type                          | Value  | Description |
 |:-------------------------------|:-------|:------------|
 | __RESERVED__                   | 0x0000 | __Reserved__ |
-| __SETUP__                      | 0x0001 | __Setup__: Capabilities Of Client Sending The Frame. |
-| __LEASE__                      | 0x0002 | __Lease__: |
+| __SETUP__                      | 0x0001 | __Setup__: Sent by client to initiate protocol processing. |
+| __LEASE__                      | 0x0002 | __Lease__: Sent by Responder to grant the ability to send requests. |
 | __KEEPALIVE__                  | 0x0003 | __Keepalive__: Connection keepalive. |
-| __REQUEST_RESPONSE__           | 0x0004 | __Request Response__: |
-| __REQUEST_FNF__                | 0x0005 | __Fire And Forget__: |
-| __REQUEST_STREAM__             | 0x0006 | __Request Stream__: |
-| __REQUEST_SUB__                | 0x0007 | __Request Subscription__: |
-| __REQUEST_CHANNEL__            | 0x0008 | __Request Channel__: |
-| __REQUEST_N__                  | 0x0009 | __Request N__: Request N more items |
-| __CANCEL__                     | 0x000A | __Cancel Request__: |
+| __REQUEST_RESPONSE__           | 0x0004 | __Request Response__: Request single response. |
+| __REQUEST_FNF__                | 0x0005 | __Fire And Forget__: A single one-way message. |
+| __REQUEST_STREAM__             | 0x0006 | __Request Stream__: Request a completable stream. |
+| __REQUEST_SUB__                | 0x0007 | __Request Subscription__: Request an infinite stream. |
+| __REQUEST_CHANNEL__            | 0x0008 | __Request Channel__: Request a completable stream in both directions. |
+| __REQUEST_N__                  | 0x0009 | __Request N__: Request N more items with ReactiveStreams semantics. |
+| __CANCEL__                     | 0x000A | __Cancel Request__: Cancel outstanding request. |
 | __RESPONSE__                   | 0x000B | __Response__: Response to a request. |
-| __ERROR__                      | 0x000C | __Error__: Response that is an error. |
+| __ERROR__                      | 0x000C | __Error__: Error at connection or application level. |
 | __METADATA_PUSH__              | 0x000D | __Metadata__: Asynchronous Metadata frame |
-| __EXT__                        | 0xFFFF | __Extension Header__: Used To Extend More Options As Well As Extensions. |
+| __EXT__                        | 0xFFFF | __Extension Header__: Used To Extend more frame types as well as extensions. |
 
 ### Setup Frame
 
@@ -235,7 +245,7 @@ means the error pertains to a given stream.
 | __UNSUPPORTED_SETUP__          | 0x00000002 | Some (or all) of the parameters specified by the client are unsupported by the server. Stream ID MUST be 0. |
 | __REJECTED_SETUP__             | 0x00000003 | The server rejected the setup, it can specify the reason in the payload. Stream ID MUST be 0. |
 | __CONNECTION_ERROR__           | 0x00000101 | The connection is being terminated. Stream ID MUST be 0. |
-| __APPLICATION_ERROR__          | 0x00000101 | Application layer logic generating a Reactive Streams _onError_ event. Stream ID MUST be non-0. |
+| __APPLICATION_ERROR__          | 0x00000201 | Application layer logic generating a Reactive Streams _onError_ event. Stream ID MUST be non-0. |
 | __REJECTED__                   | 0x00000202 | Despite being a valid request, the Responder decided to reject it. The Responder guarantees that it didn't process the request. The reason for the rejection is explained in the metadata section. Stream ID MUST be non-0. |
 | __CANCELED__                   | 0x00000203 | The responder cancelled the request but potentially have started processing it (almost identical to REJECTED but doesn't garantee that no side-effect have been started). Stream ID MUST be non-0. |
 | __INVALID__                    | 0x00000204 | The request is invalid. Stream ID MUST be non-0. |
@@ -564,7 +574,7 @@ that indicates a SETUP error.
 
 Immediately upon successful connection, the client MUST send a SETUP frame with
 Stream ID of 0. Any other frame received that is NOT a SETUP frame or a SETUP frame with
-a non-0 Stream ID, MUST cause the server to send a SETUP_ERROR (with INVALID_SETUP) and close connection.
+a non-0 Stream ID, MUST cause the server to send a SETUP_ERROR (with INVALID_SETUP) and close the connection.
 
 The client-side Requester can inform the server-side Responder as to whether it will
 honor LEASEs or not based on the presence of the __L__ flag in the SETUP frame.
