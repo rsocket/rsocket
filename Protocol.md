@@ -69,6 +69,7 @@ The ReactiveSocket protocol uses a lower level transport protocol to carry React
 
 1. Unicast [Reliable Delivery](https://en.wikipedia.org/wiki/Reliability_(computer_networking)).
 1. Preservation of frame ordering. Frame A sent before Frame B must arrive in source order. i.e. if Frame A is sent by the same source as Frame B, then Frame A will always arrive before Frame B. No assumptions about ordering across sources is assumed.
+1. [FCS](https://en.wikipedia.org/wiki/Frame_check_sequence) is assumed to be in use either at the transport protocol or at each MAC layer hop. But no protection against malicious corruption is assumed.
 
 An implementation MAY "close" a transport connection due to protocol processing. When this occurs, it is assumed that that connection will
 have no further frames sent and all frames will be ignored.
@@ -87,8 +88,13 @@ The presence of the Frame Length field is determined by the transport protocol b
 #### Handling Ignore Flag
 
 The (__I__)gnore flag is used for extension of the protocol. A value of 0 in a frame for this flag indicates the protocol can't
-ignore this frame. An implementation MAY close the underlying transport connection on reception of a frame that it does not understand with this
-bit not set.
+ignore this frame. An implementation MAY send an ERROR frame (with CONNECTION_ERROR error code) and close the underlying transport
+connection on reception of a frame that it does not understand with this bit not set.
+
+#### Frame Validation
+
+ReactiveSocket implementations may provide their own validation at the metadata level for specific frames. However, this is an application concern
+and not necessary for protocol processing.
 
 #### Metadata Optional Header
 
