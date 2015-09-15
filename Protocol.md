@@ -68,7 +68,7 @@ reception. Flags generally depend on Frame Type, but all frame types must provid
 The ReactiveSocket protocol uses a lower level transport protocol to carry ReactiveSocket frames. A transport protocol MUST prvide the following:
 
 1. Unicast [Reliable Delivery](https://en.wikipedia.org/wiki/Reliability_(computer_networking)).
-1. Preservation of frame ordering. Frame A sent before Frame B must arrive in source order. i.e. if Frame A is sent by the same source as Frame B, then Frame A will always arrive before Frame B. No assumptions about ordering across sources is assumed.
+1. [Connection-Oriented](https://en.wikipedia.org/wiki/Connection-oriented_communication) and preservation of frame ordering. Frame A sent before Frame B must arrive in source order. i.e. if Frame A is sent by the same source as Frame B, then Frame A will always arrive before Frame B. No assumptions about ordering across sources is assumed.
 1. [FCS](https://en.wikipedia.org/wiki/Frame_check_sequence) is assumed to be in use either at the transport protocol or at each MAC layer hop. But no protection against malicious corruption is assumed.
 
 An implementation MAY "close" a transport connection due to protocol processing. When this occurs, it is assumed that that connection will
