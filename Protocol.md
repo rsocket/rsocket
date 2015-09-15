@@ -63,6 +63,8 @@ reception. Flags generally depend on Frame Type, but all frame types must provid
      * (__M__)etadata: Metadata present
 * __Stream ID__: (32) Stream Identifier for this frame or 0 to indicate the entire connection.
 
+__NOTE__: Byte ordering is assumed to be big endian.
+
 #### Transport Protocol
 
 The ReactiveSocket protocol uses a lower level transport protocol to carry ReactiveSocket frames. A transport protocol MUST prvide the following:
