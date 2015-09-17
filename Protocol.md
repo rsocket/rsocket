@@ -11,7 +11,7 @@ Key words used by this document conform to the meanings in [RFC 2119](https://to
 * __Fragment__: A portion of an application message that has been partitioned for inclusion in a Frame.
 See [Fragmentation and Reassembly](#fragmentation-and-reassembly).
 * __Transport__: Protocol used to carry ReactiveSockets protocol. One of WebSockets, TCP, or Aeron. The transport MUST
-provide [reliable delivery](https://en.wikipedia.org/wiki/Reliability_(computer_networking)).
+provide capabilities mentioned in the [transport protocol](#transport-protocol) section.
 * __Stream__: Unit of operation (request/response, etc.). See [Design Principles](DesignPrinciples.md).
 * __Request__: A stream request. May be one of four types. As well as request for more items or cancellation of previous request.
 * __Response__: A stream response. Contains data associated with previous request.
