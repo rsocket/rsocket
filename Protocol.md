@@ -38,7 +38,7 @@ The following are features of Data and Metadata.
 ### Frame Header Format
 
 ReactiveSocket frames begin with a header. The general layout is given below. When used over
-transport protocols that provide framing (WebSocket and Aeron), the Frame Length field is not included.
+transport protocols that provide framing (WebSocket and Aeron), the Frame Length field MUST NOT be included.
 For transports that do not provide framing, such as TCP, the Frame Length MUST be included.
 
 ```
@@ -67,7 +67,7 @@ __NOTE__: Byte ordering is assumed to be big endian.
 
 #### Transport Protocol
 
-The ReactiveSocket protocol uses a lower level transport protocol to carry ReactiveSocket frames. A transport protocol MUST prvide the following:
+The ReactiveSocket protocol uses a lower level transport protocol to carry ReactiveSocket frames. A transport protocol MUST provide the following:
 
 1. Unicast [Reliable Delivery](https://en.wikipedia.org/wiki/Reliability_(computer_networking)).
 1. [Connection-Oriented](https://en.wikipedia.org/wiki/Connection-oriented_communication) and preservation of frame ordering. Frame A sent before Frame B must arrive in source order. i.e. if Frame A is sent by the same source as Frame B, then Frame A will always arrive before Frame B. No assumptions about ordering across sources is assumed.
@@ -80,7 +80,7 @@ ReactiveSocket as specified here only allows for TCP, WebSocket, and Aeron as tr
 
 #### Frame Length
 
-The presence of the Frame Length field is determined by the transport protocol being used. The frame length field MUST be omitted if the transport protocol provides framing or preserves message boundaries. If, however, the transport protocol only provides a stream abstraction or can merge messages without preserving boundaries, or multiple transport protocols may be used, then the frame length field MUST be used. If in doubt, then the frame length MUST be used.
+The presence of the Frame Length field is determined by the transport protocol being used. The frame length field MUST be omitted if the transport protocol provides framing or preserves message boundaries. If, however, the transport protocol only provides a stream abstraction or can merge messages without preserving boundaries, or multiple transport protocols may be used, then the frame length field MUST be used.
 
 |  Transport Protocol            | Frame Length Field Required |
 |:-------------------------------|:----------------------------|
@@ -165,7 +165,7 @@ to operate. The usage and message sequence used is shown in [Connection Establis
 
 One of the important parameters for a connection is the format, layout, and any schema of the data and metadata for
 frames. This is, for lack of a better term, referred to here as "MIME Type". An implementation MAY use typical MIME type
-values or can, alternatively, MAY decide to use specific non-MIME type values to indicate format, layout, and any schema
+values or MAY decide to use specific non-MIME type values to indicate format, layout, and any schema
 for data and metadata. The protocol implementation MUST NOT interpret the MIME type itself. This is an application
 concern only.
 
