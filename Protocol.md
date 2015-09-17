@@ -76,6 +76,8 @@ The ReactiveSocket protocol uses a lower level transport protocol to carry React
 An implementation MAY "close" a transport connection due to protocol processing. When this occurs, it is assumed that that connection will
 have no further frames sent and all frames will be ignored.
 
+ReactiveSocket as specified here only allows for TCP, WebSocket, and Aeron as transport protocols.
+
 #### Frame Length
 
 The presence of the Frame Length field is determined by the transport protocol being used. The frame length field MUST be omitted if the transport protocol provides framing or preserves message boundaries. If, however, the transport protocol only provides a stream abstraction or can merge messages without preserving boundaries, or multiple transport protocols may be used, then the frame length field MUST be used. If in doubt, then the frame length MUST be used.
