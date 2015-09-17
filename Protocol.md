@@ -31,7 +31,7 @@ The following are features of Data and Metadata.
 - Metadata can be encoded differently than Data.
 - Metadata can be "attached" (i.e. correlated) with the following entities:
     - Connection via Metadata Push and Stream ID of 0
-    - Individual Request or Response via Metadata header
+    - Individual Request or Response
 
 ## Operation
 
