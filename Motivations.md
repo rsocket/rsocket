@@ -196,7 +196,7 @@ No framing or application semantics. Must provide an application protocol.
 
 No application semantics, just framing. Must provide an application protocol.
 
-#### HTTP/1 & HTTP/2
+#### HTTP/1.1 & HTTP/2
 
 HTTP provides barely sufficient raw capabilities for application protocols to be built with, but an application protocol still needs to be defined on top of it. It is insufficient in defining application semantics. ([GRPC from Google](https://github.com/grpc/grpc-common/blob/master/PROTOCOL-HTTP2.md) is an example of a protocol being built on top of HTTP/2 to add these type of semantics).
 
