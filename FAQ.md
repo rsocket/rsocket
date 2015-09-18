@@ -44,10 +44,13 @@ It all comes down to what TCP is designed to do (not overrun the receiver OS buf
 This illustrates why ever single solution that doesn't have built in flow control at the application level (pretty much every solution mentioned aside from MQTT, AMQP, & STOMP) is not well suited for usage.
 
 
+#### Why not relying on TCP Flow Control (or the flow control of the underlying transport protocol)?
 
+TCP Flow Control is designed to control the rate of bytes from the sender/reader based on the consuming rate of the remote side. With reactivesocket, the streams are multiplexed on the same transport connection, so having flow control at the reactivesocket level is actually mandatory.
 
 #### What about Session Continuation across connections?
 
+Reactivesocket is not designed to provide session continuation across connections.
 
 #### Connection Setup Requirement
 
@@ -95,19 +98,28 @@ Beyond those factors, TCP has existed since 1977. We do not expect it to be elim
 
 #### Prioritization, QoS, OOB
 
-
-
-
+Prioritization, QoS, OOB is allowed with metadata and app level logic and app control of emission.
+Reactivesocket does not enforce a queuing model nor an emission model nor a processing model. To be effective with QoS, it would have to control all aspects. This is not realistically possible without cooperation from the app logic as well as the underlying network layer (which would be a huge layering violation as well). It's the same reason why HTTP/2 does not go into that area either and simply provides a means to express intent. With metadata, ReactiveSocket doesn't even need to do that.
 
 #### Why is cancellation required?
 
+Modern distributed system topologies tend to have multiple levels of request fan-out. It means that one request on level may leads to tens of requests to multiple backends. Being able to cancel a request can save a non-trivial amount of work.
+
 ####  What are example use cases of cancellation?
+
+Let's imagine a server responsible for computing the nth digit of Pi. A client send a request to that server but realize later that it doesn't want/need the response anymore (for arbitrary reasons). Rather than letting the server do the computation in vain, it can cancel it (the server may not even have started the work).
 
 #### What are example use cases of topic subscription (and push notification)?
 
+Let's imagine a chat server, you want to receive all the messages said in the chat server but you don't want to poll or continuously poll (long polling technique). Subscribtion is the perfect use case for that.
+
 #### What are example use cases of fire-and-forget versus request-response?
 
+Some requests doesn't require a response, and when it's fine to just ignore any failure to sending them, fire-and-forget is the right solution.
+
 #### What are example use cases of request-stream?
+
+Let's use the same example that for subscription, the chat server, but this time, we want to subscribe to a particular chat room and ignore all other messages.
 
 #### Why Binary?
 
@@ -115,7 +127,15 @@ https://http2.github.io/faq/#why-is-http2-binary
 
 #### Doesn't binary encoding make debugging harder?
 
+Yes, but the tradeoff is worth it.
+Binary encoding makes reading the message by a human more difficult, but it also makes reading the message by a machine more easy. There's also a significant performance gain of not decoding the content.
+Because we estimate that more than 99.99% of the messages will be read by a machine, it's
+
+There's already some tools to look at binary data. Also, simple tool can be written to decode the binary format to a human readable text.
+
 #### What tooling exists for debugging the protocol?
+
+Wireshark is the recommanded tool. We don't have a pluggin yet but we plan to add one in the future.
 
 #### Why are these different flow control approaches needed beyond what the transport layer offers?
 
