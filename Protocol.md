@@ -836,6 +836,12 @@ in the LEASE frame within the __Time-To-Live__ value in the LEASE.
 A Responder that receives a REQUEST that it can not honor due to LEASE restrictions MUST respond with an ERROR frame with error code
 of LEASE_ERROR. This includes an initial LEASE sent as part of [Connection Establishment](#connection-establishment).
 
+#### QoS and Prioritization
+
+Quality of Service and Prioritization of streams are considered application or network layer concerns and are better dealt with
+at those layers. The metadata capabilities, including METADATA_PUSH, are tools that applications can use for effective prioritization.
+DiffServ via IP QoS are best handled by the underlying network layer protocols.
+
 ### Handling the Unexpected
 
 This protocol attempts to be very lenient in processing of received frames and SHOULD ignore
