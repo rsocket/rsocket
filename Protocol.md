@@ -873,7 +873,3 @@ assume it is set and act accordingly.
 	1. A server MUST ignore a SETUP_ERROR frame.
 	1. A client MUST ignore a SETUP_ERROR after it has completed connection establishment.
 	1. A client MUST ignore a SETUP frame.
-
-### To Be Specified
-
-## TODO
