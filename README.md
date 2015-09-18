@@ -8,11 +8,12 @@ It enables the following symmetric interaction models via async message passing 
 - request/stream (finite stream of many)
 - fire-and-forget (no response)
 - event subscription (infinite stream of many)
+- channel (bi-directional streams)
 
 Artifacts include:
 
 - [Motivations.md](https://github.com/ReactiveSocket/reactivesocket/blob/master/Motivations.md): Motivation for creating this protocol.
-- [DesignPrinciples.md](https://github.com/ReactiveSocket/reactivesocket/blob/master/DesignPrinciples.md): Design and Architectural principles and context for the protocol and how it will be used.
+- [FAQ.md](https://github.com/ReactiveSocket/reactivesocket/blob/master/FAQ.md): Frequently Asked Questions.
 - [Protocol.md](https://github.com/ReactiveSocket/reactivesocket/blob/master/Protocol.md): The protocol definition.
 
 More information and links to various implementations can be found at http://reactivesocket.io
