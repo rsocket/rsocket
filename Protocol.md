@@ -1,6 +1,6 @@
 ## Introduction
 
-Specify a protocol for [Reactive Streams](http://www.reactive-streams.org/) semantics across an asynchronous, binary
+Specify an application protocol for [Reactive Streams](http://www.reactive-streams.org/) semantics across an asynchronous, binary
 boundary. For more information, please see [Reactive Socket](http://reactivesocket.io/).
 
 ReactiveSockets assumes an operating paradigm. These assumptions are:
