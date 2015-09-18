@@ -43,11 +43,6 @@ It all comes down to what TCP is designed to do (not overrun the receiver OS buf
 
 This illustrates why ever single solution that doesn't have built in flow control at the application level (pretty much every solution mentioned aside from MQTT, AMQP, & STOMP) is not well suited for usage.
 
-
-#### Why not relying on TCP Flow Control (or the flow control of the underlying transport protocol)?
-
-TCP Flow Control is designed to control the rate of bytes from the sender/reader based on the consuming rate of the remote side. With reactivesocket, the streams are multiplexed on the same transport connection, so having flow control at the reactivesocket level is actually mandatory.
-
 #### What about Session Continuation across connections?
 
 Reactivesocket is not designed to provide session continuation across connections.
@@ -129,7 +124,7 @@ https://http2.github.io/faq/#why-is-http2-binary
 
 Yes, but the tradeoff is worth it.
 Binary encoding makes reading the message by a human more difficult, but it also makes reading the message by a machine more easy. There's also a significant performance gain of not decoding the content.
-Because we estimate that more than 99.99% of the messages will be read by a machine, it's
+Because we estimate that more than 99.99% of the messages will be read by a machine, we decided to make the reading easier for a machine.
 
 There's already some tools to look at binary data. Also, simple tool can be written to decode the binary format to a human readable text.
 
@@ -139,11 +134,23 @@ Wireshark is the recommanded tool. We don't have a pluggin yet but we plan to ad
 
 #### Why are these different flow control approaches needed beyond what the transport layer offers?
 
+TCP Flow Control is designed to control the rate of bytes from the sender/reader based on the consuming rate of the remote side. With reactivesocket, the streams are multiplexed on the same transport connection, so having flow control at the reactivesocket level is actually mandatory.
+
 #### What are example use cases where ReactiveSocket flow control helps?
+
+Flow control help the application signal its capability to consume responses. This ensures that we never overflow any queue on the application layer.
+Relying on the TCP flow control doesn't work, because we multiplex the streams on the same connection.
 
 #### How does ReactiveSocket flow control behave?
 
+There's two type of flow control: 
+- One is provided by the request-n semantics defined in reactive-stream (Please read the spec on the reactive-stream.org for exhaustive details).
+- The second is provided via the lease semantics define in the [Protocol section](https://github.com/ReactiveSocket/reactivesocket/blob/master/Protocol.md#lease-semantics).
+
 #### How does ReactiveSocket benefit a client-side load balancer in a data center?
+
+Each reactivesocket provides an avaibility number representing abstractly its capacity to send traffic.
+For instance, when a client doesn't have a valid lease, it exposes a "0.0" availability indicating that it can't send any traffic. This extra piece of information, in combination with any loadbalancing strategy already used, give more information to the client to make smarter decision.
 
 #### Why is multiplexing more efficient?
 
@@ -152,13 +159,22 @@ https://http2.github.io/faq/#why-just-one-tcp-connection
 
 #### Is multiplexing equivalent to pipelining?
 
-#### What is difference between flow control and the reactive-stream backpressure protocol?
+No, pipelining requires reading the responses in the order of the requests. 
+e.g. with pipelining: A client sends reqA, reqB, reqC. It has to receive the response on this order: respA, respB, respC.
+e.g. with multiplexing: The same client can receive responses in any order: respB, respA, respC
+Pieplining can introduce [head-of-line-blocking](https://en.wikipedia.org/wiki/Head-of-line_blocking) and degrade the performance of the system.
 
 #### Why is the "TLS False start" strategy useful for establishing a connection?
 
+When respecting the lease semantics, establishing a reactivesocket between a client and a server require one round-trip (-> SETUP, <- LEASE, -> REQUEST). On slow network or when the connection latency is important, this round-trip is harmful. That's why you have the possibility to not respect the lease, and then can send your request right away (-> SETUP, -> REQUEST).
+
 #### What are example use cases for payload data on the Setup frame?
 
+You may want to pass data to your application at reactivesocket establishement, rather than reimplementing a connect protocol on top of reactivesocket, reactivesocket provides you the possibility to send information alongside the SETUP frame.
+For instance, this can be used by a client to send its credentials.
 
 #### Why those 5 interaction models?
 
-
+Those 5 interaction models could be reduce to just one "request-channel". Every other interaction model is a subtype of request-channel, but they have been specialized for two reasons:
+- Ease of use from the client point of view.
+- Performance.
