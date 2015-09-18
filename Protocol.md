@@ -3,6 +3,11 @@
 Specify a protocol for [Reactive Streams](http://www.reactive-streams.org/) semantics across an asynchronous, binary
 boundary. For more information, please see [Reactive Socket](http://reactivesocket.io/).
 
+ReactiveSockets assumes an operating paradigm. These assumptions are:
+- one-to-one communication
+- non-proxied communication. Or if proxied, the ReactiveSocket semantics and assumptions are preserved across the proxy.
+- no state preserved across [transport protocol](#transport-protocol) sessions by the protocol
+
 Key words used by this document conform to the meanings in [RFC 2119](https://tools.ietf.org/html/rfc2119).
 
 ## Terminology
@@ -55,7 +60,8 @@ For transports that do not provide framing, such as TCP, the Frame Length MUST b
 ```
 
 * __Frame Length__: (31 = max 2,147,483,647 bytes) Length of Frame. Including header. Only used for specific transport
-protocols. The __R__ bit is reserved and must be set to 0.
+protocols. The __R__ bit is reserved and must be set to 0. The __R__ bit is considered part of the frame length and thus
+is not present if the Frame Length is not used [see below](#frame-length).
 * __Frame Type__: (16) Type of Frame.
 * __Flags__: Any Flag bit not specifically indicated in the frame type should be set to 0 when sent and not interpreted on
 reception. Flags generally depend on Frame Type, but all frame types must provide space for the following flags:
@@ -80,7 +86,7 @@ ReactiveSocket as specified here only allows for TCP, WebSocket, and Aeron as tr
 
 #### Frame Length
 
-The presence of the Frame Length field is determined by the transport protocol being used. The frame length field MUST be omitted if the transport protocol provides framing or preserves message boundaries. If, however, the transport protocol only provides a stream abstraction or can merge messages without preserving boundaries, or multiple transport protocols may be used, then the frame length field MUST be used.
+The presence of the Frame Length field (and corresponding __R__ bit) is determined by the transport protocol being used. The frame length field MUST be omitted if the transport protocol provides framing or preserves message boundaries. If, however, the transport protocol only provides a stream abstraction or can merge messages without preserving boundaries, or multiple transport protocols may be used, then the frame length field MUST be used.
 
 |  Transport Protocol            | Frame Length Field Required |
 |:-------------------------------|:----------------------------|
