@@ -34,21 +34,21 @@ More on the motivations behind Reactive Socket can be found inhttps://github.com
 
 #### Why "Reactive Streams" `request(n)` Flow Control?
 
-Without application feedback in terms of work units done (not bytes), you get into a couple problems:
+Without application feedback in terms of work units done (not bytes), it is easy to cause "head of line blocking", overwhelm network and application buffers, and produce more data on the server than the client can handle. This is particularly bad when multiplexing multiple streams over a single connection where one stream can starve all others. Application layer `request(n)` semantics allows the consumer to signal how much it can receive on each stream, and allow the producer to interleave multiple streams together. 
 
-Data is buffered by TCP on the sender and receiver side which means that understanding what is done on the subscriber is not possible.
+Following are further details on some problems that can occur when using TCP and relying solely on its flow control: 
 
-A sender who needs to send a large work unit (larger than the buffering on the TCP sender or receiver sides) is kinda stuck to a bad behaving scenario where the TCP connection will cycle between full and empty and under utilize the buffering drastically (as well as the throughput)
+- Data is buffered by TCP on the sender and receiver side which means that understanding what is done on the subscriber is not possible.
 
-TCP isn't the only transport that would make sense to use.
+- A sender who needs to send a large work unit (larger than the buffering on the TCP sender or receiver sides) is kinda stuck to a bad behaving scenario where the TCP connection will cycle between full and empty and under utilize the buffering drastically (as well as the throughput)
 
-TCP handles a single sender/receiver pair and reactive streams allows for multiple senders and/or multiple receivers (somewhat), and
+- TCP handles a single sender/receiver pair and reactive streams allows for multiple senders and/or multiple receivers (somewhat), and
 
-(most importantly) decoupling of data reception at the transport layer from application consumption control. I.e. an application may want to artificially slow down or limit processing separately from pulling off the data from the transport.
+- (most importantly) decoupling of data reception at the transport layer from application consumption control. I.e. an application may want to artificially slow down or limit processing separately from pulling off the data from the transport.
 
 It all comes down to what TCP is designed to do (not overrun the receiver OS buffer space or network queues) and what reactive-streams flow control is designed to do (allow for push/pull application work unit semantics, additional dissemination models, and application control of when it is ready for more or not). This clear separation of concerns is necessary for any real system to operate efficiently.
 
-This illustrates why ever single solution that doesn't have built in flow control at the application level (pretty much every solution mentioned aside from MQTT, AMQP, & STOMP) is not well suited for usage.
+This illustrates why every single solution that doesn't have built in flow control at the application level (pretty much every solution mentioned aside from MQTT, AMQP, & STOMP) is not well suited for usage and why Reactive Socket incorporates application level flow control as a first-class requirement. 
 
 #### What about Session Continuation across connections?
 
