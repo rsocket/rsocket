@@ -2,7 +2,7 @@
 
 #### Why a new protocol? 
 
-The full explanations of motivations can be found in [Motivations.md](https://github.com/ReactiveSocket/reactivesocket/blob/master/Motivations.md).
+The full explanation of motivations can be found in [Motivations.md](https://github.com/ReactiveSocket/reactivesocket/blob/master/Motivations.md).
 
 Some of the key reasons include:
 
