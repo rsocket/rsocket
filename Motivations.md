@@ -49,7 +49,7 @@ ReactiveSocket allows for the `request(n)` signal to be composed over network bo
 
 ##### Leasing
 
-The second form of flow control is primarily focused on server-to-server use cases in a data center. When enabled, the flow control features of the protocol can control the flow of requests from requestor to responder using a leasing strategy. This enables application level client-side load balancing for sending messages only to servers that have signalled capacity. This signal from server to client allows for more intelligent routing and load balancing algorithms in data centers with clusters of machines. 
+The second form of flow control is primarily focused on server-to-server use cases in a data center. When enabled, a responder (typically a server) can issue leases to the requester based upon its knowledge of its capacity in order to control requests rates. On the requester side, this enables application level load balancing for sending messages only to responders (servers) that have signalled capacity. This signal from server to client allows for more intelligent routing and load balancing algorithms in data centers with clusters of machines. 
 
 
 #### Polyglot Support
