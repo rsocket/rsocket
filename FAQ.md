@@ -185,3 +185,18 @@ For instance, this can be used by a client to send its credentials.
 Those 5 interaction models could be reduce to just one "request-channel". Every other interaction model is a subtype of request-channel, but they have been specialized for two reasons:
 - Ease of use from the client point of view.
 - Performance.
+
+#### So why the "ReactiveSocket" name? 
+
+Isn't "Reactive" a totally <a href="http://www.gartner.com/technology/research/methodologies/hype-cycle.jsp">hyped</a> buzzword? 
+
+This library is directly related to several projects where "Reactive" is an important part of their name and architectural pattern. Thus the choice was made to retain this relationship in the name. Specifically:
+
+  <ul>
+    <li><a href="http://www.reactive-streams.org">Reactive Streams</a></li>
+    <li><a href="https://github.com/reactive-streams/reactive-streams-io">Reactive Streams IO</a> - proposed network protocol conforming to the Reactive Streams semantics</li>
+    <li><a href="http://www.reactivex.io">Reactive Extensions</a> with <a href="https://github.com/ReactiveX/RxJava">RxJava</a> and <a href="https://github.com/ReactiveX/RxJS">RxJS</a> in particular</li>
+    <li><a href="http://www.reactivemanifesto.org">Reactive Manifesto</a> - particularly the "Message Driven" aspect</li>
+  </ul>
+  
+ReactiveSocket implements, uses, or follows the principles in these projects and libraries, thus the name. 
