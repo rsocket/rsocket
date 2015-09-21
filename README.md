@@ -1,8 +1,8 @@
 # ReactiveSocket Protocol
 
-ReactiveSocket is (being developed to be a) network protocol with client and server implementations following <a href="http://reactive-streams.org">Reactive Streams</a> semantics.
+ReactiveSocket is an application protocol providing [Reactive Stream](http://www.reactive-streams.org) semantics over an asynchronous, binary boundary.
 
-It enables the following symmetric interaction models via async message passing over a single network connection:
+It enables the following symmetric interaction models via async message passing over a single connection:
 
 - request/response (stream of 1)
 - request/stream (finite stream of many)
