@@ -1,8 +1,15 @@
 ### FAQ
 
-#### Why a protocol? What makes creating a new protocol (a quite low level task that most devs don't really do on a daily basis) the right thing for improving large scale distributed systems?
+#### Why a new protocol? 
 
+The full explanations of motivations can be found in [Motivations.md](https://github.com/ReactiveSocket/reactivesocket/blob/master/Motivations.md).
 
+Some of the key reasons include:
+
+- interaction models beyond request/response such as streaming responses and push
+- application level flow control semantics (async pull/push of bounded batch sizes) across network boundaries
+- binary, multiplexed use of single connection
+- need of an application protocol in order to use transport protocols such as WebSockets and Aeron
 
 #### Why not HTTP/2?
 
