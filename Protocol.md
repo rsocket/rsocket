@@ -355,16 +355,17 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+---------------------------+
-    | Frame Type = REQUEST_RESPONSE |0|M|        Flags              |
-    +-------------------------------+-+-+---------------------------+
+    +-------------------------------+-+-+-+-------------------------+
+    | Frame Type = REQUEST_RESPONSE |0|M|F|      Flags              |
+    +-------------------------------+-+-+-+-------------------------+
     |                           Stream ID                           |
     +---------------------------------------------------------------+
                          Metadata & Request Data
 ```
 
 * __Flags__:
-     * (__M__)etadata: Metdadata present
+    * (__M__)etadata: Metdadata present
+    * (__F__)ollows: More Fragments Follow This Fragment.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
 ### Request Fire-n-Forget Frame
@@ -376,16 +377,17 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+---------------------------+
-    |    Frame Type = REQUEST_FNF   |0|M|        Flags              |
-    +-------------------------------+-+-+---------------------------+
+    +-------------------------------+-+-+-+-------------------------+
+    |    Frame Type = REQUEST_FNF   |0|M|F|       Flags             |
+    +-------------------------------+-+-+-+-------------------------+
     |                           Stream ID                           |
     +---------------------------------------------------------------+
                           Metadata & Request Data
 ```
 
 * __Flags__:
-     * (__M__)etadata: Metdadata present
+    * (__M__)etadata: Metdadata present
+    * (__F__)ollows: More Fragments Follow This Fragment.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
 ### Request Stream Frame
@@ -397,9 +399,9 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+---------------------------+
-    |  Frame Type = REQUEST_STREAM  |0|M|        Flags              |
-    +-------------------------------+-+-+---------------------------+
+    +-------------------------------+-+-+-+-------------------------+
+    |  Frame Type = REQUEST_STREAM  |0|M|F|       Flags             |
+    +-------------------------------+-+-+-+-------------------------+
     |                           Stream ID                           |
     +---------------------------------------------------------------+
     |                      Initial Request N                        |
@@ -408,7 +410,8 @@ Frame Contents
 ```
 
 * __Flags__:
-     * (__M__)etadata: Metdadata present
+    * (__M__)etadata: Metdadata present
+    * (__F__)ollows: More Fragments Follow This Fragment.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 * __Initial Request N__: initial request N value for stream.
 
@@ -421,9 +424,9 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+---------------------------+
-    |     Frame Type = REQUEST_SUB  |0|M|        Flags              |
-    +-------------------------------+-+-+---------------------------+
+    +-------------------------------+-+-+-+-------------------------+
+    |     Frame Type = REQUEST_SUB  |0|M|F|       Flags             |
+    +-------------------------------+-+-+-+-------------------------+
     |                           Stream ID                           |
     +---------------------------------------------------------------+
     |                      Initial Request N                        |
@@ -432,7 +435,8 @@ Frame Contents
 ```
 
 * __Flags__:
-     * (__M__)etadata: Metdadata present
+    * (__M__)etadata: Metdadata present
+    * (__F__)ollows: More Fragments Follow This Fragment.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 * __Initial Request N__: initial request N value for subscription.
 
@@ -457,7 +461,7 @@ Frame Contents
 
 * __Flags__:
     * (__M__)etadata: Metdadata present
-    * (__F__)ollows: More fragments follow this fragment.
+    * (__F__)ollows: More Fragments Follow This Fragment.
     * (__C__)omplete: bit to indicate COMPLETE.
     * (__N__): Is Initial Request N present or not
 * __Request Data__: identification of the service being requested along with parameters for the request.
@@ -670,8 +674,8 @@ The possible sequences with LEASE are below.
 
 ## Fragmentation And Reassembly
 
-RESPONSE frames and REQUEST_CHANNEL frames may represent a large object and MAY need to be fragmented to fit within the Frame Data size. When this
-occurs, the RESPONSE __F__ flag indicates if more fragments follow the current frame (or not).
+RESPONSE frames and all REQUEST frames may represent a large object and MAY need to be fragmented to fit within the Frame Data size. When this
+occurs, the __F__ flag indicates if more fragments follow the current frame (or not).
 
 ## Stream Sequences and Lifetimes
 
