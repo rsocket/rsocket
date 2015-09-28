@@ -91,9 +91,22 @@ One such example is push notifications. Using request/response forces an applica
 
 For this and other reasons, ReactiveSocket is not limited to just one interaction model. The various supported interaction models described below open up powerful new possibilities for system design:
 
+
+##### Fire-and-Forget
+
+Fire-and-forget is an optimization of request/response that is useful when a response is not needed. It allows for significant performance optimizations, not just in saved network usage by skipping the response, but also in client and server processing time as no bookkeeping is needed to wait for and associate a response or cancellation request. 
+
+This interaction model is useful for use cases that support lossiness, such as non-critical event logging. 
+
+Usage can be thought of like this:
+
+```java
+Future<Void> completionSignalOfSend = socketClient.fireAndForget(message);
+```
+
 ##### Request/Response (single-response)
 
-Standard request/response semantics are still supported, and still expected to represent the majority of requests over a ReactiveSocket connection. These request/response interactions can be considered optimized "streams of 1", and are asynchronous messages multiplexed over a single connection. 
+Standard request/response semantics are still supported, and still expected to represent the majority of requests over a ReactiveSocket connection. These request/response interactions can be considered optimized "streams of only 1 response", and are asynchronous messages multiplexed over a single connection. 
 
 The consumer "waits" for the response message, so it looks like a typical request/response, but underneath it never synchronously blocks.
 
@@ -117,18 +130,6 @@ Usage can be thought of like this:
 
 ```java
 Publisher<Payload> response = socketClient.requestStream(requestPayload);
-```
-
-##### Fire-and-Forget
-
-Fire-and-forget is an optimization of request/response that is useful when a response is not needed. It allows for significant performance optimizations, not just in saved network usage by skipping the response, but also in client and server processing time as no bookkeeping is needed to wait for and associate a response or cancellation request. 
-
-This interaction model is useful for use cases that support lossiness, such as non-critical event logging. 
-
-Usage can be thought of like this:
-
-```java
-Future<Void> completionSignalOfSend = socketClient.fireAndForget(message);
 ```
 
 ##### Topic Subscription (multi-response, infinite) 
@@ -164,6 +165,10 @@ Publisher<Payload> output = socketClient.requestChannel(Publisher<Payload> input
 #### Behaviors
 
 Beyond the interaction models above, there are other behaviors that can benefit applications and system efficiency. 
+
+##### single-response vs multi-response
+
+One key difference between single-response and multi-response is how the Reactive Socket stack delivers data to the application: A single-response might be carried across multiple frames, and be part of a larger RS connection that is streaming multiple messages multiplexed. But single-response means the application only gets its data when the entire response is received. While multi-response delivers it piecemeal. This could allow the user to design its service with multi-response in mind, and then the client can start processing the data as soon as it receives the first chunk.
 
 ##### Bi-Directional
 
