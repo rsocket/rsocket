@@ -217,7 +217,7 @@ in [RFC 2045](https://tools.ietf.org/html/rfc2045). Many are registered with
 [IANA](https://www.iana.org/assignments/media-types/media-types.xhtml) such as
 [CBOR](https://www.iana.org/assignments/media-types/application/cbor).
 [Suffix](http://www.iana.org/assignments/media-type-structured-suffix/media-type-structured-suffix.xml)
-rules MAY be used for handling layout. For example, `application/x.netflix+cbor` or 
+rules MAY be used for handling layout. For example, `application/x.netflix+cbor` or
 `application/x.reactivesocket+cbor` or `application/x.netflix+json`. The string may or may not be null terminated.
 * __Setup Data__: includes payload describing connection capabilities of the endpoint sending the
 Setup header.
@@ -412,8 +412,8 @@ Frame Contents
 * __Flags__:
     * (__M__)etadata: Metdadata present
     * (__F__)ollows: More Fragments Follow This Fragment.
-* __Request Data__: identification of the service being requested along with parameters for the request.
 * __Initial Request N__: initial request N value for stream.
+* __Request Data__: identification of the service being requested along with parameters for the request.
 
 ### Request Subscription Frame
 
@@ -437,8 +437,8 @@ Frame Contents
 * __Flags__:
     * (__M__)etadata: Metdadata present
     * (__F__)ollows: More Fragments Follow This Fragment.
-* __Request Data__: identification of the service being requested along with parameters for the request.
 * __Initial Request N__: initial request N value for subscription.
+* __Request Data__: identification of the service being requested along with parameters for the request.
 
 ### Request Channel Frame
 
@@ -464,8 +464,8 @@ Frame Contents
     * (__F__)ollows: More Fragments Follow This Fragment.
     * (__C__)omplete: bit to indicate COMPLETE.
     * (__N__): Is Initial Request N present or not
-* __Request Data__: identification of the service being requested along with parameters for the request.
 * __Initial Request N__: initial request N value for channel.
+* __Request Data__: identification of the service being requested along with parameters for the request.
 
 ### Request N Frame
 
@@ -736,7 +736,7 @@ or
 1. RS -> RQ: RESPONSE*
 1. RS -> RQ: RESPONSE with COMPLETE
 
-or 
+or
 
 1. RQ -> RS: REQUEST_STREAM
 1. RS -> RQ: RESPONSE*
