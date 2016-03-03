@@ -834,6 +834,19 @@ There are multiple flow control mechanics provided by the protocol.
 
 [Reactive Stream](http://www.reactive-streams.org/) semantics for flow control of Streams, Subscriptions, and Channels.
 
+The Requester and the Responder MUST respect the reactive-streams semantics.
+
+e.g. here's an example of a successful stream call with flow-control.
+
+1. RQ -> RS: REQUEST_STREAM (REQUEST_N=3)
+1. RS -> RQ: RESPONSE
+1. RS -> RQ: RESPONSE
+1. RS -> RQ: RESPONSE
+1. RS needs to wait for a new REQUEST_N at that point
+1. RQ -> RS: REQUEST_N (n=3)
+1. RS -> RQ: RESPONSE
+1. RS -> RQ: RESPONSE with COMPLETE
+
 #### Lease Semantics
 
 The LEASE semantics are to control the number of indivdiual requests (all types) that a Requester may send in a given period.
