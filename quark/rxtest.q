@@ -35,12 +35,26 @@ class RoundTripTest {
         checkEqual(dataType, copy.dataType);
     }
 
-    void testSetup1() {
-        doTestSetup(123, 30, 60*10, "testMeta", "testType");
+    void testSetup1() { doTestSetup(123, 30, 60*10, "testMeta", "testType"); }
+    void testSetup2() { doTestSetup(321, 0, 0, "", ""); }
+
+    void doTestLease(int ttl, int nrequests) {
+        Lease lease = new Lease();
+        lease.ttl = ttl;
+        lease.nrequests = nrequests;
+
+        Buffer buf = defaultCodec().buffer(1024);
+        lease.encode(buf, 0);
+
+        Lease copy = new Lease();
+        copy.decode(buf, 0);
+        checkEqual(ttl, copy.ttl);
+        checkEqual(nrequests, copy.nrequests);
     }
 
-    void testSetup2() {
-        doTestSetup(321, 0, 0, "", "");
-    }
+    void testLease1() { doTestLease(0, 0); }
+    void testLease2() { doTestLease(0, 1); }
+    void testLease3() { doTestLease(1, 0); }
+    void testLease4() { doTestLease(1, 1); }
 
 }
