@@ -13,8 +13,8 @@ namespace rxlib {
         }
 
         void send(Frame frame) {
-            frame.encode(buf, 0);
-            socket.sendBinary(buf);
+            int n = frame.encode(buf, 0);
+            socket.sendBinary(buf.getSlice(0, n));
             log.info("SENT: " + frame.toString());
         }
 

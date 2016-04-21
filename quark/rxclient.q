@@ -27,6 +27,7 @@ void spam(RequestClient client, Requester requester, int count) {
 void main(List<String> args) {
     Config config = logging.config();
     config.setAppender(logging.stdout());
+    // Set this to debug for a full trace of all network interactions.
     config.setLevel("info");
     config.configure();
     Runtime runtime = Context.runtime();

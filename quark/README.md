@@ -34,7 +34,7 @@ worked:
 
     # pip install --user --upgrade datawire-quark
     # quark --version
-    Quark 0.5.1
+    Quark 0.5.2
 
 Note: depending on your platform you may need to add `~/.local/bin` to
 your path.
@@ -92,8 +92,19 @@ similarly.
 The details of running Quark generated code differ depending on the
 backend in use, however the Quark compiler can run the code for you:
 
-    # quark run --python rxtest.q
+    # quark run rxtest.q --python
     ...
+    Running: rxtest
+    =============================== starting tests ===============================
+    rxtest.RoundTripTest.testSetup1 [5 checks, 0 failures]
+    rxtest.RoundTripTest.testSetup2 [5 checks, 0 failures]
+    rxtest.RoundTripTest.testLease1 [2 checks, 0 failures]
+    rxtest.RoundTripTest.testLease2 [2 checks, 0 failures]
+    rxtest.RoundTripTest.testLease3 [2 checks, 0 failures]
+    rxtest.RoundTripTest.testLease4 [2 checks, 0 failures]
+    =============================== stopping tests ===============================
+    Total: 6, Filtered: 0, Passed: 6, Failed: 0
+
 
 # Running the server
 
@@ -103,13 +114,21 @@ backend in use, however the Quark compiler can run the code for you:
 
     # quark run rxclient.q ws://localhost:8910 --python
 
+# How to use this
+
+If you are building your own reactive sockets implementation, you can
+use this TCK/RI in multiple ways:
+
+ - You can use some or all of the reference implementation to
+   bootstrap your own implementation
+ - If you are building a client implementation you can validate it
+   against the provided server.
+ - If you are building a server implementation you can validate it
+   using the provided client.
+
 # Status
 
 The implementation is currently mostly skeletal; however it does
 include a functioning server and client that do simple
 request/responses and rate limited request/responses using the
 reactive sockets lease mechanism.
-
-A few pieces of the implementation use some newer Quark features that
-aren't functioning quite right for Java and Ruby, so currently Python
-and JavaScript are the safe bets for playing with this stuff.
