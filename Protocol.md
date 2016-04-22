@@ -86,7 +86,7 @@ ReactiveSocket as specified here only allows for TCP, WebSocket, and Aeron as tr
 
 #### Frame Length
 
-The presence of the Frame Length field (and corresponding __R__ bit) is determined by the transport protocol being used. The frame length field MUST be omitted if the transport protocol provides framing or preserves message boundaries. If, however, the transport protocol only provides a stream abstraction or can merge messages without preserving boundaries, or multiple transport protocols may be used, then the frame length field MUST be used.
+The presence of the Frame Length field (and corresponding __R__ bit) is determined by the transport protocol being used. The frame length field MUST be omitted if the transport protocol preserves message boundaries e.g. provides compatible framing. If, however, the transport protocol only provides a stream abstraction or can merge messages without preserving boundaries, or multiple transport protocols may be used, then the frame length field MUST be used.
 
 |  Transport Protocol            | Frame Length Field Required |
 |:-------------------------------|:----------------------------|
@@ -263,7 +263,7 @@ means the error pertains to a given stream.
 | __CONNECTION_ERROR__           | 0x00000101 | The connection is being terminated. Stream ID MUST be 0. |
 | __APPLICATION_ERROR__          | 0x00000201 | Application layer logic generating a Reactive Streams _onError_ event. Stream ID MUST be non-0. |
 | __REJECTED__                   | 0x00000202 | Despite being a valid request, the Responder decided to reject it. The Responder guarantees that it didn't process the request. The reason for the rejection is explained in the metadata section. Stream ID MUST be non-0. |
-| __CANCELED__                   | 0x00000203 | The responder cancelled the request but potentially have started processing it (almost identical to REJECTED but doesn't garantee that no side-effect have been started). Stream ID MUST be non-0. |
+| __CANCELED__                   | 0x00000203 | The responder canceled the request but potentially have started processing it (almost identical to REJECTED but doesn't garantee that no side-effect have been started). Stream ID MUST be non-0. |
 | __INVALID__                    | 0x00000204 | The request is invalid. Stream ID MUST be non-0. |
 | __RESERVED__                   | 0xFFFFFFFF | __Reserved for Extension Use__ |
 
