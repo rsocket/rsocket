@@ -16,7 +16,7 @@ The default mime type assumes key-value metadata fields with the following encod
 
 ##### Name
 
-The name of the default mime type for metadata payloads is __application/x.reactivesocket+cbor__.
+The name of the default mime type for metadata payloads is __application/x.reactivesocket.meta+cbor__.
 This name MUST be mentioned in the [SETUP frame](https://github.com/ReactiveSocket/reactivesocket/blob/master/Protocol.md#setup-frame) as the mime type for metadata.
 
 ##### Format
