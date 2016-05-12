@@ -33,7 +33,7 @@ class RXServer extends WSServlet {
 }
 
 void main(List<String> args) {
-    Config config = logging.config();
+    Config config = logging.makeConfig();
     config.setAppender(logging.stdout());
     // Set this to debug for a full trace of all network interactions.
     config.setLevel("info");

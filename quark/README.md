@@ -28,16 +28,15 @@ language to use in order to run quark compiled code. This README will
 assume Python, however Java, Ruby, and JavaScript should work
 similarly if all the necessary dependencies are available.
 
-To install the Quark compiler, first use `pip` to install the
-datawire-quark package and then run `quark --version` to verify that it
-worked:
+Use the following command to install the Quark compiler:
 
-    # pip install --user --upgrade datawire-quark
+    # curl -sL https://raw.githubusercontent.com/datawire/quark/master/install.sh | sh
+    ...
+
+You can then run `quark --version` to verify that it worked:
+
     # quark --version
-    Quark 0.5.2
-
-Note: depending on your platform you may need to add `~/.local/bin` to
-your path.
+    Quark 0.6.40
 
 You can now use the compiler to build the test suite, client, and server:
 
