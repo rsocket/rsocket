@@ -560,7 +560,7 @@ Frame Contents
 
 * __Flags__:
      * (__M__)etadata: Metdadata _always_ present
-* __Stream ID__: May be 0 to pertain to the entire connection.
+* __Stream ID__: Must be 0 to pertain to the entire connection.
 
 ### Extension Frame
 
