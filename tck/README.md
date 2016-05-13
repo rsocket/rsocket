@@ -76,12 +76,20 @@ packages that use the native package tooling of the given backend.
 
     24 directories
 
-You can build and install these manually, or you can use Quark to
-install the generated packages in the language of your choice. The
-Quark compiler will simply invoke the toolchain of the given backend,
-so you will need to have the appropriate tooling installed for your
-language. We will use Python for brevity, but other languages work
-similarly.
+The quark compile command is useful if you want to view or distribute
+the generated source, but otherwise it isn't usually necessary if you
+want to *use* quark code. You can just use the quark install command
+``quark install <url-or-file>.q --<lang>``, and that will detect any
+changes in your .q file (or in any .q files that it depends on) and
+perform an incremental rebuild/reinstall using the appropriate
+toolchain for the language you select.
+
+Note that you will need to have the appropriate tooling installed for
+your language. The quark install command *should* check and give you a
+useful error message if any necessary tools are missing.
+
+The command below illustrates how this works for python, but other
+languages work similarly:
 
     # quark install rxtest.q rxclient.q rxserver.q --python
     ...
@@ -89,7 +97,9 @@ similarly.
 # Running the tests
 
 The details of running Quark generated code differ depending on the
-backend in use, however the Quark compiler can run the code for you:
+backend in use, however the Quark compiler can run the code for
+you. Please note that you need to run ``quark install
+<url-or-file>.q`` first in order for the quark run command to work:
 
     # quark run rxtest.q --python
     ...
