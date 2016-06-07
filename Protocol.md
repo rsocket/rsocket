@@ -140,7 +140,7 @@ Stream ID value of 0 is reserved for any operation involving the connection.
 A stream ID must be locally unique for a Requester in a connection.
 
 Stream ID generation follows general guidelines for [HTTP/2](https://tools.ietf.org/html/rfc7540) with respect
-to odd/even values. In other words, a client MUST generate even Stream IDs and a server MUST generate odd Stream IDs.
+to odd/even values. In other words, a client MUST generate odd Stream IDs and a server MUST generate even Stream IDs.
 
 ### Frame Types
 
