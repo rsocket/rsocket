@@ -38,7 +38,7 @@ between the types in an application is left to the application.
 
 The following are features of Data and Metadata.
 
-- Metadata can be encoded differently than Data.
+- Metadata can be encoded differently than Data. Default metadata encoding is specified in [this document](https://github.com/ReactiveSocket/reactivesocket/blob/master/MimeTypes.md)
 - Metadata can be "attached" (i.e. correlated) with the following entities:
     - Connection via Metadata Push and Stream ID of 0
     - Individual Request or Response
