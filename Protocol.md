@@ -1,3 +1,8 @@
+## Status
+
+This protocol is currently a draft for the final specifications. 
+Current version of the protocol is __0.1__ (Major Version: 0, Minor Version: 1).
+
 ## Introduction
 
 Specify an application protocol for [Reactive Streams](http://www.reactive-streams.org/) semantics across an asynchronous, binary
@@ -188,9 +193,9 @@ Frame Contents
     |     Frame Type = SETUP        |0|M|L|S|       Flags           |
     +-------------------------------+-+-+-+-+-----------------------+
     |                          Stream ID = 0                        |
-    +---------------------------------------------------------------+
-    |                            Version                            |
-    +---------------------------------------------------------------+
+    +-------------------------------+-------------------------------+
+    |     Major Version             |         Minor Version         |
+    +-------------------------------+-------------------------------+
     |                   Time Between KEEPALIVE Frames               |
     +---------------------------------------------------------------+
     |                         Max Lifetime                          |
@@ -206,7 +211,10 @@ Frame Contents
      * (__M__)etadata: Metdadata present
      * (__L__)ease: Will honor LEASE (or not).
      * (__S__)trict: Adhere to strict interpretation of Data and Metadata.
-* __Version__: Version of the protocol.
+* __Version__: Numeric Version of the protocol expressed as two numbers: 
+     * Major Version: 16-bit major version number of the protocol.
+     * Minor Version: 16-bit minor version number of the protocol.
+See [Status](#Staus) for current version.
 * __Time Between KEEPALIVE Frames__: Time (in milliseconds) between KEEPALIVE frames that the client will send.
 * __Max Lifetime__: Time (in milliseconds) that a client will allow a server to not respond to a KEEPALIVE before
 it is assumed to be dead.
