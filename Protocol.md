@@ -203,7 +203,7 @@ Frame Contents
 ```
 
 * __Flags__:
-     * (__M__)etadata: Metdadata present
+     * (__M__)etadata: Metadata present
      * (__L__)ease: Will honor LEASE (or not).
      * (__S__)trict: Adhere to strict interpretation of Data and Metadata.
 * __Version__: Version of the protocol.
@@ -245,7 +245,7 @@ Frame Contents
 ```
 
 * __Flags__:
-     * (__M__)etadata: Metdadata present
+     * (__M__)etadata: Metadata present
 * __Error Code__: Type of Error.
 * __Setup Error Data__: includes payload describing error information. Error Data MUST be a UTF-8 encoded string. The string may or may not be null terminated.
 
@@ -301,7 +301,7 @@ Frame Contents
 ```
 
 * __Flags__:
-     * (__M__)etadata: Metdadata present
+     * (__M__)etadata: Metadata present
 * __Time-To-Live (TTL)__: Time (in milliseconds) for validity of LEASE from time of reception
 * __Number of Requests__: Number of Requests that may be sent until next LEASE
 
@@ -342,7 +342,7 @@ Frame Contents
 ```
 
 * __Flags__:
-     * (__M__)etadata: Metdadata __never__ present
+     * (__M__)etadata: Metadata __never__ present
      * (__R__)espond with KEEPALIVE or not
 * __Data__: Data attached to a KEEPALIVE.
 
@@ -364,7 +364,7 @@ Frame Contents
 ```
 
 * __Flags__:
-    * (__M__)etadata: Metdadata present
+    * (__M__)etadata: Metadata present
     * (__F__)ollows: More Fragments Follow This Fragment.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
@@ -386,7 +386,7 @@ Frame Contents
 ```
 
 * __Flags__:
-    * (__M__)etadata: Metdadata present
+    * (__M__)etadata: Metadata present
     * (__F__)ollows: More Fragments Follow This Fragment.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
@@ -410,7 +410,7 @@ Frame Contents
 ```
 
 * __Flags__:
-    * (__M__)etadata: Metdadata present
+    * (__M__)etadata: Metadata present
     * (__F__)ollows: More Fragments Follow This Fragment.
 * __Initial Request N__: initial request N value for stream.
 * __Request Data__: identification of the service being requested along with parameters for the request.
@@ -435,7 +435,7 @@ Frame Contents
 ```
 
 * __Flags__:
-    * (__M__)etadata: Metdadata present
+    * (__M__)etadata: Metadata present
     * (__F__)ollows: More Fragments Follow This Fragment.
 * __Initial Request N__: initial request N value for subscription.
 * __Request Data__: identification of the service being requested along with parameters for the request.
@@ -460,7 +460,7 @@ Frame Contents
 ```
 
 * __Flags__:
-    * (__M__)etadata: Metdadata present
+    * (__M__)etadata: Metadata present
     * (__F__)ollows: More Fragments Follow This Fragment.
     * (__C__)omplete: bit to indicate COMPLETE.
     * (__N__): Is Initial Request N present or not
@@ -486,7 +486,7 @@ Frame Contents
 ```
 
 * __Flags__:
-     * (__M__)etadata: Metdadata __NOT__ present
+     * (__M__)etadata: Metadata __NOT__ present
 * __Request N__: integer value of items to request.
 
 ### Cancel Frame
@@ -507,7 +507,7 @@ Frame Contents
 ```
 
 * __Flags__:
-     * (__M__)etadata: Metdadata present
+     * (__M__)etadata: Metadata present
 
 ### Response Frame
 
@@ -559,7 +559,7 @@ Frame Contents
 ```
 
 * __Flags__:
-     * (__M__)etadata: Metdadata _always_ present
+     * (__M__)etadata: Metadata _always_ present
 * __Stream ID__: Must be 0 to pertain to the entire connection.
 
 ### Extension Frame
