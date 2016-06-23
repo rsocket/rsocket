@@ -18,6 +18,10 @@ Artifacts include:
 
 More information and links to various implementations can be found at http://reactivesocket.io
 
+## Communication
+
+Gitter: https://gitter.im/ReactiveSocket
+
 ## Bugs and Feedback
 
 For bugs, questions and discussions please use the [Github Issues](https://github.com/ReactiveSocket/reactivesocket/issues).
