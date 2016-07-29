@@ -211,14 +211,14 @@ Frame Contents
 * __Max Lifetime__: Time (in milliseconds) that a client will allow a server to not respond to a KEEPALIVE before
 it is assumed to be dead.
 * __MIME Length__: Encoding MIME Type Length in bytes.
-* __Encoding MIME Type__: MIME Type for encoding of Data and Metadata. This MAY be a US-ASCII string
+* __Encoding MIME Type__: MIME Type for encoding of Data and Metadata. This MUST be a ASCII string
 that includes the [Internet media type](https://en.wikipedia.org/wiki/Internet_media_type) specified
 in [RFC 2045](https://tools.ietf.org/html/rfc2045). Many are registered with
 [IANA](https://www.iana.org/assignments/media-types/media-types.xhtml) such as
 [CBOR](https://www.iana.org/assignments/media-types/application/cbor).
 [Suffix](http://www.iana.org/assignments/media-type-structured-suffix/media-type-structured-suffix.xml)
 rules MAY be used for handling layout. For example, `application/x.netflix+cbor` or
-`application/x.reactivesocket+cbor` or `application/x.netflix+json`. The string may or may not be null terminated.
+`application/x.reactivesocket+cbor` or `application/x.netflix+json`. The string MUST NOT be null terminated.
 * __Setup Data__: includes payload describing connection capabilities of the endpoint sending the
 Setup header.
 
@@ -247,7 +247,7 @@ Frame Contents
 * __Flags__:
      * (__M__)etadata: Metadata present
 * __Error Code__: Type of Error.
-* __Setup Error Data__: includes payload describing error information. Error Data MUST be a UTF-8 encoded string. The string may or may not be null terminated.
+* __Setup Error Data__: includes payload describing error information. Error Data MUST be a UTF-8 encoded string. The string MUST NOT be null terminated.
 
 A Stream ID of 0 means the error pertains to the connection. Including connection establishment. A non-0 Stream ID
 means the error pertains to a given stream.
