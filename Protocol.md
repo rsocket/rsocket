@@ -225,7 +225,7 @@ Setup header.
 ### Error Frame
 
 Error frames are used for errors on individual requests/streams as well as connection errors and in response
-to SETUP frames. The latter is referred to as SETUP_ERRORs.
+to SETUP frames. The latter is referred to as a SETUP_ERROR.
 
 Frame Contents
 
@@ -241,16 +241,18 @@ Frame Contents
     +---------------------------------------------------------------+
     |                          Error Code                           |
     +---------------------------------------------------------------+
-                        Metadata & Setup Error Data
+                        Metadata & Error Data
 ```
 
 * __Flags__:
      * (__M__)etadata: Metadata present
 * __Error Code__: Type of Error.
-* __Setup Error Data__: includes payload describing error information. Error Data MUST be a UTF-8 encoded string. The string may or may not be null terminated.
+* __Error Data__: includes payload describing error information. Error Data MUST be a UTF-8 encoded string. The string may or may not be null terminated.
 
 A Stream ID of 0 means the error pertains to the connection. Including connection establishment. A non-0 Stream ID
 means the error pertains to a given stream.
+
+The Error Data is typically an Exception message, but could include stringified stacktrace information if appropriate.  
 
 #### Error Codes
 
