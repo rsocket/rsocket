@@ -247,7 +247,7 @@ Frame Contents
 * __Flags__:
      * (__M__)etadata: Metadata present
 * __Error Code__: Type of Error.
-* __Error Data__: includes payload describing error information. Error Data MUST be a UTF-8 encoded string. The string MUST NOT be null terminated.
+* __Error Data__: includes payload describing error information. Error Data SHOULD be a UTF-8 encoded string. The string MUST NOT be null terminated.
 
 A Stream ID of 0 means the error pertains to the connection. Including connection establishment. A non-0 Stream ID
 means the error pertains to a given stream.
