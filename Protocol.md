@@ -211,7 +211,7 @@ Frame Contents
 * __Max Lifetime__: Time (in milliseconds) that a client will allow a server to not respond to a KEEPALIVE before
 it is assumed to be dead.
 * __MIME Length__: Encoding MIME Type Length in bytes.
-* __Encoding MIME Type__: MIME Type for encoding of Data and Metadata. This MUST be a US-ASCII string
+* __Encoding MIME Type__: MIME Type for encoding of Data and Metadata. This SHOULD be a US-ASCII string
 that includes the [Internet media type](https://en.wikipedia.org/wiki/Internet_media_type) specified
 in [RFC 2045](https://tools.ietf.org/html/rfc2045). Many are registered with
 [IANA](https://www.iana.org/assignments/media-types/media-types.xhtml) such as
