@@ -211,7 +211,7 @@ Frame Contents
 * __Max Lifetime__: Time (in milliseconds) that a client will allow a server to not respond to a KEEPALIVE before
 it is assumed to be dead.
 * __MIME Length__: Encoding MIME Type Length in bytes.
-* __Encoding MIME Type__: MIME Type for encoding of Data and Metadata. This MUST be a ASCII string
+* __Encoding MIME Type__: MIME Type for encoding of Data and Metadata. This SHOULD be a US-ASCII string
 that includes the [Internet media type](https://en.wikipedia.org/wiki/Internet_media_type) specified
 in [RFC 2045](https://tools.ietf.org/html/rfc2045). Many are registered with
 [IANA](https://www.iana.org/assignments/media-types/media-types.xhtml) such as
@@ -225,7 +225,7 @@ Setup header.
 ### Error Frame
 
 Error frames are used for errors on individual requests/streams as well as connection errors and in response
-to SETUP frames. The latter is referred to as SETUP_ERRORs.
+to SETUP frames. The latter is referred to as a SETUP_ERROR.
 
 Frame Contents
 
@@ -241,16 +241,18 @@ Frame Contents
     +---------------------------------------------------------------+
     |                          Error Code                           |
     +---------------------------------------------------------------+
-                        Metadata & Setup Error Data
+                        Metadata & Error Data
 ```
 
 * __Flags__:
      * (__M__)etadata: Metadata present
 * __Error Code__: Type of Error.
-* __Setup Error Data__: includes payload describing error information. Error Data MUST be a UTF-8 encoded string. The string MUST NOT be null terminated.
+* __Error Data__: includes payload describing error information. Error Data SHOULD be a UTF-8 encoded string. The string MUST NOT be null terminated.
 
 A Stream ID of 0 means the error pertains to the connection. Including connection establishment. A non-0 Stream ID
 means the error pertains to a given stream.
+
+The Error Data is typically an Exception message, but could include stringified stacktrace information if appropriate.  
 
 #### Error Codes
 
