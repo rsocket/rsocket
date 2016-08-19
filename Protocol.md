@@ -1,3 +1,8 @@
+## Status
+
+This protocol is currently a draft for the final specifications. 
+Current version of the protocol is __0.1__ (Major Version: 0, Minor Version: 1).
+
 ## Introduction
 
 Specify an application protocol for [Reactive Streams](http://www.reactive-streams.org/) semantics across an asynchronous, binary
@@ -25,6 +30,16 @@ provide capabilities mentioned in the [transport protocol](#transport-protocol) 
 * __Connection__: The instance of a transport session between client and server.
 * __Requester__: The side sending a request. A connection has at most 2 Requesters. One in each direction.
 * __Responder__: The side receiving a request. A connection has at most 2 Responders. One in each direction.
+
+## Versioning Scheme
+
+ReactiveSocket follows a versioning scheme consisting of a numeric major version and a numeric minor version.
+
+### Cross version compatibility
+
+ReactiveSocket assumes that all version changes (major and minor) are backward incompatible.
+A client can pass a version that it supports via the [Setup Frame](#setup-frame)
+It is up to a server to accept clients of lower versions than what it supports.
 
 ## Data And Metadata
 
@@ -188,9 +203,9 @@ Frame Contents
     |     Frame Type = SETUP        |0|M|L|S|       Flags           |
     +-------------------------------+-+-+-+-+-----------------------+
     |                          Stream ID = 0                        |
-    +---------------------------------------------------------------+
-    |                            Version                            |
-    +---------------------------------------------------------------+
+    +-------------------------------+-------------------------------+
+    |     Major Version             |         Minor Version         |
+    +-------------------------------+-------------------------------+
     |                   Time Between KEEPALIVE Frames               |
     +---------------------------------------------------------------+
     |                         Max Lifetime                          |
@@ -206,7 +221,8 @@ Frame Contents
      * (__M__)etadata: Metadata present
      * (__L__)ease: Will honor LEASE (or not).
      * (__S__)trict: Adhere to strict interpretation of Data and Metadata.
-* __Version__: Version of the protocol.
+* __Major Version__: (16) Major version number of the protocol.
+* __Minor Version__: (16) Minor version number of the protocol.
 * __Time Between KEEPALIVE Frames__: Time (in milliseconds) between KEEPALIVE frames that the client will send.
 * __Max Lifetime__: Time (in milliseconds) that a client will allow a server to not respond to a KEEPALIVE before
 it is assumed to be dead.
