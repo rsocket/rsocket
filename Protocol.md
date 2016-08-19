@@ -1,3 +1,8 @@
+## Status
+
+This protocol is currently a draft for the final specifications. 
+Current version of the protocol is __0.1__ (Major Version: 0, Minor Version: 1).
+
 ## Introduction
 
 Specify an application protocol for [Reactive Streams](http://www.reactive-streams.org/) semantics across an asynchronous, binary
@@ -25,6 +30,16 @@ provide capabilities mentioned in the [transport protocol](#transport-protocol) 
 * __Connection__: The instance of a transport session between client and server.
 * __Requester__: The side sending a request. A connection has at most 2 Requesters. One in each direction.
 * __Responder__: The side receiving a request. A connection has at most 2 Responders. One in each direction.
+
+## Versioning Scheme
+
+ReactiveSocket follows a versioning scheme consisting of a numeric major version and a numeric minor version.
+
+### Cross version compatibility
+
+ReactiveSocket assumes that all version changes (major and minor) are backward incompatible.
+A client can pass a version that it supports via the [Setup Frame](#setup-frame)
+It is up to a server to accept clients of lower versions than what it supports.
 
 ## Data And Metadata
 
@@ -188,9 +203,9 @@ Frame Contents
     |     Frame Type = SETUP        |0|M|L|S|       Flags           |
     +-------------------------------+-+-+-+-+-----------------------+
     |                          Stream ID = 0                        |
-    +---------------------------------------------------------------+
-    |                            Version                            |
-    +---------------------------------------------------------------+
+    +-------------------------------+-------------------------------+
+    |     Major Version             |         Minor Version         |
+    +-------------------------------+-------------------------------+
     |                   Time Between KEEPALIVE Frames               |
     +---------------------------------------------------------------+
     |                         Max Lifetime                          |
@@ -203,29 +218,30 @@ Frame Contents
 ```
 
 * __Flags__:
-     * (__M__)etadata: Metdadata present
+     * (__M__)etadata: Metadata present
      * (__L__)ease: Will honor LEASE (or not).
      * (__S__)trict: Adhere to strict interpretation of Data and Metadata.
-* __Version__: Version of the protocol.
+* __Major Version__: (16) Major version number of the protocol.
+* __Minor Version__: (16) Minor version number of the protocol.
 * __Time Between KEEPALIVE Frames__: Time (in milliseconds) between KEEPALIVE frames that the client will send.
 * __Max Lifetime__: Time (in milliseconds) that a client will allow a server to not respond to a KEEPALIVE before
 it is assumed to be dead.
 * __MIME Length__: Encoding MIME Type Length in bytes.
-* __Encoding MIME Type__: MIME Type for encoding of Data and Metadata. This MAY be a US-ASCII string
+* __Encoding MIME Type__: MIME Type for encoding of Data and Metadata. This SHOULD be a US-ASCII string
 that includes the [Internet media type](https://en.wikipedia.org/wiki/Internet_media_type) specified
 in [RFC 2045](https://tools.ietf.org/html/rfc2045). Many are registered with
 [IANA](https://www.iana.org/assignments/media-types/media-types.xhtml) such as
 [CBOR](https://www.iana.org/assignments/media-types/application/cbor).
 [Suffix](http://www.iana.org/assignments/media-type-structured-suffix/media-type-structured-suffix.xml)
 rules MAY be used for handling layout. For example, `application/x.netflix+cbor` or
-`application/x.reactivesocket+cbor` or `application/x.netflix+json`. The string may or may not be null terminated.
+`application/x.reactivesocket+cbor` or `application/x.netflix+json`. The string MUST NOT be null terminated.
 * __Setup Data__: includes payload describing connection capabilities of the endpoint sending the
 Setup header.
 
 ### Error Frame
 
 Error frames are used for errors on individual requests/streams as well as connection errors and in response
-to SETUP frames. The latter is referred to as SETUP_ERRORs.
+to SETUP frames. The latter is referred to as a SETUP_ERROR.
 
 Frame Contents
 
@@ -241,16 +257,18 @@ Frame Contents
     +---------------------------------------------------------------+
     |                          Error Code                           |
     +---------------------------------------------------------------+
-                        Metadata & Setup Error Data
+                        Metadata & Error Data
 ```
 
 * __Flags__:
-     * (__M__)etadata: Metdadata present
+     * (__M__)etadata: Metadata present
 * __Error Code__: Type of Error.
-* __Setup Error Data__: includes payload describing error information. Error Data MUST be a UTF-8 encoded string. The string may or may not be null terminated.
+* __Error Data__: includes payload describing error information. Error Data SHOULD be a UTF-8 encoded string. The string MUST NOT be null terminated.
 
 A Stream ID of 0 means the error pertains to the connection. Including connection establishment. A non-0 Stream ID
 means the error pertains to a given stream.
+
+The Error Data is typically an Exception message, but could include stringified stacktrace information if appropriate.  
 
 #### Error Codes
 
@@ -301,7 +319,7 @@ Frame Contents
 ```
 
 * __Flags__:
-     * (__M__)etadata: Metdadata present
+     * (__M__)etadata: Metadata present
 * __Time-To-Live (TTL)__: Time (in milliseconds) for validity of LEASE from time of reception
 * __Number of Requests__: Number of Requests that may be sent until next LEASE
 
@@ -342,7 +360,7 @@ Frame Contents
 ```
 
 * __Flags__:
-     * (__M__)etadata: Metdadata __never__ present
+     * (__M__)etadata: Metadata __never__ present
      * (__R__)espond with KEEPALIVE or not
 * __Data__: Data attached to a KEEPALIVE.
 
@@ -364,7 +382,7 @@ Frame Contents
 ```
 
 * __Flags__:
-    * (__M__)etadata: Metdadata present
+    * (__M__)etadata: Metadata present
     * (__F__)ollows: More Fragments Follow This Fragment.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
@@ -386,7 +404,7 @@ Frame Contents
 ```
 
 * __Flags__:
-    * (__M__)etadata: Metdadata present
+    * (__M__)etadata: Metadata present
     * (__F__)ollows: More Fragments Follow This Fragment.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
@@ -410,7 +428,7 @@ Frame Contents
 ```
 
 * __Flags__:
-    * (__M__)etadata: Metdadata present
+    * (__M__)etadata: Metadata present
     * (__F__)ollows: More Fragments Follow This Fragment.
 * __Initial Request N__: initial request N value for stream.
 * __Request Data__: identification of the service being requested along with parameters for the request.
@@ -435,7 +453,7 @@ Frame Contents
 ```
 
 * __Flags__:
-    * (__M__)etadata: Metdadata present
+    * (__M__)etadata: Metadata present
     * (__F__)ollows: More Fragments Follow This Fragment.
 * __Initial Request N__: initial request N value for subscription.
 * __Request Data__: identification of the service being requested along with parameters for the request.
@@ -460,7 +478,7 @@ Frame Contents
 ```
 
 * __Flags__:
-    * (__M__)etadata: Metdadata present
+    * (__M__)etadata: Metadata present
     * (__F__)ollows: More Fragments Follow This Fragment.
     * (__C__)omplete: bit to indicate COMPLETE.
     * (__N__): Is Initial Request N present or not
@@ -486,7 +504,7 @@ Frame Contents
 ```
 
 * __Flags__:
-     * (__M__)etadata: Metdadata __NOT__ present
+     * (__M__)etadata: Metadata __NOT__ present
 * __Request N__: integer value of items to request.
 
 ### Cancel Frame
@@ -507,7 +525,7 @@ Frame Contents
 ```
 
 * __Flags__:
-     * (__M__)etadata: Metdadata present
+     * (__M__)etadata: Metadata present
 
 ### Response Frame
 
@@ -559,7 +577,7 @@ Frame Contents
 ```
 
 * __Flags__:
-     * (__M__)etadata: Metdadata _always_ present
+     * (__M__)etadata: Metadata _always_ present
 * __Stream ID__: Must be 0 to pertain to the entire connection.
 
 ### Extension Frame
