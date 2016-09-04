@@ -43,7 +43,7 @@ This protocol is designed for use both in datacenter, server-to-server, use case
 
 ##### "Reactive Stream" `request(n)` Async Pull
 
-This first form of flow control is suited to both server-to-server and server-to-device use cases. It is inspired by the Reactive Streams [Subscription.request(n)](https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/README.md#3-subscription-code) behavior. [RxJava](https://github.com/ReactiveX/RxJava/wiki/Backpressure#how-a-subscriber-establishes-reactive-pull-backpressure), [Reactor](https://github.com/reactor/reactor), and [Akka Streams](http://doc.akka.io/docs/akka-stream-and-http-experimental/1.0-M2/stream-design.html) are examples of implementations using this form of "async pull-push" flow control.
+This first form of flow control is suited to both server-to-server and server-to-device use cases. It is inspired by the Reactive Streams [Subscription.request(n)](https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/README.md#3-subscription-code) behavior. [RxJava](https://github.com/ReactiveX/RxJava/wiki/Backpressure#how-a-subscriber-establishes-reactive-pull-backpressure), [Reactor](https://github.com/reactor/reactor), and [Akka Streams](http://doc.akka.io/docs/akka/2.4/scala/stream/index.html) are examples of implementations using this form of "async pull-push" flow control.
 
 ReactiveSocket allows for the `request(n)` signal to be composed over network boundaries from requester to responder (typically client to server). This controls the flow of emission from responder to requestor using Reactive Stream semantics at the application level and enables use of bounded buffers so rate of flow adjusts to application consumption and not rely solely on transport and network buffering.
 
