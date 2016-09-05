@@ -111,17 +111,13 @@ Modern distributed system topologies tend to have multiple levels of request fan
 
 Let's imagine a server responsible for computing the nth digit of Pi. A client sends a request to that server but realizes later that it doesn't want/need the response anymore (for arbitrary reasons). Rather than letting the server do the computation in vain, it can cancel it (the server may not even have started the work).
 
-#### What are example use cases of topic subscription (and push notification)?
-
-Let's imagine a chat server, you want to receive all the messages said in the chat server but you don't want to poll or continuously poll (long polling technique). Subscription is the perfect use case for that.
-
 #### What are example use cases of fire-and-forget versus request-response?
 
 Some requests don't require a response, and when it's fine to simply ignore any failure to send them, fire-and-forget is the right solution. An example could be non-critical metrics tracking in environments where UDP is inappropriate.
 
 #### What are example use cases of request-stream?
 
-Let's use the same example as for subscription, the chat server, but this time we want to subscribe to a particular chat room and ignore all other messages.
+Let's imagine a chat server, you want to receive all the messages said in the chat server but you don't want to poll or continuously poll (long polling technique). request-stream is the perfect use case for that.
 
 #### Why Binary?
 
