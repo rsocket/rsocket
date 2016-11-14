@@ -82,7 +82,7 @@ is not present if the Frame Length is not used [see below](#frame-length).
 reception. Flags generally depend on Frame Type, but all frame types must provide space for the following flags:
      * (__I__)gnore: Ignore frame if not understood
      * (__M__)etadata: Metadata present
-* __Stream ID__: (32) Stream Identifier for this frame or 0 to indicate the entire connection.
+* __Stream ID__: (32) Positive signed integer representing the stream Identifier for this frame or 0 to indicate the entire connection.
 
 __NOTE__: Byte ordering is assumed to be big endian.
 
@@ -141,7 +141,7 @@ If Metadata Length is greater than this value, the entire frame MUST be ignored.
     +---------------------------------------------------------------+
 ```
 
-* __Metadata Length__: (31 = max 2,147,483,647 bytes) Length of Metadata in bytes. Including Metadata header. The __R__ bit is reserved and must be set to 0.
+* __Metadata Length__: (31 = max 2,147,483,647 bytes) unsigned positive Integer representing the length of Metadata in bytes. Including Metadata header. The __R__ bit is reserved and must be set to 0.
 
 ### Stream Identifiers
 
@@ -265,7 +265,7 @@ Frame Contents
 * __Error Code__: Type of Error.
 * __Error Data__: includes payload describing error information. Error Data SHOULD be a UTF-8 encoded string. The string MUST NOT be null terminated.
 
-A Stream ID of 0 means the error pertains to the connection. Including connection establishment. A non-0 Stream ID
+A Stream ID of 0 means the error pertains to the connection. Including connection establishment. A positive non-0 Stream ID
 means the error pertains to a given stream.
 
 The Error Data is typically an Exception message, but could include stringified stacktrace information if appropriate.  
@@ -433,6 +433,10 @@ Frame Contents
 * __Initial Request N__: 32-bit signed integer representing the initial request N value for the stream. Only positive values are allowed.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
+Please note that this explicitly does NOT follow the same rule as number 17 in https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/README.md#3-subscription-code
+
+While reactivestreams support a demand of up to 2^63-1, and treats 2^63-1 as a magic number after which it is not necessary to track demand, this is not the case for reactivesocket. Reactivesocket only uses 4 bytes instead of 8, because we want to prioritize flow control over the network over supporting a "magic number".
+
 ### Request Subscription Frame
 
 Frame Contents
@@ -457,6 +461,8 @@ Frame Contents
     * (__F__)ollows: More Fragments Follow This Fragment.
 * __Initial Request N__: 32-bit signed integer representing the initial request N value for subscription. Only positive values are allowed.
 * __Request Data__: identification of the service being requested along with parameters for the request.
+
+See Request Stream Frame for additional information.
 
 ### Request Channel Frame
 
@@ -485,6 +491,8 @@ Frame Contents
 * __Initial Request N__: 32-bit signed integer representing the initial request N value for channel. Only positive values are allowed.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
+See Request Stream Frame for additional information.
+
 ### Request N Frame
 
 Frame Contents
@@ -506,6 +514,8 @@ Frame Contents
 * __Flags__:
      * (__M__)etadata: Metadata __NOT__ present
 * __Request N__: 32-bit signed integer value of items to request. Only positive values are allowed.
+
+See Request Stream Frame for additional information.
 
 ### Cancel Frame
 
