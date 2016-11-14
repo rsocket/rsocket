@@ -430,7 +430,7 @@ Frame Contents
 * __Flags__:
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More Fragments Follow This Fragment.
-* __Initial Request N__: 32-bit signed integer representing the initial request N value for subscription. Only positive values are allowed.
+* __Initial Request N__: 32-bit signed integer representing the initial request N value for the stream. Only positive values are allowed.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
 ### Request Subscription Frame
