@@ -447,7 +447,7 @@ Frame Contents
     +-------------------------------+-+-+-+-------------------------+
     |                           Stream ID                           |
     +---------------------------------------------------------------+
-    |I|                    Initial Request N                        |
+    |0|                    Initial Request N                        |
     +---------------------------------------------------------------+
                            Metadata & Request Data
 ```
@@ -455,7 +455,7 @@ Frame Contents
 * __Flags__:
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More Fragments Follow This Fragment.
-* __Initial Request N__: 31-bit unsigned integer representing the initial request N value for subscription. If the __I__-bit is set, it is treated as infinite
+* __Initial Request N__: 32-bit signed integer representing the initial request N value for subscription. Only positive values are allowed.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
 ### Request Channel Frame
@@ -472,7 +472,7 @@ Frame Contents
     +-------------------------------+-+-+-+-+-+---------------------+
     |                           Stream ID                           |
     +---------------------------------------------------------------+
-    |I|            Initial Request N (only if N bit set)            |
+    |0|            Initial Request N (only if N bit set)            |
     +---------------------------------------------------------------+
                            Metadata & Request Data
 ```
@@ -482,7 +482,7 @@ Frame Contents
     * (__F__)ollows: More Fragments Follow This Fragment.
     * (__C__)omplete: bit to indicate COMPLETE.
     * (__N__): Is Initial Request N present or not
-* __Initial Request N__: 31-bit unsigned integer representing the initial request N value for channel. If the __I__-bit is set, it is treated as infinite
+* __Initial Request N__: 32-bit signed integer representing the initial request N value for channel. Only positive values are allowed.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
 ### Request N Frame
@@ -499,13 +499,13 @@ Frame Contents
     +-------------------------------+-+-+---------------------------+
     |                           Stream ID                           |
     +---------------------------------------------------------------+
-    |I|                         Request N                           |
+    |0|                         Request N                           |
     +---------------------------------------------------------------+
 ```
 
 * __Flags__:
      * (__M__)etadata: Metadata __NOT__ present
-* __Request N__: 31-bit unsigned integer value of items to request. If the __I__-bit is set, it is treated as infinite
+* __Request N__: 32-bit signed integer value of items to request. Only positive values are allowed.
 
 ### Cancel Frame
 
