@@ -1,7 +1,7 @@
 ## Status
 
 This protocol is currently a draft for the final specifications. 
-Current version of the protocol is __0.1__ (Major Version: 0, Minor Version: 1).
+Current version of the protocol is __1.0__ (Major Version: 1, Minor Version: 0).
 
 ## Introduction
 
@@ -14,6 +14,8 @@ ReactiveSockets assumes an operating paradigm. These assumptions are:
 - no state preserved across [transport protocol](#transport-protocol) sessions by the protocol
 
 Key words used by this document conform to the meanings in [RFC 2119](https://tools.ietf.org/html/rfc2119).
+
+Byte ordering is assumed to be big endian.
 
 ## Terminology
 
@@ -53,40 +55,9 @@ The following are features of Data and Metadata.
     - Connection via Metadata Push and Stream ID of 0
     - Individual Request or Response
 
-## Operation
+## Framing Protocol
 
-### Frame Header Format
-
-ReactiveSocket frames begin with a header. The general layout is given below. When used over
-transport protocols that provide framing (WebSocket and Aeron), the Frame Length field MUST NOT be included.
-For transports that do not provide framing, such as TCP, the Frame Length MUST be included.
-
-```
-     0                   1                   2                   3
-     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+---------------------------+
-    |         Frame Type            |I|M|        Flags              |
-    +-------------------------------+-+-+---------------------------+
-    |                           Stream ID                           |
-    +---------------------------------------------------------------+
-                           Depends on Frame Type
-```
-
-* __Frame Length__: (31 = max 2,147,483,647 bytes) Length of Frame. Including header. Only used for specific transport
-protocols. The __R__ bit is reserved and must be set to 0. The __R__ bit is considered part of the frame length and thus
-is not present if the Frame Length is not used [see below](#frame-length).
-* __Frame Type__: (16) Type of Frame.
-* __Flags__: Any Flag bit not specifically indicated in the frame type should be set to 0 when sent and not interpreted on
-reception. Flags generally depend on Frame Type, but all frame types must provide space for the following flags:
-     * (__I__)gnore: Ignore frame if not understood
-     * (__M__)etadata: Metadata present
-* __Stream ID__: (32) Stream Identifier for this frame or 0 to indicate the entire connection.
-
-__NOTE__: Byte ordering is assumed to be big endian.
-
-#### Transport Protocol
+### Transport Protocol
 
 The ReactiveSocket protocol uses a lower level transport protocol to carry ReactiveSocket frames. A transport protocol MUST provide the following:
 
@@ -99,16 +70,72 @@ have no further frames sent and all frames will be ignored.
 
 ReactiveSocket as specified here only allows for TCP, WebSocket, and Aeron as transport protocols.
 
-#### Frame Length
+### Framing Protocol
 
-The presence of the Frame Length field (and corresponding __R__ bit) is determined by the transport protocol being used. The frame length field MUST be omitted if the transport protocol preserves message boundaries e.g. provides compatible framing. If, however, the transport protocol only provides a stream abstraction or can merge messages without preserving boundaries, or multiple transport protocols may be used, then the frame length field MUST be used.
+Some of the supported transport protocols for ReactiveSocket may not support specific framing of messages. For these protocols, a framing protocol must be
+used with the ReactiveSocket frame.
+
+The framing header MUST be omitted if the transport protocol preserves message boundaries e.g. provides compatible framing. If, however, the transport protocol only provides a stream abstraction or can merge messages without preserving boundaries, or multiple transport protocols may be used, then the frame header MUST be used.
 
 |  Transport Protocol            | Frame Length Field Required |
 |:-------------------------------|:----------------------------|
 | TCP                            | __YES__ |
 | WebSocket                      | __NO__  |
 | Aeron                          | __NO__  |
+| HTTP/2                         | __NO__  |
 | Other                          | __YES__ |
+
+### Framing Header Format
+
+When using a transport protocol providing framing, the ReactiveSocket frame is simply encapsulated into the transport protocol messages directly.
+
+```
+    +-----------------------------+-----------------------
+    | ReactiveSocket Frame Header | Depends on Frame Type
+    +-----------------------------+-----------------------
+```
+
+When using a transport protocol that does not provide compatible framing, the Frame Length must be pre-pended to the ReactiveSocket Frame.
+
+```
+     0                   1                   2
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                    Frame Length               |
+    +-----------------------------------------------+
+    |           ReactiveSocket Frame Header        ...
+    +-----------------------------------------------+
+                     Depends on Frame Type
+```
+
+* __Frame Length__: (24 = max 16,777,216 bytes) Length of Frame. Excluding Framing Length Field.
+
+__NOTE__: Byte ordering is assumed to be big endian.
+
+## Operation
+
+### Frame Header Format
+
+ReactiveSocket frames begin with a header. The general layout is given below.
+
+```
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                           Stream ID                           |
+    +---------------+-+-+-----------+-------------------------------+
+    |   Frame Type  |I|M|   Flags   |     Depends on Frame Type    ...
+    +-------------------------------+
+```
+
+* __Stream ID__: (32) Stream Identifier for this frame or 0 to indicate the entire connection.
+* __Frame Type__: (8) Type of Frame.
+* __Flags__: Any Flag bit not specifically indicated in the frame type should be set to 0 when sent and not interpreted on
+reception. Flags generally depend on Frame Type, but all frame types must provide space for the following flags:
+     * (__I__)gnore: Ignore frame if not understood
+     * (__M__)etadata: Metadata present
+
+__NOTE__: Byte ordering is assumed to be big endian.
 
 #### Handling Ignore Flag
 
@@ -133,7 +160,7 @@ If Metadata Length is greater than this value, the entire frame MUST be ignored.
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                       Metadata Length                       |
+    |              Metadata Length                  |
     +-+-------------------------------------------------------------+
     |                       Metadata Payload                       ...
     +---------------------------------------------------------------+
@@ -141,7 +168,7 @@ If Metadata Length is greater than this value, the entire frame MUST be ignored.
     +---------------------------------------------------------------+
 ```
 
-* __Metadata Length__: (31 = max 2,147,483,647 bytes) Length of Metadata in bytes. Including Metadata header. The __R__ bit is reserved and must be set to 0.
+* __Metadata Length__: (24 = max 16,777,216 bytes) Length of Metadata in bytes. Excluding Metadata Length field.
 
 ### Stream Identifiers
 
@@ -161,21 +188,22 @@ to odd/even values. In other words, a client MUST generate even Stream IDs and a
 
 |  Type                          | Value  | Description |
 |:-------------------------------|:-------|:------------|
-| __RESERVED__                   | 0x0000 | __Reserved__ |
-| __SETUP__                      | 0x0001 | __Setup__: Sent by client to initiate protocol processing. |
-| __LEASE__                      | 0x0002 | __Lease__: Sent by Responder to grant the ability to send requests. |
-| __KEEPALIVE__                  | 0x0003 | __Keepalive__: Connection keepalive. |
-| __REQUEST_RESPONSE__           | 0x0004 | __Request Response__: Request single response. |
-| __REQUEST_FNF__                | 0x0005 | __Fire And Forget__: A single one-way message. |
-| __REQUEST_STREAM__             | 0x0006 | __Request Stream__: Request a completable stream. |
-| __REQUEST_SUB__                | 0x0007 | __Request Subscription__: Request an infinite stream. |
-| __REQUEST_CHANNEL__            | 0x0008 | __Request Channel__: Request a completable stream in both directions. |
-| __REQUEST_N__                  | 0x0009 | __Request N__: Request N more items with ReactiveStreams semantics. |
-| __CANCEL__                     | 0x000A | __Cancel Request__: Cancel outstanding request. |
-| __RESPONSE__                   | 0x000B | __Response__: Response to a request. |
-| __ERROR__                      | 0x000C | __Error__: Error at connection or application level. |
-| __METADATA_PUSH__              | 0x000D | __Metadata__: Asynchronous Metadata frame |
-| __EXT__                        | 0xFFFF | __Extension Header__: Used To Extend more frame types as well as extensions. |
+| __RESERVED__                   | 0x00 | __Reserved__ |
+| __SETUP__                      | 0x01 | __Setup__: Sent by client to initiate protocol processing. |
+| __LEASE__                      | 0x02 | __Lease__: Sent by Responder to grant the ability to send requests. |
+| __KEEPALIVE__                  | 0x03 | __Keepalive__: Connection keepalive. |
+| __REQUEST_RESPONSE__           | 0x04 | __Request Response__: Request single response. |
+| __REQUEST_FNF__                | 0x05 | __Fire And Forget__: A single one-way message. |
+| __REQUEST_STREAM__             | 0x06 | __Request Stream__: Request a completable stream. |
+| __REQUEST_CHANNEL__            | 0x07 | __Request Channel__: Request a completable stream in both directions. |
+| __REQUEST_N__                  | 0x08 | __Request N__: Request N more items with ReactiveStreams semantics. |
+| __CANCEL__                     | 0x09 | __Cancel Request__: Cancel outstanding request. |
+| __RESPONSE__                   | 0x0A | __Response__: Response to a request. |
+| __ERROR__                      | 0x0B | __Error__: Error at connection or application level. |
+| __METADATA_PUSH__              | 0x0C | __Metadata__: Asynchronous Metadata frame |
+| __RESUME__                     | 0x0D | __Resume__: Replaces SETUP for Resuming Operation (optional) |
+| __RESUME_OK__                  | 0x0E | __Resume OK__ : Sent in response to a RESUME if resuming operation possible (optional) |
+| __EXT__                        | 0xFF | __Extension Header__: Used To Extend more frame types as well as extensions. |
 
 ### Setup Frame
 
@@ -198,17 +226,23 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+-+-+-----------------------+
-    |     Frame Type = SETUP        |0|M|L|S|       Flags           |
-    +-------------------------------+-+-+-+-+-----------------------+
-    |                          Stream ID = 0                        |
-    +-------------------------------+-------------------------------+
+    |                           Stream ID                           |
+    +---------------+-+-+-+-+-+-----+-------------------------------+
+    |   Frame Type  |0|M|L|S|R|     |     
+    +---------------+-+-+-+-+-+-----+-------------------------------+
     |     Major Version             |         Minor Version         |
     +-------------------------------+-------------------------------+
     |                   Time Between KEEPALIVE Frames               |
     +---------------------------------------------------------------+
     |                         Max Lifetime                          |
+    +---------------------------------------------------------------+
+    |                    Resume Identification Token                |
+    +                                                               +
+    |                                                               |
+    +                                                               +
+    |                                                               |
+    +                                                               +
+    |                                                               |
     +---------------+-----------------------------------------------+
     |  MIME Length  |   Metadata Encoding MIME Type                ...
     +---------------+-----------------------------------------------+
@@ -221,11 +255,13 @@ Frame Contents
      * (__M__)etadata: Metadata present
      * (__L__)ease: Will honor LEASE (or not).
      * (__S__)trict: Adhere to strict interpretation of Data and Metadata.
+     * (__R__)esume Enable: Client requests resume capability is possible (Optional).
 * __Major Version__: (16) Major version number of the protocol.
 * __Minor Version__: (16) Minor version number of the protocol.
 * __Time Between KEEPALIVE Frames__: Time (in milliseconds) between KEEPALIVE frames that the client will send.
 * __Max Lifetime__: Time (in milliseconds) that a client will allow a server to not respond to a KEEPALIVE before
 it is assumed to be dead.
+* __Resume Identification Token__: (128) Token used for client resume identification. (Optional - set to all 0s if not supported)
 * __MIME Length__: Encoding MIME Type Length in bytes.
 * __Encoding MIME Type__: MIME Type for encoding of Data and Metadata. This SHOULD be a US-ASCII string
 that includes the [Internet media type](https://en.wikipedia.org/wiki/Internet_media_type) specified
@@ -238,6 +274,8 @@ rules MAY be used for handling layout. For example, `application/x.netflix+cbor`
 * __Setup Data__: includes payload describing connection capabilities of the endpoint sending the
 Setup header.
 
+__NOTE__: A server that receives a SETUP frame that has (__R__)esume Enabled set, but does not support resuming operation, must reject the SETUP with an ERROR. 
+
 ### Error Frame
 
 Error frames are used for errors on individual requests/streams as well as connection errors and in response
@@ -249,12 +287,10 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+---------------------------+
-    |       Frame Type = ERROR      |0|M|        Flags              |
-    +-------------------------------+-+-+---------------------------+
     |                           Stream ID                           |
-    +---------------------------------------------------------------+
+    +---------------+-+-+-----------+-------------------------------+
+    |   Frame Type  |0|M|    Flags  | 
+    +---------------+-+-+-----------+-------------------------------+
     |                          Error Code                           |
     +---------------------------------------------------------------+
                         Metadata & Error Data
@@ -279,6 +315,7 @@ The Error Data is typically an Exception message, but could include stringified 
 | __UNSUPPORTED_SETUP__          | 0x00000002 | Some (or all) of the parameters specified by the client are unsupported by the server. Stream ID MUST be 0. |
 | __REJECTED_SETUP__             | 0x00000003 | The server rejected the setup, it can specify the reason in the payload. Stream ID MUST be 0. |
 | __CONNECTION_ERROR__           | 0x00000101 | The connection is being terminated. Stream ID MUST be 0. |
+| __CONNECTION_ERROR_NO_RETRY__  | 0x00000102 | The connection is being terminated. May __NOT__ be resumed. Stream ID MUST be 0. |
 | __APPLICATION_ERROR__          | 0x00000201 | Application layer logic generating a Reactive Streams _onError_ event. Stream ID MUST be non-0. |
 | __REJECTED__                   | 0x00000202 | Despite being a valid request, the Responder decided to reject it. The Responder guarantees that it didn't process the request. The reason for the rejection is explained in the metadata section. Stream ID MUST be non-0. |
 | __CANCELED__                   | 0x00000203 | The responder canceled the request but potentially have started processing it (almost identical to REJECTED but doesn't garantee that no side-effect have been started). Stream ID MUST be non-0. |
@@ -305,12 +342,10 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+---------------------------+
-    |     Frame Type = LEASE        |0|M|        Flags              |
-    +-------------------------------+-+-+---------------------------+
     |                           Stream ID                           |
-    +---------------------------------------------------------------+
+    +---------------+-+-+-----------+-------------------------------+
+    |   Frame Type  |0|M|    Flags  | 
+    +---------------+-+-+-----------+-------------------------------+
     |                         Time-To-Live                          |
     +---------------------------------------------------------------+
     |                       Number of Requests                      |
@@ -350,11 +385,13 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+-+-------------------------+
-    |      Frame Type = KEEPALIVE   |0|0|R|      Flags              |
-    +-------------------------------+-+-+-+-------------------------+
     |                           Stream ID                           |
+    +---------------+-+-+-+---------+-------------------------------+
+    |   Frame Type  |0|0|R|  Flags  |
+    +---------------+-+-+-+---------+-------------------------------+
+    |                    Last Received Position                     |
+    +                                                               +
+    |                                                               |
     +---------------------------------------------------------------+
                                   Data
 ```
@@ -362,6 +399,7 @@ Frame Contents
 * __Flags__:
      * (__M__)etadata: Metadata __never__ present
      * (__R__)espond with KEEPALIVE or not
+* __Last Received Position__: (64) Resume Last Received Position (optional. Set to all 0s when not supported.)
 * __Data__: Data attached to a KEEPALIVE.
 
 ### Request Response Frame
@@ -372,12 +410,10 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+-+-------------------------+
-    | Frame Type = REQUEST_RESPONSE |0|M|F|      Flags              |
-    +-------------------------------+-+-+-+-------------------------+
     |                           Stream ID                           |
-    +---------------------------------------------------------------+
+    +---------------+-+-+-+---------+-------------------------------+
+    |   Frame Type  |0|M|F|  Flags  |
+    +-------------------------------+
                          Metadata & Request Data
 ```
 
@@ -394,12 +430,10 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+-+-------------------------+
-    |    Frame Type = REQUEST_FNF   |0|M|F|       Flags             |
-    +-------------------------------+-+-+-+-------------------------+
     |                           Stream ID                           |
-    +---------------------------------------------------------------+
+    +---------------+-+-+-+---------+-------------------------------+
+    |   Frame Type  |0|M|F|  Flags  |
+    +-------------------------------+
                           Metadata & Request Data
 ```
 
@@ -416,12 +450,10 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+-+-------------------------+
-    |  Frame Type = REQUEST_STREAM  |0|M|F|       Flags             |
-    +-------------------------------+-+-+-+-------------------------+
     |                           Stream ID                           |
-    +---------------------------------------------------------------+
+    +---------------+-+-+-+---------+-------------------------------+
+    |   Frame Type  |0|M|F|  Flags  |
+    +-------------------------------+-------------------------------+
     |                      Initial Request N                        |
     +---------------------------------------------------------------+
                           Metadata & Request Data
@@ -433,31 +465,6 @@ Frame Contents
 * __Initial Request N__: initial request N value for stream.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
-### Request Subscription Frame
-
-Frame Contents
-
-```
-     0                   1                   2                   3
-     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+-+-------------------------+
-    |     Frame Type = REQUEST_SUB  |0|M|F|       Flags             |
-    +-------------------------------+-+-+-+-------------------------+
-    |                           Stream ID                           |
-    +---------------------------------------------------------------+
-    |                      Initial Request N                        |
-    +---------------------------------------------------------------+
-                           Metadata & Request Data
-```
-
-* __Flags__:
-    * (__M__)etadata: Metadata present
-    * (__F__)ollows: More Fragments Follow This Fragment.
-* __Initial Request N__: initial request N value for subscription.
-* __Request Data__: identification of the service being requested along with parameters for the request.
-
 ### Request Channel Frame
 
 Frame Contents
@@ -466,12 +473,10 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+-+-+-+---------------------+
-    |  Frame Type = REQUEST_CHANNEL |0|M|F|C|N|      Flags          |
-    +-------------------------------+-+-+-+-+-+---------------------+
     |                           Stream ID                           |
-    +---------------------------------------------------------------+
+    +---------------+-+-+-+-+-+-----+-------------------------------+
+    |   Frame Type  |0|M|F|C|N|     |
+    +-------------------------------+-------------------------------+
     |              Initial Request N (only if N bit set)            |
     +---------------------------------------------------------------+
                            Metadata & Request Data
@@ -493,12 +498,10 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+---------------------------+
-    |      Frame Type = REQUEST_N   |0|0|        Flags              |
-    +-------------------------------+-+-+---------------------------+
     |                           Stream ID                           |
-    +---------------------------------------------------------------+
+    +---------------+-+-+-----------+-------------------------------+
+    |   Frame Type  |0|0|   Flags   |
+    +-------------------------------+-------------------------------+
     |                           Request N                           |
     +---------------------------------------------------------------+
 ```
@@ -515,12 +518,10 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+---------------------------+
-    |       Frame Type = CANCEL     |0|M|        Flags              |
-    +-------------------------------+-+-+---------------------------+
     |                           Stream ID                           |
-    +---------------------------------------------------------------+
+    +---------------+-+-+-----------+-------------------------------+
+    |   Frame Type  |0|M|  Flags    |
+    +-------------------------------+-------------------------------+
                                 Metadata
 ```
 
@@ -535,12 +536,10 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+-+-+-----------------------+
-    |      Frame Type = RESPONSE    |0|M|F|C|        Flags          |
-    +-------------------------------+-+-+-+-+-----------------------+
     |                           Stream ID                           |
-    +---------------------------------------------------------------+
+    +---------------+-+-+-+-+-------+-------------------------------+
+    |   Frame Type  |0|M|F|C| Flags |
+    +-------------------------------+-------------------------------+
                          Metadata & Response Data
 ```
 
@@ -567,12 +566,10 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+---------------------------+
-    |   Frame Type = METADATA_PUSH  |0|1|        Flags              |
-    +-------------------------------+-+-+---------------------------+
     |                           Stream ID                           |
-    +---------------------------------------------------------------+
+    +---------------+-+-+-----------+-------------------------------+
+    |   Frame Type  |0|1|   Flags   |
+    +-------------------------------+-------------------------------+
                                 Metadata
 ```
 
@@ -588,10 +585,10 @@ The general format for an extension frame is given below.
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+---------------------------+
-    |       Frame Type = EXT        |I|M|        Flags              |
-    +-------------------------------+-+-+---------------------------+
+    |                           Stream ID                           |
+    +---------------+-+-+-----------+-------------------------------+
+    |   Frame Type  |I|M|  Flags    |
+    +-------------------------------+-------------------------------+
     |                        Extended Type                          |
     +---------------------------------------------------------------+
                           Depends on Extended Type...
@@ -770,33 +767,6 @@ Upon receiving a COMPLETE or ERROR, the stream is terminated on the Requester.
 
 Upon sending a COMPLETE or ERROR, the stream is terminated on the Responder.
 
-### Request Subscription
-
-1. RQ -> RS: REQUEST_SUBSCRIPTION
-1. RS -> RQ: RESPONSE*
-
-or
-
-1. RQ -> RS: REQUEST_SUBSCRIPTION
-1. RS -> RQ: RESPONSE*
-1. RS -> RQ: ERROR
-
-or
-
-1. RQ -> RS: REQUEST_SUBSCRIPTION
-1. RS -> RQ: RESPONSE*
-1. RQ -> RS: CANCEL
-
-At any time, a client may send REQUEST_N frames.
-
-Upon receiving a CANCEL, the stream is terminated on the Responder.
-
-Upon sending a CANCEL, the stream is terminated on the Requester.
-
-Upon receiving a ERROR, the stream is terminated on the Requester.
-
-Upon sending a ERROR, the stream is terminated on the Responder.
-
 ### Request Channel
 
 1. RQ -> RS: REQUEST_CHANNEL* intermixed with
@@ -908,3 +878,142 @@ assume it is set and act accordingly.
 	1. A server MUST ignore a SETUP_ERROR frame.
 	1. A client MUST ignore a SETUP_ERROR after it has completed connection establishment.
 	1. A client MUST ignore a SETUP frame.
+
+## Resuming Operation
+
+Due to the large number of active requests for ReactiveSocket, it is often necessary to provide the ability for resuming operation on transport failure. This behavior is totally optional for operation and may be supported or not based on an implementation choice.
+
+### Assumptions
+
+ReactiveSocket resumption exists only for specific cases. It is not intended to be an “always works” solution. If resuming operation is not possible, the connection should be terminated with an ERROR as specified by the protocol definition.
+
+1. Resumption is optional behavior for implementations. But highly suggested. Clients and Servers should assume NO resumption capability by default.
+1. Resumption is an optimistic operation. It may not always succeed.
+1. Resumption is desired to be fast and require a minimum of state to be exchanged.
+1. Resumption is designed for loss of connectivity and assumes client and server state is maintained across connectivity loss. I.e. there is no assumption of loss of state by either end. This is very important as without it, all the requirements of "guaranteed messaging" come into play.
+1. Resumption assumes no changes to Lease, Data format (encoding), etc. for resuming operation. i.e. A client is not allowed to change the metadata MIME type or the data MIME type or version, etc. when resuming operation.
+1. Resumption is always initiated by the client and either allowed or denied by the server.
+1. Resumption makes no assumptions of application state for delivered frames with respect to atomicity, transactionality, etc. See above.
+
+### Implied Position
+
+Resuming operation requires knowing the position of data reception of the previous connection. For this to be simplified, the underlying transport is assumed to support contiguous delivery of data on a per frame basis. In other words, partial frames are not delivered for processing nor are gaps allowed in the stream of frames sent by either the client or server. The current list of supported transports (TCP, WebSocket, and Aeron) all satisfy this requirement or can be made to do so in the case of TCP.
+
+As a Requester or Responder __sends__ REQUEST, CANCEL, or RESPONSE frames, it maintains a __position__ of that frame within the connection in that direction. This is a 64-bit value that starts at 0. As a Requester or Responder __receives__ REQUEST, CANCEL, or RESPONSE frames, it maintains an __implied position__ of that frame within the connection in that direction. This is also a 64-bit value that starts at 0.
+
+The reason this is “implied” is that the position is not included in each frame and is inferred simply by the message being sent/received on the connection in relation to previous frames.
+
+This position will be used to identify the location for resuming operation to begin.
+
+Frame types outside REQUEST, CANCEL, ERROR, and RESPONSE do not have assigned (nor implied) positions.
+
+### Client Lifetime Management
+
+Client lifetime management for servers must be extended to incorporate the length of time a client may successfully attempt resumption. A server may reject resumption if the client has been gone too long. The means of client lifetime management are totally up to the implementation.
+
+### Resume Operation
+
+All ERROR frames sent MUST be CONNECTION_ERROR or CONNECTION_ERROR_NO_RETRY error code.
+
+Client side resumption operation starts when the client desires to try to resume and starts a new transport connection. The operation then proceeds as the following:
+
+* Client sends RESUME frame. The client must NOT send any other frame types until resumption succeeds. The RESUME Identification Token MUST be the token used in the original SETUP frame. The RESUME Last Received Position field MUST be the last successfully received implied position from the server.
+* Client waits for either a RESUME_OK or ERROR frame from the server.
+* On receiving an ERROR frame, the client MUST NOT attempt resumption again if the error code was CONNECTION_ERROR_NO_RETRY.
+* On receiving a RESUME_OK, the client:
+    * MUST assume that the next REQUEST, CANCEL, ERROR, and RESPONSE frames have an implied position commencing from the last implied positions
+    * MAY retransmit *all* REQUEST, CANCEL, ERROR, and RESPONSE frames starting at the RESUME_OK Last Received Position field value from the server.
+    * MAY send an ERROR frame indicating the end of the connection and MUST NOT attempt resumption again
+
+Server side resumption operation starts when the client sends a RESUME frame. The operation then proceeds as the following:
+
+* On receiving a RESUME frame, the server:
+    * MUST send an ERROR frame if the server does not support resuming operation. This is encoded as a 0 for the Ignore bit in the flags.
+    * use the RESUME Identification Token field to determine which client the resume pertains to. If the client is identified successfully, resumption MAY be continued. If not identified, then the server MUST send an ERROR frame.
+    * if successfully identified, then the server MAY send a RESUME_OK and then:
+        * MUST assume that the next REQUEST, CANCEL, ERROR, and RESPONSE frames have an implied position commencing from the last implied positions
+        * MAY retransmit *all* REQUEST, CANCEL, ERROR, and RESPONSE frames starting at the RESUME Last Received Position field value from the client.
+    * if successfully identified, then the server MAY send an ERROR frame if the server can not resume operation given the value of RESUME Last Received Position if the position is not one it deems valid to resume operation from or other extenuating circumstances.
+
+A Server that receives a RESUME frame after a SETUP frame, SHOULD send an ERROR.
+
+A Server that receives a RESUME frame after a previous RESUME frame, SHOULD send an ERROR.
+
+A Server implementation MAY use CONNECTION_ERROR or CONNECTION_ERROR_NO_RETRY as it sees fit for each error condition.
+
+Leasing semantics are NOT assumed to carry over from previous connections when resuming. LEASE semantics MUST be restarted upon a new connection by sending a LEASE frame from the server.
+
+#### Resume Frame
+
+The general format for a Resume frame is given below.
+
+```
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                           Stream ID                           |
+    +---------------+-+-+-----------+-------------------------------+
+    |   Frame Type  |0|0|  Flags    |
+    +-------------------------------+-------------------------------+
+    |                    Resume Identification Token                |
+    +                                                               +
+    |                                                               |
+    +                                                               +
+    |                                                               |
+    +                                                               +
+    |                                                               |
+    +---------------------------------------------------------------+
+    |                  Last Received Position (Client)              |
+    +                                                               +
+    |                                                               |
+    +---------------------------------------------------------------+
+```
+
+* __Frame Type__: (16) 0x0D for Resume Header.
+* __Flags__:
+    * (__I__)gnore: Frame can __NOT__ be ignored if not understood.
+    * (__M__)etadata: Metadata __never__ Present.
+* __Resume Identification Token__: (128) Token used for client resume identification. Same Resume Identification used in the initial SETUP by the client.
+* __Last Received Position__: (64) The last implied position the client received from the server
+
+#### Resume OK Frame
+
+The general format for a Resume OK frame is given below.
+
+```
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                           Stream ID                           |
+    +---------------+-+-+-----------+-------------------------------+
+    |   Frame Type  |0|0|  Flags    |
+    +-------------------------------+-------------------------------+
+    |                 Last Received Position (Server)               |
+    +                                                               +
+    |                                                               |
+    +---------------------------------------------------------------+
+```
+
+* __Frame Type__: (16) 0x0E for Resume OK Header.
+* __Flags__:
+    * (__I__)gnore: Frame can __NOT__ be ignored if not understood.
+    * (__M__)etadata: Metadata __never__ Present.
+* __Last Received Position__: (64) The last implied position the server received from the client
+
+#### Keepalive Position Field
+
+Keepalive frames include the implied position of the client (or server). When sent, they act as a means for the other end of the connection to know the position of the other side.
+
+This information MAY be used to update state for possible retransmission, such as trimming a retransmit buffer, or possible associations with individual stream status.
+
+### Identification Token Handling
+
+The requirements for the Resume Identification Token are implementation dependent. However, some guidelines and considerations are:
+
+* Tokens may be generated by the client and the client may responsible for generating the token.
+* Tokens may be generated outside the client and the server and managed externally to the protocol.
+* Tokens should uniquely identify a connection on the server. The server should not assume a generation method of the token and should consider the token opaque. This allows a client to be compatible with any ReactiveSocket implementation that supports resuming operation and allows the client full control of Identification Token generation.
+* Tokens must be valid for the lifetime of an individual connection
+* A server should not accept a SETUP with a Token that is currently already being used
+* Tokens should be resilient to replay attacks and thus should only be valid for the lifetime of an individual connection
+* Tokens should not be predictable by an attacking 3rd party
