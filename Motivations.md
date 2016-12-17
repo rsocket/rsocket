@@ -132,18 +132,6 @@ Usage can be thought of like this:
 Publisher<Payload> response = socketClient.requestStream(requestPayload);
 ```
 
-##### Topic Subscription (multi-response, infinite) 
-
-Similar to request/stream is topic subscription (also known as requestSubscription). It is the same as request/stream, except it does not emit a successful terminal event (but it can terminate with an error). In other words, it is intended to be infinite until the client unsubscribes (cancels).
-
-This is a semantic difference from request/stream to allow applications to treat subscriptions differently. This interaction model targets use cases such as push notifications, or "hot" event streams that continuously emit, such as metrics, or stock prices. 
-
-Usage can be thought of like this:
-
-```java
-Publisher<Payload> response = socketClient.requestSubscription(topicSubscription);
-```
-
 ##### Channel
 
 A channel is bi-directional, with a stream in both directions. 
