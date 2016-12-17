@@ -181,9 +181,9 @@ When respecting the lease semantics, establishing a ReactiveSocket between a cli
 You may want to pass data to your application at ReactiveSocket establishment, rather than reimplementing a connect protocol on top of ReactiveSocket, ReactiveSocket provides you the possibility to send information alongside the SETUP frame.
 For instance, this can be used by a client to send its credentials.
 
-#### Why those 5 interaction models?
+#### Why those multiple interaction models?
 
-Those 5 interaction models could be reduced to just one "request-channel". Every other interaction model is a subtype of request-channel, but they have been specialized for two reasons:
+The interaction models could be reduced to just one "request-channel". Every other interaction model is a subtype of request-channel, but they have been specialized for two reasons:
 
 - Ease of use from the client point of view.
 - Performance.
