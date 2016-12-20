@@ -81,7 +81,7 @@ The frame length field MUST be omitted if the transport protocol preserves messa
 | TCP                            | __YES__ |
 | WebSocket                      | __NO__  |
 | Aeron                          | __NO__  |
-| HTTP/2                         | __NO__  |
+| HTTP/2                         | __YES__ |
 | Other                          | __YES__ |
 
 ### Framing Format
