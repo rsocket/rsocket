@@ -1,7 +1,7 @@
 ## Status
 
 This protocol is currently a draft for the final specifications. 
-Current version of the protocol is __1.0__ (Major Version: 1, Minor Version: 0).
+Current version of the protocol is __0.2__ (Major Version: 0, Minor Version: 2).
 
 ## Introduction
 
@@ -15,7 +15,7 @@ ReactiveSockets assumes an operating paradigm. These assumptions are:
 
 Key words used by this document conform to the meanings in [RFC 2119](https://tools.ietf.org/html/rfc2119).
 
-Byte ordering is assumed to be big endian.
+Byte ordering is big endian for all fields.
 
 ## Terminology
 
@@ -55,7 +55,7 @@ The following are features of Data and Metadata.
     - Connection via Metadata Push and Stream ID of 0
     - Individual Request or Response
 
-## Framing Protocol
+## Framing
 
 ### Transport Protocol
 
@@ -70,12 +70,11 @@ have no further frames sent and all frames will be ignored.
 
 ReactiveSocket as specified here only allows for TCP, WebSocket, and Aeron as transport protocols.
 
-### Framing Protocol
+### Framing Protocol Usage
 
-Some of the supported transport protocols for ReactiveSocket may not support specific framing of messages. For these protocols, a framing protocol must be
-used with the ReactiveSocket frame.
+Some of the supported transport protocols for ReactiveSocket may not support specific framing that preserves message boundaries. For these protocols, a framing protocol must be used with the ReactiveSocket frame that prepends the ReactiveSocket Frame Length.
 
-The framing header MUST be omitted if the transport protocol preserves message boundaries e.g. provides compatible framing. If, however, the transport protocol only provides a stream abstraction or can merge messages without preserving boundaries, or multiple transport protocols may be used, then the frame header MUST be used.
+The frame length field MUST be omitted if the transport protocol preserves message boundaries e.g. provides compatible framing. If, however, the transport protocol only provides a stream abstraction or can merge messages without preserving boundaries, or multiple transport protocols may be used, then the frame header MUST be used.
 
 |  Transport Protocol            | Frame Length Field Required |
 |:-------------------------------|:----------------------------|
@@ -85,17 +84,18 @@ The framing header MUST be omitted if the transport protocol preserves message b
 | HTTP/2                         | __NO__  |
 | Other                          | __YES__ |
 
-### Framing Header Format
+### Framing Format
 
 When using a transport protocol providing framing, the ReactiveSocket frame is simply encapsulated into the transport protocol messages directly.
 
 ```
-    +-----------------------------+-----------------------
-    | ReactiveSocket Frame Header | Depends on Frame Type
-    +-----------------------------+-----------------------
+    +-----------------------------------------------+
+    |                ReactiveSocket Frame          ...
+    |                                              
+    +-----------------------------------------------+
 ```
 
-When using a transport protocol that does not provide compatible framing, the Frame Length must be pre-pended to the ReactiveSocket Frame.
+When using a transport protocol that does not provide compatible framing, the Frame Length must be prepended to the ReactiveSocket Frame.
 
 ```
      0                   1                   2
@@ -103,20 +103,20 @@ When using a transport protocol that does not provide compatible framing, the Fr
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                    Frame Length               |
     +-----------------------------------------------+
-    |           ReactiveSocket Frame Header        ...
+    |                ReactiveSocket Frame          ...
+    |                                              
     +-----------------------------------------------+
-                     Depends on Frame Type
 ```
 
 * __Frame Length__: (24 = max 16,777,216 bytes) Length of Frame. Excluding Framing Length Field.
 
-__NOTE__: Byte ordering is assumed to be big endian.
+__NOTE__: Byte ordering is big endian.
 
 ## Operation
 
 ### Frame Header Format
 
-ReactiveSocket frames begin with a header. The general layout is given below.
+ReactiveSocket frames begin with a ReactiveSocket Frame Header. The general layout is given below.
 
 ```
      0                   1                   2                   3
@@ -135,7 +135,7 @@ reception. Flags generally depend on Frame Type, but all frame types must provid
      * (__I__)gnore: Ignore frame if not understood
      * (__M__)etadata: Metadata present
 
-__NOTE__: Byte ordering is assumed to be big endian.
+__NOTE__: Byte ordering is big endian.
 
 #### Handling Ignore Flag
 
