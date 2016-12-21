@@ -1,7 +1,7 @@
 ## Status
 
 This protocol is currently a draft for the final specifications. 
-Current version of the protocol is __0.1__ (Major Version: 0, Minor Version: 1).
+Current version of the protocol is __0.2__ (Major Version: 0, Minor Version: 2).
 
 ## Introduction
 
@@ -14,6 +14,8 @@ ReactiveSockets assumes an operating paradigm. These assumptions are:
 - no state preserved across [transport protocol](#transport-protocol) sessions by the protocol
 
 Key words used by this document conform to the meanings in [RFC 2119](https://tools.ietf.org/html/rfc2119).
+
+Byte ordering is big endian for all fields.
 
 ## Terminology
 
@@ -53,40 +55,9 @@ The following are features of Data and Metadata.
     - Connection via Metadata Push and Stream ID of 0
     - Individual Request or Response
 
-## Operation
+## Framing
 
-### Frame Header Format
-
-ReactiveSocket frames begin with a header. The general layout is given below. When used over
-transport protocols that provide framing (WebSocket and Aeron), the Frame Length field MUST NOT be included.
-For transports that do not provide framing, such as TCP, the Frame Length MUST be included.
-
-```
-     0                   1                   2                   3
-     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+---------------------------+
-    |         Frame Type            |I|M|        Flags              |
-    +-------------------------------+-+-+---------------------------+
-    |                           Stream ID                           |
-    +---------------------------------------------------------------+
-                           Depends on Frame Type
-```
-
-* __Frame Length__: (31 = max 2,147,483,647 bytes) Length of Frame. Including header. Only used for specific transport
-protocols. The __R__ bit is reserved and must be set to 0. The __R__ bit is considered part of the frame length and thus
-is not present if the Frame Length is not used [see below](#frame-length).
-* __Frame Type__: (16) Type of Frame.
-* __Flags__: Any Flag bit not specifically indicated in the frame type should be set to 0 when sent and not interpreted on
-reception. Flags generally depend on Frame Type, but all frame types must provide space for the following flags:
-     * (__I__)gnore: Ignore frame if not understood
-     * (__M__)etadata: Metadata present
-* __Stream ID__: (32) Stream Identifier for this frame or 0 to indicate the entire connection.
-
-__NOTE__: Byte ordering is assumed to be big endian.
-
-#### Transport Protocol
+### Transport Protocol
 
 The ReactiveSocket protocol uses a lower level transport protocol to carry ReactiveSocket frames. A transport protocol MUST provide the following:
 
@@ -99,16 +70,72 @@ have no further frames sent and all frames will be ignored.
 
 ReactiveSocket as specified here only allows for TCP, WebSocket, and Aeron as transport protocols.
 
-#### Frame Length
+### Framing Protocol Usage
 
-The presence of the Frame Length field (and corresponding __R__ bit) is determined by the transport protocol being used. The frame length field MUST be omitted if the transport protocol preserves message boundaries e.g. provides compatible framing. If, however, the transport protocol only provides a stream abstraction or can merge messages without preserving boundaries, or multiple transport protocols may be used, then the frame length field MUST be used.
+Some of the supported transport protocols for ReactiveSocket may not support specific framing that preserves message boundaries. For these protocols, a framing protocol must be used with the ReactiveSocket frame that prepends the ReactiveSocket Frame Length.
+
+The frame length field MUST be omitted if the transport protocol preserves message boundaries e.g. provides compatible framing. If, however, the transport protocol only provides a stream abstraction or can merge messages without preserving boundaries, or multiple transport protocols may be used, then the frame header MUST be used.
 
 |  Transport Protocol            | Frame Length Field Required |
 |:-------------------------------|:----------------------------|
 | TCP                            | __YES__ |
 | WebSocket                      | __NO__  |
 | Aeron                          | __NO__  |
+| HTTP/2                         | __YES__ |
 | Other                          | __YES__ |
+
+### Framing Format
+
+When using a transport protocol providing framing, the ReactiveSocket frame is simply encapsulated into the transport protocol messages directly.
+
+```
+    +-----------------------------------------------+
+    |                ReactiveSocket Frame          ...
+    |                                              
+    +-----------------------------------------------+
+```
+
+When using a transport protocol that does not provide compatible framing, the Frame Length must be prepended to the ReactiveSocket Frame.
+
+```
+     0                   1                   2
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                    Frame Length               |
+    +-----------------------------------------------+
+    |                ReactiveSocket Frame          ...
+    |                                              
+    +-----------------------------------------------+
+```
+
+* __Frame Length__: (24 = max 16,777,216 bytes) Length of Frame. Excluding Framing Length Field.
+
+__NOTE__: Byte ordering is big endian.
+
+## Operation
+
+### Frame Header Format
+
+ReactiveSocket frames begin with a ReactiveSocket Frame Header. The general layout is given below.
+
+```
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                           Stream ID                           |
+    +---------------+-+-+-----------+-------------------------------+
+    |   Frame Type  |I|M|   Flags   |     Depends on Frame Type    ...
+    +-------------------------------+
+```
+
+* __Stream ID__: (32) Stream Identifier for this frame or 0 to indicate the entire connection.
+* __Frame Type__: (8) Type of Frame.
+* __Flags__: Any Flag bit not specifically indicated in the frame type should be set to 0 when sent and not interpreted on
+reception. Flags generally depend on Frame Type, but all frame types must provide space for the following flags:
+     * (__I__)gnore: Ignore frame if not understood
+     * (__M__)etadata: Metadata present
+
+__NOTE__: Byte ordering is big endian.
 
 #### Handling Ignore Flag
 
@@ -133,7 +160,7 @@ If Metadata Length is greater than this value, the entire frame MUST be ignored.
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                       Metadata Length                       |
+    |              Metadata Length                  |
     +-+-------------------------------------------------------------+
     |                       Metadata Payload                       ...
     +---------------------------------------------------------------+
@@ -141,7 +168,7 @@ If Metadata Length is greater than this value, the entire frame MUST be ignored.
     +---------------------------------------------------------------+
 ```
 
-* __Metadata Length__: (31 = max 2,147,483,647 bytes) Length of Metadata in bytes. Including Metadata header. The __R__ bit is reserved and must be set to 0.
+* __Metadata Length__: (24 = max 16,777,216 bytes) Length of Metadata in bytes. Excluding Metadata Length field.
 
 ### Stream Identifiers
 
@@ -161,21 +188,22 @@ to odd/even values. In other words, a client MUST generate even Stream IDs and a
 
 |  Type                          | Value  | Description |
 |:-------------------------------|:-------|:------------|
-| __RESERVED__                   | 0x0000 | __Reserved__ |
-| __SETUP__                      | 0x0001 | __Setup__: Sent by client to initiate protocol processing. |
-| __LEASE__                      | 0x0002 | __Lease__: Sent by Responder to grant the ability to send requests. |
-| __KEEPALIVE__                  | 0x0003 | __Keepalive__: Connection keepalive. |
-| __REQUEST_RESPONSE__           | 0x0004 | __Request Response__: Request single response. |
-| __REQUEST_FNF__                | 0x0005 | __Fire And Forget__: A single one-way message. |
-| __REQUEST_STREAM__             | 0x0006 | __Request Stream__: Request a completable stream. |
-| __REQUEST_SUB__                | 0x0007 | __Request Subscription__: Request an infinite stream. |
-| __REQUEST_CHANNEL__            | 0x0008 | __Request Channel__: Request a completable stream in both directions. |
-| __REQUEST_N__                  | 0x0009 | __Request N__: Request N more items with ReactiveStreams semantics. |
-| __CANCEL__                     | 0x000A | __Cancel Request__: Cancel outstanding request. |
-| __RESPONSE__                   | 0x000B | __Response__: Response to a request. |
-| __ERROR__                      | 0x000C | __Error__: Error at connection or application level. |
-| __METADATA_PUSH__              | 0x000D | __Metadata__: Asynchronous Metadata frame |
-| __EXT__                        | 0xFFFF | __Extension Header__: Used To Extend more frame types as well as extensions. |
+| __RESERVED__                   | 0x00 | __Reserved__ |
+| __SETUP__                      | 0x01 | __Setup__: Sent by client to initiate protocol processing. |
+| __LEASE__                      | 0x02 | __Lease__: Sent by Responder to grant the ability to send requests. |
+| __KEEPALIVE__                  | 0x03 | __Keepalive__: Connection keepalive. |
+| __REQUEST_RESPONSE__           | 0x04 | __Request Response__: Request single response. |
+| __REQUEST_FNF__                | 0x05 | __Fire And Forget__: A single one-way message. |
+| __REQUEST_STREAM__             | 0x06 | __Request Stream__: Request a completable stream. |
+| __REQUEST_CHANNEL__            | 0x07 | __Request Channel__: Request a completable stream in both directions. |
+| __REQUEST_N__                  | 0x08 | __Request N__: Request N more items with ReactiveStreams semantics. |
+| __CANCEL__                     | 0x09 | __Cancel Request__: Cancel outstanding request. |
+| __RESPONSE__                   | 0x0A | __Response__: Response to a request. |
+| __ERROR__                      | 0x0B | __Error__: Error at connection or application level. |
+| __METADATA_PUSH__              | 0x0C | __Metadata__: Asynchronous Metadata frame |
+| __RESUME__                     | 0x0D | __Resume__: Replaces SETUP for Resuming Operation (optional) |
+| __RESUME_OK__                  | 0x0E | __Resume OK__ : Sent in response to a RESUME if resuming operation possible (optional) |
+| __EXT__                        | 0xFF | __Extension Header__: Used To Extend more frame types as well as extensions. |
 
 ### Setup Frame
 
@@ -198,17 +226,23 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+-+-+-----------------------+
-    |     Frame Type = SETUP        |0|M|L|S|       Flags           |
-    +-------------------------------+-+-+-+-+-----------------------+
-    |                          Stream ID = 0                        |
-    +-------------------------------+-------------------------------+
+    |                           Stream ID                           |
+    +---------------+-+-+-+-+-+-----+-------------------------------+
+    |   Frame Type  |0|M|L|S|R|     |     
+    +---------------+-+-+-+-+-+-----+-------------------------------+
     |     Major Version             |         Minor Version         |
     +-------------------------------+-------------------------------+
     |                   Time Between KEEPALIVE Frames               |
     +---------------------------------------------------------------+
     |                         Max Lifetime                          |
+    +---------------------------------------------------------------+
+    |                    Resume Identification Token                |
+    +                                                               +
+    |                                                               |
+    +                                                               +
+    |                                                               |
+    +                                                               +
+    |                                                               |
     +---------------+-----------------------------------------------+
     |  MIME Length  |   Metadata Encoding MIME Type                ...
     +---------------+-----------------------------------------------+
@@ -221,11 +255,13 @@ Frame Contents
      * (__M__)etadata: Metadata present
      * (__L__)ease: Will honor LEASE (or not).
      * (__S__)trict: Adhere to strict interpretation of Data and Metadata.
+     * (__R__)esume Enable: Client requests resume capability is possible (Optional).
 * __Major Version__: (16) Major version number of the protocol.
 * __Minor Version__: (16) Minor version number of the protocol.
 * __Time Between KEEPALIVE Frames__: Time (in milliseconds) between KEEPALIVE frames that the client will send.
 * __Max Lifetime__: Time (in milliseconds) that a client will allow a server to not respond to a KEEPALIVE before
 it is assumed to be dead.
+* __Resume Identification Token__: (128) Token used for client resume identification. (Optional - set to all 0s if not supported)
 * __MIME Length__: Encoding MIME Type Length in bytes.
 * __Encoding MIME Type__: MIME Type for encoding of Data and Metadata. This SHOULD be a US-ASCII string
 that includes the [Internet media type](https://en.wikipedia.org/wiki/Internet_media_type) specified
@@ -249,12 +285,10 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+---------------------------+
-    |       Frame Type = ERROR      |0|M|        Flags              |
-    +-------------------------------+-+-+---------------------------+
     |                           Stream ID                           |
-    +---------------------------------------------------------------+
+    +---------------+-+-+-----------+-------------------------------+
+    |   Frame Type  |0|M|    Flags  | 
+    +---------------+-+-+-----------+-------------------------------+
     |                          Error Code                           |
     +---------------------------------------------------------------+
                         Metadata & Error Data
@@ -305,12 +339,10 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+---------------------------+
-    |     Frame Type = LEASE        |0|M|        Flags              |
-    +-------------------------------+-+-+---------------------------+
     |                           Stream ID                           |
-    +---------------------------------------------------------------+
+    +---------------+-+-+-----------+-------------------------------+
+    |   Frame Type  |0|M|    Flags  | 
+    +---------------+-+-+-----------+-------------------------------+
     |                         Time-To-Live                          |
     +---------------------------------------------------------------+
     |                       Number of Requests                      |
@@ -350,11 +382,13 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+-+-------------------------+
-    |      Frame Type = KEEPALIVE   |0|0|R|      Flags              |
-    +-------------------------------+-+-+-+-------------------------+
     |                           Stream ID                           |
+    +---------------+-+-+-+---------+-------------------------------+
+    |   Frame Type  |0|0|R|  Flags  |
+    +---------------+-+-+-+---------+-------------------------------+
+    |                    Last Received Position                     |
+    +                                                               +
+    |                                                               |
     +---------------------------------------------------------------+
                                   Data
 ```
@@ -362,6 +396,7 @@ Frame Contents
 * __Flags__:
      * (__M__)etadata: Metadata __never__ present
      * (__R__)espond with KEEPALIVE or not
+* __Last Received Position__: (64) Resume Last Received Position (optional. Set to all 0s when not supported.)
 * __Data__: Data attached to a KEEPALIVE.
 
 ### Request Response Frame
@@ -372,12 +407,10 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+-+-------------------------+
-    | Frame Type = REQUEST_RESPONSE |0|M|F|      Flags              |
-    +-------------------------------+-+-+-+-------------------------+
     |                           Stream ID                           |
-    +---------------------------------------------------------------+
+    +---------------+-+-+-+---------+-------------------------------+
+    |   Frame Type  |0|M|F|  Flags  |
+    +-------------------------------+
                          Metadata & Request Data
 ```
 
@@ -394,12 +427,10 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+-+-------------------------+
-    |    Frame Type = REQUEST_FNF   |0|M|F|       Flags             |
-    +-------------------------------+-+-+-+-------------------------+
     |                           Stream ID                           |
-    +---------------------------------------------------------------+
+    +---------------+-+-+-+---------+-------------------------------+
+    |   Frame Type  |0|M|F|  Flags  |
+    +-------------------------------+
                           Metadata & Request Data
 ```
 
@@ -416,12 +447,10 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+-+-------------------------+
-    |  Frame Type = REQUEST_STREAM  |0|M|F|       Flags             |
-    +-------------------------------+-+-+-+-------------------------+
     |                           Stream ID                           |
-    +---------------------------------------------------------------+
+    +---------------+-+-+-+---------+-------------------------------+
+    |   Frame Type  |0|M|F|  Flags  |
+    +-------------------------------+-------------------------------+
     |                      Initial Request N                        |
     +---------------------------------------------------------------+
                           Metadata & Request Data
@@ -433,31 +462,6 @@ Frame Contents
 * __Initial Request N__: initial request N value for stream.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
-### Request Subscription Frame
-
-Frame Contents
-
-```
-     0                   1                   2                   3
-     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+-+-------------------------+
-    |     Frame Type = REQUEST_SUB  |0|M|F|       Flags             |
-    +-------------------------------+-+-+-+-------------------------+
-    |                           Stream ID                           |
-    +---------------------------------------------------------------+
-    |                      Initial Request N                        |
-    +---------------------------------------------------------------+
-                           Metadata & Request Data
-```
-
-* __Flags__:
-    * (__M__)etadata: Metadata present
-    * (__F__)ollows: More Fragments Follow This Fragment.
-* __Initial Request N__: initial request N value for subscription.
-* __Request Data__: identification of the service being requested along with parameters for the request.
-
 ### Request Channel Frame
 
 Frame Contents
@@ -466,12 +470,10 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+-+-+-+---------------------+
-    |  Frame Type = REQUEST_CHANNEL |0|M|F|C|N|      Flags          |
-    +-------------------------------+-+-+-+-+-+---------------------+
     |                           Stream ID                           |
-    +---------------------------------------------------------------+
+    +---------------+-+-+-+-+-+-----+-------------------------------+
+    |   Frame Type  |0|M|F|C|N|     |
+    +-------------------------------+-------------------------------+
     |              Initial Request N (only if N bit set)            |
     +---------------------------------------------------------------+
                            Metadata & Request Data
@@ -493,12 +495,10 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+---------------------------+
-    |      Frame Type = REQUEST_N   |0|0|        Flags              |
-    +-------------------------------+-+-+---------------------------+
     |                           Stream ID                           |
-    +---------------------------------------------------------------+
+    +---------------+-+-+-----------+-------------------------------+
+    |   Frame Type  |0|0|   Flags   |
+    +-------------------------------+-------------------------------+
     |                           Request N                           |
     +---------------------------------------------------------------+
 ```
@@ -515,12 +515,10 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+---------------------------+
-    |       Frame Type = CANCEL     |0|M|        Flags              |
-    +-------------------------------+-+-+---------------------------+
     |                           Stream ID                           |
-    +---------------------------------------------------------------+
+    +---------------+-+-+-----------+-------------------------------+
+    |   Frame Type  |0|M|  Flags    |
+    +-------------------------------+-------------------------------+
                                 Metadata
 ```
 
@@ -535,12 +533,10 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+-+-+-----------------------+
-    |      Frame Type = RESPONSE    |0|M|F|C|        Flags          |
-    +-------------------------------+-+-+-+-+-----------------------+
     |                           Stream ID                           |
-    +---------------------------------------------------------------+
+    +---------------+-+-+-+-+-------+-------------------------------+
+    |   Frame Type  |0|M|F|C| Flags |
+    +-------------------------------+-------------------------------+
                          Metadata & Response Data
 ```
 
@@ -567,12 +563,10 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+---------------------------+
-    |   Frame Type = METADATA_PUSH  |0|1|        Flags              |
-    +-------------------------------+-+-+---------------------------+
     |                           Stream ID                           |
-    +---------------------------------------------------------------+
+    +---------------+-+-+-----------+-------------------------------+
+    |   Frame Type  |0|1|   Flags   |
+    +-------------------------------+-------------------------------+
                                 Metadata
 ```
 
@@ -588,10 +582,10 @@ The general format for an extension frame is given below.
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+---------------------------+
-    |       Frame Type = EXT        |I|M|        Flags              |
-    +-------------------------------+-+-+---------------------------+
+    |                           Stream ID                           |
+    +---------------+-+-+-----------+-------------------------------+
+    |   Frame Type  |I|M|  Flags    |
+    +-------------------------------+-------------------------------+
     |                        Extended Type                          |
     +---------------------------------------------------------------+
                           Depends on Extended Type...
@@ -769,33 +763,6 @@ Upon sending a CANCEL, the stream is terminated on the Requester.
 Upon receiving a COMPLETE or ERROR, the stream is terminated on the Requester.
 
 Upon sending a COMPLETE or ERROR, the stream is terminated on the Responder.
-
-### Request Subscription
-
-1. RQ -> RS: REQUEST_SUBSCRIPTION
-1. RS -> RQ: RESPONSE*
-
-or
-
-1. RQ -> RS: REQUEST_SUBSCRIPTION
-1. RS -> RQ: RESPONSE*
-1. RS -> RQ: ERROR
-
-or
-
-1. RQ -> RS: REQUEST_SUBSCRIPTION
-1. RS -> RQ: RESPONSE*
-1. RQ -> RS: CANCEL
-
-At any time, a client may send REQUEST_N frames.
-
-Upon receiving a CANCEL, the stream is terminated on the Responder.
-
-Upon sending a CANCEL, the stream is terminated on the Requester.
-
-Upon receiving a ERROR, the stream is terminated on the Requester.
-
-Upon sending a ERROR, the stream is terminated on the Responder.
 
 ### Request Channel
 
