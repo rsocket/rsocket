@@ -25,7 +25,7 @@ See [Fragmentation and Reassembly](#fragmentation-and-reassembly).
 * __Transport__: Protocol used to carry ReactiveSockets protocol. One of WebSockets, TCP, or Aeron. The transport MUST
 provide capabilities mentioned in the [transport protocol](#transport-protocol) section.
 * __Stream__: Unit of operation (request/response, etc.). See [Motivations](Motivations.md).
-* __Request__: A stream request. May be one of five types. As well as request for more items or cancellation of previous request.
+* __Request__: A stream request. May be one of four types. As well as request for more items or cancellation of previous request.
 * __Response__: A stream response. Contains data associated with previous request.
 * __Client__: The side initiating a connection.
 * __Server__: The side accepting connections from clients.
