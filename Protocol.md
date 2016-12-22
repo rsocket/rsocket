@@ -40,7 +40,7 @@ ReactiveSocket follows a versioning scheme consisting of a numeric major version
 ### Cross version compatibility
 
 ReactiveSocket assumes that all version changes (major and minor) are backward incompatible.
-A client can pass a version that it supports via the [Setup Frame](#setup-frame)
+A client can pass a version that it supports via the [Setup Frame](#setup-frame).
 It is up to a server to accept clients of lower versions than what it supports.
 
 ## Data And Metadata
