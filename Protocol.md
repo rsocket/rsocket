@@ -128,6 +128,7 @@ ReactiveSocket frames begin with a ReactiveSocket Frame Header. The general layo
 ```
 
 * __Stream ID__: (32) Stream Identifier for this frame or 0 to indicate the entire connection.
+  * Transport protocols that include demultiplexing, such as HTTP/2, MAY omit the Stream ID field if all parties agree. The means of negotiation and agreement is left to the transport protocol. 
 * __Frame Type__: (8) Type of Frame.
 * __Flags__: Any Flag bit not specifically indicated in the frame type should be set to 0 when sent and not interpreted on
 reception. Flags generally depend on Frame Type, but all frame types must provide space for the following flags:
