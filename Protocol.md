@@ -24,7 +24,7 @@ Byte ordering is big endian for all fields.
 See [Fragmentation and Reassembly](#fragmentation-and-reassembly).
 * __Transport__: Protocol used to carry ReactiveSockets protocol. One of WebSockets, TCP, or Aeron. The transport MUST
 provide capabilities mentioned in the [transport protocol](#transport-protocol) section.
-* __Stream__: Unit of operation (request/response, etc.). See [Design Principles](DesignPrinciples.md).
+* __Stream__: Unit of operation (request/response, etc.). See [Motivations](Motivations.md).
 * __Request__: A stream request. May be one of four types. As well as request for more items or cancellation of previous request.
 * __Response__: A stream response. Contains data associated with previous request.
 * __Client__: The side initiating a connection.
@@ -40,7 +40,7 @@ ReactiveSocket follows a versioning scheme consisting of a numeric major version
 ### Cross version compatibility
 
 ReactiveSocket assumes that all version changes (major and minor) are backward incompatible.
-A client can pass a version that it supports via the [Setup Frame](#setup-frame)
+A client can pass a version that it supports via the [Setup Frame](#setup-frame).
 It is up to a server to accept clients of lower versions than what it supports.
 
 ## Data And Metadata
@@ -82,7 +82,6 @@ The frame length field MUST be omitted if the transport protocol preserves messa
 | WebSocket                      | __NO__  |
 | Aeron                          | __NO__  |
 | HTTP/2                         | __YES__ |
-| Other                          | __YES__ |
 
 ### Framing Format
 
