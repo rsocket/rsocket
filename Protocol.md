@@ -127,7 +127,7 @@ ReactiveSocket frames begin with a ReactiveSocket Frame Header. The general layo
     +-------------------------------+
 ```
 
-* __Stream ID__: (32) Stream Identifier for this frame or 0 to indicate the entire connection.
+* __Stream ID__: (32) Positive signed integer representing the stream Identifier for this frame or 0 to indicate the entire connection.
   * Transport protocols that include demultiplexing, such as HTTP/2, MAY omit the Stream ID field if all parties agree. The means of negotiation and agreement is left to the transport protocol. 
 * __Frame Type__: (8) Type of Frame.
 * __Flags__: Any Flag bit not specifically indicated in the frame type should be set to 0 when sent and not interpreted on
@@ -168,7 +168,7 @@ If Metadata Length is greater than this value, the entire frame MUST be ignored.
     +---------------------------------------------------------------+
 ```
 
-* __Metadata Length__: (24 = max 16,777,216 bytes) Length of Metadata in bytes. Excluding Metadata Length field.
+* __Metadata Length__: (24 = max 16,777,216 bytes) unsigned positive Integer representing the length of Metadata in bytes. Excluding Metadata Length field.
 
 ### Stream Identifiers
 
@@ -299,7 +299,7 @@ Frame Contents
 * __Error Code__: Type of Error.
 * __Error Data__: includes payload describing error information. Error Data SHOULD be a UTF-8 encoded string. The string MUST NOT be null terminated.
 
-A Stream ID of 0 means the error pertains to the connection. Including connection establishment. A non-0 Stream ID
+A Stream ID of 0 means the error pertains to the connection. Including connection establishment. A positive non-0 Stream ID
 means the error pertains to a given stream.
 
 The Error Data is typically an Exception message, but could include stringified stacktrace information if appropriate.  
@@ -459,8 +459,12 @@ Frame Contents
 * __Flags__:
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More Fragments Follow This Fragment.
-* __Initial Request N__: initial request N value for stream.
+* __Initial Request N__: 32-bit signed integer representing the initial request N value for the stream. Only positive values are allowed.
 * __Request Data__: identification of the service being requested along with parameters for the request.
+
+Please note that this explicitly does NOT follow rule number 17 in https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/README.md#3-subscription-code
+
+While ReactiveStreams supports a demand of up to 2^63-1, and treats 2^63-1 as a magic number signaling to not track demand, this is not the case for ReactiveSocket. ReactiveSocket prioritizes byte size and only uses 4 bytes instead of 8 so the magic number is unavailable.
 
 ### Request Channel Frame
 
@@ -484,8 +488,10 @@ Frame Contents
     * (__F__)ollows: More Fragments Follow This Fragment.
     * (__C__)omplete: bit to indicate COMPLETE.
     * (__N__): Is Initial Request N present or not
-* __Initial Request N__: initial request N value for channel.
+* __Initial Request N__: 32-bit signed integer representing the initial request N value for channel. Only positive values are allowed.
 * __Request Data__: identification of the service being requested along with parameters for the request.
+
+See Request Stream Frame for additional information.
 
 ### Request N Frame
 
@@ -505,7 +511,9 @@ Frame Contents
 
 * __Flags__:
      * (__M__)etadata: Metadata __NOT__ present
-* __Request N__: integer value of items to request.
+* __Request N__: 32-bit signed integer value of items to request. Only positive values are allowed.
+
+See Request Stream Frame for additional information.
 
 ### Cancel Frame
 
