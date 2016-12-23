@@ -168,13 +168,12 @@ to odd/even values. In other words, a client MUST generate even Stream IDs and a
 | __REQUEST_RESPONSE__           | 0x0004 | __Request Response__: Request single response. |
 | __REQUEST_FNF__                | 0x0005 | __Fire And Forget__: A single one-way message. |
 | __REQUEST_STREAM__             | 0x0006 | __Request Stream__: Request a completable stream. |
-| __REQUEST_SUB__                | 0x0007 | __Request Subscription__: Request an infinite stream. |
-| __REQUEST_CHANNEL__            | 0x0008 | __Request Channel__: Request a completable stream in both directions. |
-| __REQUEST_N__                  | 0x0009 | __Request N__: Request N more items with ReactiveStreams semantics. |
-| __CANCEL__                     | 0x000A | __Cancel Request__: Cancel outstanding request. |
-| __RESPONSE__                   | 0x000B | __Response__: Response to a request. |
-| __ERROR__                      | 0x000C | __Error__: Error at connection or application level. |
-| __METADATA_PUSH__              | 0x000D | __Metadata__: Asynchronous Metadata frame |
+| __REQUEST_CHANNEL__            | 0x0007 | __Request Channel__: Request a completable stream in both directions. |
+| __REQUEST_N__                  | 0x0008 | __Request N__: Request N more items with ReactiveStreams semantics. |
+| __CANCEL__                     | 0x0009 | __Cancel Request__: Cancel outstanding request. |
+| __RESPONSE__                   | 0x000A | __Response__: Response to a request. |
+| __ERROR__                      | 0x000B | __Error__: Error at connection or application level. |
+| __METADATA_PUSH__              | 0x000C | __Metadata__: Asynchronous Metadata frame |
 | __EXT__                        | 0xFFFF | __Extension Header__: Used To Extend more frame types as well as extensions. |
 
 ### Setup Frame
@@ -433,36 +432,9 @@ Frame Contents
 * __Initial Request N__: 32-bit signed integer representing the initial request N value for the stream. Only positive values are allowed.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
-Please note that this explicitly does NOT follow the same rule as number 17 in https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/README.md#3-subscription-code
+Please note that this explicitly does NOT follow rule number 17 in https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/README.md#3-subscription-code
 
-While reactivestreams support a demand of up to 2^63-1, and treats 2^63-1 as a magic number after which it is not necessary to track demand, this is not the case for reactivesocket. Reactivesocket only uses 4 bytes instead of 8, because we want to prioritize flow control over the network over supporting a "magic number".
-
-### Request Subscription Frame
-
-Frame Contents
-
-```
-     0                   1                   2                   3
-     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |R|                    Frame Length (optional)                  |
-    +-------------------------------+-+-+-+-------------------------+
-    |     Frame Type = REQUEST_SUB  |0|M|F|       Flags             |
-    +-------------------------------+-+-+-+-------------------------+
-    |                           Stream ID                           |
-    +---------------------------------------------------------------+
-    |                      Initial Request N                        |
-    +---------------------------------------------------------------+
-                           Metadata & Request Data
-```
-
-* __Flags__:
-    * (__M__)etadata: Metadata present
-    * (__F__)ollows: More Fragments Follow This Fragment.
-* __Initial Request N__: 32-bit signed integer representing the initial request N value for subscription. Only positive values are allowed.
-* __Request Data__: identification of the service being requested along with parameters for the request.
-
-See Request Stream Frame for additional information.
+While ReactiveStreams supports a demand of up to 2^63-1, and treats 2^63-1 as a magic number signaling to not track demand, this is not the case for ReactiveSocket. ReactiveSocket prioritizes byte size and only uses 4 bytes instead of 8 so the magic number is unavailable.
 
 ### Request Channel Frame
 
@@ -779,33 +751,6 @@ Upon sending a CANCEL, the stream is terminated on the Requester.
 Upon receiving a COMPLETE or ERROR, the stream is terminated on the Requester.
 
 Upon sending a COMPLETE or ERROR, the stream is terminated on the Responder.
-
-### Request Subscription
-
-1. RQ -> RS: REQUEST_SUBSCRIPTION
-1. RS -> RQ: RESPONSE*
-
-or
-
-1. RQ -> RS: REQUEST_SUBSCRIPTION
-1. RS -> RQ: RESPONSE*
-1. RS -> RQ: ERROR
-
-or
-
-1. RQ -> RS: REQUEST_SUBSCRIPTION
-1. RS -> RQ: RESPONSE*
-1. RQ -> RS: CANCEL
-
-At any time, a client may send REQUEST_N frames.
-
-Upon receiving a CANCEL, the stream is terminated on the Responder.
-
-Upon sending a CANCEL, the stream is terminated on the Requester.
-
-Upon receiving a ERROR, the stream is terminated on the Requester.
-
-Upon sending a ERROR, the stream is terminated on the Responder.
 
 ### Request Channel
 

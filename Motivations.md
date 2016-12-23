@@ -116,32 +116,22 @@ Usage can be thought of like this:
 Future<Payload> response = socketClient.requestResponse(requestPayload);
 ```
 
-##### Request/Stream (multi-response, finite) 
+##### Request/Stream (multi-response) 
 
 Extending from request/response is request/stream, which allows multiple values to be streamed back. Think of this as a "collection" or "list" response, but instead of getting back all the data as a single response, each element is streamed back in order.
+A stream may be finite or infinite. An infinite stream will not have any terminal event but may cancel.
 
 Use cases could include things like:
 
 - fetching a list of videos
 - fetching products in a catalog
 - retrieving a file line-by-line
+- Infinite event streams that continuously emit, such as metrics, or stock prices.
 
 Usage can be thought of like this:
 
 ```java
 Publisher<Payload> response = socketClient.requestStream(requestPayload);
-```
-
-##### Topic Subscription (multi-response, infinite) 
-
-Similar to request/stream is topic subscription (also known as requestSubscription). It is the same as request/stream, except it does not emit a successful terminal event (but it can terminate with an error). In other words, it is intended to be infinite until the client unsubscribes (cancels).
-
-This is a semantic difference from request/stream to allow applications to treat subscriptions differently. This interaction model targets use cases such as push notifications, or "hot" event streams that continuously emit, such as metrics, or stock prices. 
-
-Usage can be thought of like this:
-
-```java
-Publisher<Payload> response = socketClient.requestSubscription(topicSubscription);
 ```
 
 ##### Channel
