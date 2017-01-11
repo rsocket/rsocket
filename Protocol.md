@@ -554,7 +554,7 @@ Frame Contents
 * __Flags__:
     * (__M__)etadata: Metadata Present.
     * (__F__)ollows: More fragments follow this fragment.
-    * (__N__)ext: bit to indicate Next (Response Data).
+    * (__N__)ext: bit to indicate Next (Response Data and/or Metadata present).
        * If set, `onNext` will be invoked on Subscriber/Observer.
     * (__C__)omplete: bit to indicate COMPLETE.
        * If set, `onComplete` will be invoked on Subscriber/Observer.
