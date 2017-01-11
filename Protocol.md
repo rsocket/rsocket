@@ -546,7 +546,7 @@ Frame Contents
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                           Stream ID                           |
     +---------------+-+-+-+-+-------+-------------------------------+
-    |   Frame Type  |0|M|F|C| Flags |
+    |   Frame Type  |0|M|F|N|C| ... |
     +-------------------------------+-------------------------------+
                          Metadata & Response Data
 ```
@@ -554,7 +554,10 @@ Frame Contents
 * __Flags__:
     * (__M__)etadata: Metadata Present.
     * (__F__)ollows: More fragments follow this fragment.
+    * (__N__)ext: bit to indicate Next (Response Data).
+       * If set, `onNext` will be invoked on Subscriber/Observer.
     * (__C__)omplete: bit to indicate COMPLETE.
+       * If set, `onComplete` will be invokved on Subscriber/Observer.
 * __Response Data__: payload for Reactive Streams onNext.
 
 A Response is generally referred to as a NEXT.
