@@ -236,13 +236,7 @@ Frame Contents
     +---------------------------------------------------------------+
     |                         Max Lifetime                          |
     +---------------------------------------------------------------+
-    |                    Resume Identification Token                |
-    +                                                               +
-    |                                                               |
-    +                                                               +
-    |                                                               |
-    +                                                               +
-    |                                                               |
+    |         Token Length          | Resume Identification Token  ...
     +---------------+-----------------------------------------------+
     |  MIME Length  |   Metadata Encoding MIME Type                ...
     +---------------+-----------------------------------------------+
@@ -261,7 +255,8 @@ Frame Contents
 * __Time Between KEEPALIVE Frames__: Time (in milliseconds) between KEEPALIVE frames that the client will send.
 * __Max Lifetime__: Time (in milliseconds) that a client will allow a server to not respond to a KEEPALIVE before
 it is assumed to be dead.
-* __Resume Identification Token__: (128) Token used for client resume identification. (Optional - set to all 0s if not supported)
+* __Resume Identification Token Length__: Resume Identification Token Length in bytes. (Default to 0 if resumption not being used)
+* __Resume Identification Token__: Token used for client resume identification (Optional - leave length as 0 if not included)
 * __MIME Length__: Encoding MIME Type Length in bytes.
 * __Encoding MIME Type__: MIME Type for encoding of Data and Metadata. This SHOULD be a US-ASCII string
 that includes the [Internet media type](https://en.wikipedia.org/wiki/Internet_media_type) specified
@@ -968,13 +963,7 @@ RESUME frames MUST always use Stream ID 0 as they pertain to the connection.
     +---------------+-+-+-----------+-------------------------------+
     |   Frame Type  |0|0|  Flags    |
     +-------------------------------+-------------------------------+
-    |                    Resume Identification Token                |
-    +                                                               +
-    |                                                               |
-    +                                                               +
-    |                                                               |
-    +                                                               +
-    |                                                               |
+    |         Token Length          | Resume Identification Token  ...
     +---------------------------------------------------------------+
     |                  Last Received Position (Client)              |
     +                                                               +
@@ -987,6 +976,8 @@ RESUME frames MUST always use Stream ID 0 as they pertain to the connection.
     * (__I__)gnore: Frame can __NOT__ be ignored if not understood.
     * (__M__)etadata: Metadata __never__ Present.
 * __Resume Identification Token__: (128) Token used for client resume identification. Same Resume Identification used in the initial SETUP by the client.
+* __Resume Identification Token Length__: Resume Identification Token Length in bytes. 
+* __Resume Identification Token__: TToken used for client resume identification. Same Resume Identification used in the initial SETUP by the client.
 * __Last Received Position__: (64) The last implied position the client received from the server
 
 #### Resume OK Frame
