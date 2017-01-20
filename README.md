@@ -7,9 +7,8 @@ ReactiveSocket is an application protocol providing [Reactive Stream](http://www
 It enables the following symmetric interaction models via async message passing over a single connection:
 
 - request/response (stream of 1)
-- request/stream (finite stream of many)
+- request/stream (finite/infinite stream of many)
 - fire-and-forget (no response)
-- event subscription (infinite stream of many)
 - channel (bi-directional streams)
 
 Artifacts include:
