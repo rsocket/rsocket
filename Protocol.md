@@ -203,7 +203,7 @@ to odd/even values. In other words, a client MUST generate odd Stream IDs and a 
 | __METADATA_PUSH__              | 0x0C | __Metadata__: Asynchronous Metadata frame |
 | __RESUME__                     | 0x0D | __Resume__: Replaces SETUP for Resuming Operation (optional) |
 | __RESUME_OK__                  | 0x0E | __Resume OK__ : Sent in response to a RESUME if resuming operation possible (optional) |
-| __EXT__                        | 0x40 | __Extension Header__: Used To Extend more frame types as well as extensions. |
+| __EXT__                        | 0x3F | __Extension Header__: Used To Extend more frame types as well as extensions. |
 
 ### Setup Frame
 
