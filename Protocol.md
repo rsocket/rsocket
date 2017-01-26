@@ -228,7 +228,7 @@ Frame Contents
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                           Stream ID                           |
     +-----------+-+-+-+-+-+---------+-------------------------------+
-    |Frame Type |0|M|L|S|R|  Flags  |
+    |Frame Type |0|R|M|L|S|  Flags  |
     +-----------+-+-+-+-+-+---------+-------------------------------+
     |     Major Version             |         Minor Version         |
     +-------------------------------+-------------------------------+
@@ -246,17 +246,17 @@ Frame Contents
 ```
 
 * __Flags__:
+     * (__R__)esume Enable: Client requests resume capability if possible. Resume Identification Token present.
      * (__M__)etadata: Metadata present
      * (__L__)ease: Will honor LEASE (or not).
      * (__S__)trict: Adhere to strict interpretation of Data and Metadata.
-     * (__R__)esume Enable: Client requests resume capability is possible (Optional).
 * __Major Version__: (16) Major version number of the protocol.
 * __Minor Version__: (16) Minor version number of the protocol.
 * __Time Between KEEPALIVE Frames__: Time (in milliseconds) between KEEPALIVE frames that the client will send.
 * __Max Lifetime__: Time (in milliseconds) that a client will allow a server to not respond to a KEEPALIVE before
 it is assumed to be dead.
-* __Resume Identification Token Length__: (16 = max 65,536 bytes) Resume Identification Token Length in bytes. (Default to 0 if resumption not being used)
-* __Resume Identification Token__: Token used for client resume identification (Optional - leave length as 0 if not included)
+* __Resume Identification Token Length__: (16 = max 65,536 bytes) Resume Identification Token Length in bytes. (Not present if R flag is not set)
+* __Resume Identification Token__: Token used for client resume identification (Not present if R flag is not set)
 * __MIME Length__: Encoding MIME Type Length in bytes.
 * __Encoding MIME Type__: MIME Type for encoding of Data and Metadata. This SHOULD be a US-ASCII string
 that includes the [Internet media type](https://en.wikipedia.org/wiki/Internet_media_type) specified
