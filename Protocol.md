@@ -309,8 +309,8 @@ The Error Data is typically an Exception message, but could include stringified 
 | __INVALID_SETUP__              | 0x00000001 | The Setup frame is invalid for the server (it could be that the client is too recent for the old server). Stream ID MUST be 0. |
 | __UNSUPPORTED_SETUP__          | 0x00000002 | Some (or all) of the parameters specified by the client are unsupported by the server. Stream ID MUST be 0. |
 | __REJECTED_SETUP__             | 0x00000003 | The server rejected the setup, it can specify the reason in the payload. Stream ID MUST be 0. |
+| __REJECTED_RESUME__             | 0x00000004 | The server rejected the resume, it can specify the reason in the payload. Stream ID MUST be 0. |
 | __CONNECTION_ERROR__           | 0x00000101 | The connection is being terminated. Stream ID MUST be 0. |
-| __CONNECTION_ERROR_NO_RETRY__  | 0x00000102 | The connection is being terminated. May __NOT__ be resumed. Stream ID MUST be 0. |
 | __APPLICATION_ERROR__          | 0x00000201 | Application layer logic generating a Reactive Streams _onError_ event. Stream ID MUST be non-0. |
 | __REJECTED__                   | 0x00000202 | Despite being a valid request, the Responder decided to reject it. The Responder guarantees that it didn't process the request. The reason for the rejection is explained in the metadata section. Stream ID MUST be non-0. |
 | __CANCELED__                   | 0x00000203 | The responder canceled the request but potentially have started processing it (almost identical to REJECTED but doesn't garantee that no side-effect have been started). Stream ID MUST be non-0. |
@@ -919,13 +919,13 @@ Client lifetime management for servers must be extended to incorporate the lengt
 
 ### Resume Operation
 
-All ERROR frames sent MUST be CONNECTION_ERROR or CONNECTION_ERROR_NO_RETRY error code.
+All ERROR frames sent MUST be CONNECTION_ERROR or REJECTED_RESUME error code.
 
 Client side resumption operation starts when the client desires to try to resume and starts a new transport connection. The operation then proceeds as the following:
 
 * Client sends RESUME frame. The client must NOT send any other frame types until resumption succeeds. The RESUME Identification Token MUST be the token used in the original SETUP frame. The RESUME Last Received Position field MUST be the last successfully received implied position from the server.
 * Client waits for either a RESUME_OK or ERROR frame from the server.
-* On receiving an ERROR frame, the client MUST NOT attempt resumption again if the error code was CONNECTION_ERROR_NO_RETRY.
+* On receiving an ERROR frame, the client MUST NOT attempt resumption again if the error code was REJECTED_RESUME.
 * On receiving a RESUME_OK, the client:
     * MUST assume that the next REQUEST, CANCEL, ERROR, and RESPONSE frames have an implied position commencing from the last implied positions
     * MAY retransmit *all* REQUEST, CANCEL, ERROR, and RESPONSE frames starting at the RESUME_OK Last Received Position field value from the server.
@@ -945,7 +945,7 @@ A Server that receives a RESUME frame after a SETUP frame, SHOULD send an ERROR.
 
 A Server that receives a RESUME frame after a previous RESUME frame, SHOULD send an ERROR.
 
-A Server implementation MAY use CONNECTION_ERROR or CONNECTION_ERROR_NO_RETRY as it sees fit for each error condition.
+A Server implementation MAY use CONNECTION_ERROR or REJECTED_RESUME as it sees fit for each error condition.
 
 Leasing semantics are NOT assumed to carry over from previous connections when resuming. LEASE semantics MUST be restarted upon a new connection by sending a LEASE frame from the server.
 
