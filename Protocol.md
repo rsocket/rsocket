@@ -255,7 +255,7 @@ Frame Contents
 * __Time Between KEEPALIVE Frames__: Time (in milliseconds) between KEEPALIVE frames that the client will send.
 * __Max Lifetime__: Time (in milliseconds) that a client will allow a server to not respond to a KEEPALIVE before
 it is assumed to be dead.
-* __Resume Identification Token Length__: (16 = max 65,536 bytes) Resume Identification Token Length in bytes. (Not present if R flag is not set)
+* __Resume Identification Token Length__: (16 = max 65,535 bytes) Resume Identification Token Length in bytes. (Not present if R flag is not set)
 * __Resume Identification Token__: Token used for client resume identification (Not present if R flag is not set)
 * __MIME Length__: Encoding MIME Type Length in bytes.
 * __Encoding MIME Type__: MIME Type for encoding of Data and Metadata. This SHOULD be a US-ASCII string
