@@ -198,7 +198,7 @@ to odd/even values. In other words, a client MUST generate odd Stream IDs and a 
 | __REQUEST_CHANNEL__            | 0x07 | __Request Channel__: Request a completable stream in both directions. |
 | __REQUEST_N__                  | 0x08 | __Request N__: Request N more items with ReactiveStreams semantics. |
 | __CANCEL__                     | 0x09 | __Cancel Request__: Cancel outstanding request. |
-| __RESPONSE__                   | 0x0A | __Response__: Response to a request. |
+| __PAYLOAD__                    | 0x0A | __Payload__: Payload on a stream. For example, response to a request, or message on a channel. |
 | __ERROR__                      | 0x0B | __Error__: Error at connection or application level. |
 | __METADATA_PUSH__              | 0x0C | __Metadata__: Asynchronous Metadata frame |
 | __RESUME__                     | 0x0D | __Resume__: Replaces SETUP for Resuming Operation (optional) |
@@ -649,7 +649,7 @@ A client assumes a SETUP is rejected if it receives a SETUP_ERROR.
 
 Until connection establishment is complete, a Requester MUST NOT send any Request frames.
 
-Until connection establishment is complete, a Responder MUST NOT emit any RESPONSE frames.
+Until connection establishment is complete, a Responder MUST NOT emit any PAYLOAD frames.
 
 ### Negotiation
 
@@ -695,7 +695,7 @@ The possible sequences with LEASE are below.
 
 ## Fragmentation And Reassembly
 
-RESPONSE frames and all REQUEST frames may represent a large object and MAY need to be fragmented to fit within the Frame Data size. When this
+PAYLOAD frames and all REQUEST frames may represent a large object and MAY need to be fragmented to fit within the Frame Data size. When this
 occurs, the __F__ flag indicates if more fragments follow the current frame (or not).
 
 ## Stream Sequences and Lifetimes
@@ -715,7 +715,7 @@ time, but it is recommended that an implementation not aggressively re-use IDs.
 ### Request Response
 
 1. RQ -> RS: REQUEST_RESPONSE
-1. RS -> RQ: RESPONSE with COMPLETE
+1. RS -> RQ: PAYLOAD with COMPLETE
 
 or
 
@@ -748,19 +748,19 @@ REQUEST_FNF are assumed to be best effort and MAY not be processed due to: (1) S
 ### Request Stream
 
 1. RQ -> RS: REQUEST_STREAM
-1. RS -> RQ: RESPONSE*
+1. RS -> RQ: PAYLOAD*
 1. RS -> RQ: ERROR
 
 or
 
 1. RQ -> RS: REQUEST_STREAM
-1. RS -> RQ: RESPONSE*
-1. RS -> RQ: RESPONSE with COMPLETE
+1. RS -> RQ: PAYLOAD*
+1. RS -> RQ: COMPLETE
 
 or
 
 1. RQ -> RS: REQUEST_STREAM
-1. RS -> RQ: RESPONSE*
+1. RS -> RQ: PAYLOAD*
 1. RQ -> RS: CANCEL
 
 At any time, a client may send REQUEST_N frames.
@@ -776,13 +776,13 @@ Upon sending a COMPLETE or ERROR, the stream is terminated on the Responder.
 ### Request Channel
 
 1. RQ -> RS: REQUEST_CHANNEL* intermixed with
-1. RS -> RQ: RESPONSE*
+1. RS -> RQ: PAYLOAD*
 1. RS -> RQ: COMPLETE | ERROR
 
 or
 
 1. RQ -> RS: REQUEST_CHANNEL* intermixed with
-1. RS -> RQ: RESPONSE*
+1. RS -> RQ: PAYLOAD*
 1. RQ -> RS: CANCEL
 
 At any time, a Requester may send REQUEST_CHANNEL frames with F bit set to indicate fragmentation.
@@ -815,7 +815,7 @@ Upon sending a COMPLETE or ERROR, the stream is terminated on the Responder.
 #### Responder
 
 1. CLOSED: implicit starting/ending state of all stream IDs
-1. Responding: sending RESPONSEs and processing REQUEST_N
+1. Responding: sending PAYLOADs and processing REQUEST_N
 1. CLOSED (received CANCEL)
 1. CLOSED (sent COMPLETE or received REQUEST_FNF)
 1. CLOSED (sent ERROR)
@@ -833,13 +833,13 @@ The Requester and the Responder MUST respect the reactive-streams semantics.
 e.g. here's an example of a successful stream call with flow-control.
 
 1. RQ -> RS: REQUEST_STREAM (REQUEST_N=3)
-1. RS -> RQ: RESPONSE
-1. RS -> RQ: RESPONSE
-1. RS -> RQ: RESPONSE
+1. RS -> RQ: PAYLOAD
+1. RS -> RQ: PAYLOAD
+1. RS -> RQ: PAYLOAD
 1. RS needs to wait for a new REQUEST_N at that point
 1. RQ -> RS: REQUEST_N (n=3)
-1. RS -> RQ: RESPONSE
-1. RS -> RQ: RESPONSE with COMPLETE
+1. RS -> RQ: PAYLOAD
+1. RS -> RQ: PAYLOAD with COMPLETE
 
 #### Lease Semantics
 
@@ -869,16 +869,16 @@ under [Keepalive Frame](#keepalive-frame). The decision to close a connection du
 1. Request keepalive and timeout semantics are the responsibility of the application.
 1. Lack of REQUEST_N frames that stops a stream is an application concern and SHALL NOT be handled by the protocol.
 1. Lack of LEASE frames that stops new Requests is an application concern and SHALL NOT be handled by the protocol.
-1. If a RESPONSE for a REQUEST_RESPONSE is received that does not have a COMPLETE flag set, the implementation MUST
+1. If a PAYLOAD for a REQUEST_RESPONSE is received that does not have a COMPLETE flag set, the implementation MUST
 assume it is set and act accordingly.
-1. Reassembly of RESPONSEs and REQUEST_CHANNELs MUST assume the possibility of an infinite stream.
+1. Reassembly of PAYLOADs and REQUEST_CHANNELs MUST assume the possibility of an infinite stream.
 1. Stream ID values MAY be re-used after completion or error of a stream.
-1. A RESPONSE with both __F__ and __C__ flags set, implicitly ignores the __F__ flag.
+1. A PAYLOAD with both __F__ and __C__ flags set, implicitly ignores the __F__ flag.
 1. All other received frames that are not accounted for in previous sections MUST be ignored. Thus, for example:
     1. Receiving a Request frame on a Stream ID that is already in use MUST be ignored.
     1. Receiving a CANCEL on an unknown Stream ID (including 0) MUST be ignored.
     1. Receiving an ERROR on an unknown Stream ID MUST be ignored.
-    1. Receiving a RESPONSE on an unknown Stream ID (including 0) MUST be ignored.
+    1. Receiving a PAYLOAD on an unknown Stream ID (including 0) MUST be ignored.
     1. Receiving a METADATA_PUSH with a non-0 Stream ID MUST be ignored.
 	1. A server MUST ignore a SETUP frame after it has accepted a previous SETUP.
 	1. A server MUST ignore a SETUP_ERROR frame.
@@ -905,13 +905,13 @@ ReactiveSocket resumption exists only for specific cases. It is not intended to 
 
 Resuming operation requires knowing the position of data reception of the previous connection. For this to be simplified, the underlying transport is assumed to support contiguous delivery of data on a per frame basis. In other words, partial frames are not delivered for processing nor are gaps allowed in the stream of frames sent by either the client or server. The current list of supported transports (TCP, WebSocket, and Aeron) all satisfy this requirement or can be made to do so in the case of TCP.
 
-As a Requester or Responder __sends__ REQUEST, CANCEL, or RESPONSE frames, it maintains a __position__ of that frame within the connection in that direction. This is a 64-bit value that starts at 0. As a Requester or Responder __receives__ REQUEST, CANCEL, or RESPONSE frames, it maintains an __implied position__ of that frame within the connection in that direction. This is also a 64-bit value that starts at 0.
+As a Requester or Responder __sends__ REQUEST, CANCEL, or PAYLOAD frames, it maintains a __position__ of that frame within the connection in that direction. This is a 64-bit value that starts at 0. As a Requester or Responder __receives__ REQUEST, CANCEL, or PAYLOAD frames, it maintains an __implied position__ of that frame within the connection in that direction. This is also a 64-bit value that starts at 0.
 
 The reason this is “implied” is that the position is not included in each frame and is inferred simply by the message being sent/received on the connection in relation to previous frames.
 
 This position will be used to identify the location for resuming operation to begin.
 
-Frame types outside REQUEST, CANCEL, ERROR, and RESPONSE do not have assigned (nor implied) positions.
+Frame types outside REQUEST, CANCEL, ERROR, and PAYLOAD do not have assigned (nor implied) positions.
 
 ### Client Lifetime Management
 
@@ -927,8 +927,8 @@ Client side resumption operation starts when the client desires to try to resume
 * Client waits for either a RESUME_OK or ERROR frame from the server.
 * On receiving an ERROR frame, the client MUST NOT attempt resumption again if the error code was REJECTED_RESUME.
 * On receiving a RESUME_OK, the client:
-    * MUST assume that the next REQUEST, CANCEL, ERROR, and RESPONSE frames have an implied position commencing from the last implied positions
-    * MAY retransmit *all* REQUEST, CANCEL, ERROR, and RESPONSE frames starting at the RESUME_OK Last Received Position field value from the server.
+    * MUST assume that the next REQUEST, CANCEL, ERROR, and PAYLOAD frames have an implied position commencing from the last implied positions
+    * MAY retransmit *all* REQUEST, CANCEL, ERROR, and PAYLOAD frames starting at the RESUME_OK Last Received Position field value from the server.
     * MAY send an ERROR frame indicating the end of the connection and MUST NOT attempt resumption again
 
 Server side resumption operation starts when the client sends a RESUME frame. The operation then proceeds as the following:
@@ -937,8 +937,8 @@ Server side resumption operation starts when the client sends a RESUME frame. Th
     * MUST send an ERROR frame if the server does not support resuming operation. This is accomplished by handling the Ignore bit in the RESUME frame.
     * use the RESUME Identification Token field to determine which client the resume pertains to. If the client is identified successfully, resumption MAY be continued. If not identified, then the server MUST send an ERROR frame.
     * if successfully identified, then the server MAY send a RESUME_OK and then:
-        * MUST assume that the next REQUEST, CANCEL, ERROR, and RESPONSE frames have an implied position commencing from the last implied positions
-        * MAY retransmit *all* REQUEST, CANCEL, ERROR, and RESPONSE frames starting at the RESUME Last Received Position field value from the client.
+        * MUST assume that the next REQUEST, CANCEL, ERROR, and PAYLOAD frames have an implied position commencing from the last implied positions
+        * MAY retransmit *all* REQUEST, CANCEL, ERROR, and PAYLOAD frames starting at the RESUME Last Received Position field value from the client.
     * if successfully identified, then the server MAY send an ERROR frame if the server can not resume operation given the value of RESUME Last Received Position if the position is not one it deems valid to resume operation from or other extenuating circumstances.
 
 A Server that receives a RESUME frame after a SETUP frame, SHOULD send an ERROR.
