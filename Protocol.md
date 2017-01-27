@@ -309,8 +309,9 @@ The Error Data is typically an Exception message, but could include stringified 
 | __INVALID_SETUP__              | 0x00000001 | The Setup frame is invalid for the server (it could be that the client is too recent for the old server). Stream ID MUST be 0. |
 | __UNSUPPORTED_SETUP__          | 0x00000002 | Some (or all) of the parameters specified by the client are unsupported by the server. Stream ID MUST be 0. |
 | __REJECTED_SETUP__             | 0x00000003 | The server rejected the setup, it can specify the reason in the payload. Stream ID MUST be 0. |
-| __REJECTED_RESUME__             | 0x00000004 | The server rejected the resume, it can specify the reason in the payload. Stream ID MUST be 0. |
-| __CONNECTION_ERROR__           | 0x00000101 | The connection is being terminated. Stream ID MUST be 0. |
+| __REJECTED_RESUME__            | 0x00000004 | The server rejected the resume, it can specify the reason in the payload. Stream ID MUST be 0. |
+| __CONNECTION_ERROR__           | 0x00000101 | The connection is being terminated. Stream ID MUST be 0. Sender or Receiver of this frame MAY close the connection immediately without waiting for outstanding streams to terminate.|
+| __CONNECTION_CLOSE__           | 0x00000102 | The connection is being terminated. Stream ID MUST be 0. Sender or Receiver of this frame MUST wait for outstanding streams to terminate before closing the connection. New requests MAY not be accepted.|
 | __APPLICATION_ERROR__          | 0x00000201 | Application layer logic generating a Reactive Streams _onError_ event. Stream ID MUST be non-0. |
 | __REJECTED__                   | 0x00000202 | Despite being a valid request, the Responder decided to reject it. The Responder guarantees that it didn't process the request. The reason for the rejection is explained in the metadata section. Stream ID MUST be non-0. |
 | __CANCELED__                   | 0x00000203 | The responder canceled the request but potentially have started processing it (almost identical to REJECTED but doesn't garantee that no side-effect have been started). Stream ID MUST be non-0. |
