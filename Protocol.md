@@ -474,7 +474,7 @@ Frame Contents
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                           Stream ID                           |
     +-----------+-+-+-+-+-+---------+-------------------------------+
-    |Frame Type |0|M|F|C|N|  Flags  |
+    |Frame Type |0|M|F|C|  Flags    |
     +-------------------------------+-------------------------------+
     |              Initial Request N (only if N bit set)            |
     +---------------------------------------------------------------+
@@ -485,7 +485,6 @@ Frame Contents
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More Fragments Follow This Fragment.
     * (__C__)omplete: bit to indicate COMPLETE.
-    * (__N__): Is Initial Request N present or not
 * __Initial Request N__: 32-bit signed integer representing the initial request N value for channel. Only positive values are allowed.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
