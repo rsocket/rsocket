@@ -516,7 +516,9 @@ Frame Contents
      * (__M__)etadata: Metadata __NOT__ present
 * __Request N__: 32-bit signed integer value of items to request. Only positive values are allowed.
 
-See Request Stream Frame for additional information.
+Please note that this explicitly does NOT follow rule number 17 in https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/README.md#3-subscription-code
+
+While ReactiveStreams supports a demand of up to 2^63-1, and treats 2^63-1 as a magic number signaling to not track demand, this is not the case for ReactiveSocket. ReactiveSocket prioritizes byte size and only uses 4 bytes instead of 8 so the magic number is unavailable.
 
 ### Cancel Frame
 
