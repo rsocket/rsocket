@@ -990,7 +990,7 @@ RESUME frames MUST always use Stream ID 0 as they pertain to the connection.
 * __Resume Identification Token Length__: (16 = max 65,536 bytes) Resume Identification Token Length in bytes. 
 * __Resume Identification Token__: TToken used for client resume identification. Same Resume Identification used in the initial SETUP by the client.
 * __Last Received Server Position__: (64) The last implied position the client received from the server.
-* __First Available Client Position__: (65) The earliest position that the client can rewind back to prior to resending frames.
+* __First Available Client Position__: (64) The earliest position that the client can rewind back to prior to resending frames.
 
 #### Resume OK Frame
 
