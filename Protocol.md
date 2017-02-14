@@ -918,7 +918,7 @@ This position will be used to identify the location for resuming operation to be
 
 Frame types outside REQUEST, CANCEL, ERROR, and PAYLOAD do not have assigned (nor implied) positions.
 
-For resumption to take place, both sides (client and server) need to resend frames that were sent earlier, but were not received on the other side.  To enable this, both sides retain a sequence of most-recent transmitted frames.  When a client sends a RESUME frame, it sends two implied positions: the last frame that was received from the server; the earliest frame position it still retains.  Now the server makes a determination on whether resumption is possible: have all frames past the client's last-received position been retained? and has the client retained all frames past the server's last-retained position.  If resumption is possible, the server sends a RESUME_OK frame, indicating its last-received position.  Now both the client and the server each re-send frames as necessary.
+When a client sends a RESUME frame, it sends two implied positions: the last frame that was received from the server; the earliest frame position it still retains.  The server can make a determination on whether resumption is possible: have all frames past the client's last-received position been retained? and has the client retained all frames past the server's last-retained position.  If resumption is allowed to continue, the server sends a RESUME_OK frame, indicating its last-received position.
 
 ### Client Lifetime Management
 
