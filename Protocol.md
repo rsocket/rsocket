@@ -918,6 +918,8 @@ This position will be used to identify the location for resuming operation to be
 
 Frame types outside REQUEST, CANCEL, ERROR, and PAYLOAD do not have assigned (nor implied) positions.
 
+For resumption to take place, both sides (client and server) need to resend frames that were sent earlier, but were not received on the other side.  To enable this, both sides retain a sequence of most-recent transmitted frames.  When a client sends a RESUME frame, it sends two implied positions: the last frame that was received from the server; the earliest frame position it still retains.  Now the server makes a determination on whether resumption is possible: have all frames past the client's last-received position been retained? and has the client retained all frames past the server's last-retained position.  If resumption is possible, the server sends a RESUME_OK frame, indicating its last-received position.  Now both the client and the server each re-send frames as necessary.
+
 ### Client Lifetime Management
 
 Client lifetime management for servers must be extended to incorporate the length of time a client may successfully attempt resumption passed a transport disconnect. The means of client lifetime management are totally up to the implementation.
@@ -970,8 +972,12 @@ RESUME frames MUST always use Stream ID 0 as they pertain to the connection.
     +-------------------------------+-------------------------------+
     |         Token Length          | Resume Identification Token  ...
     +---------------------------------------------------------------+
-    |                  Last Received Position (Client)              |
-    +                                                               +
+    |                                                               |
+    +                 Last Received Server Position                 +
+    |                                                               |
+    +---------------------------------------------------------------+
+    |                                                               |
+    +                First Available Client Position                +
     |                                                               |
     +---------------------------------------------------------------+
 ```
@@ -983,7 +989,8 @@ RESUME frames MUST always use Stream ID 0 as they pertain to the connection.
 * __Resume Identification Token__: (128) Token used for client resume identification. Same Resume Identification used in the initial SETUP by the client.
 * __Resume Identification Token Length__: (16 = max 65,536 bytes) Resume Identification Token Length in bytes. 
 * __Resume Identification Token__: TToken used for client resume identification. Same Resume Identification used in the initial SETUP by the client.
-* __Last Received Position__: (64) The last implied position the client received from the server
+* __Last Received Server Position__: (64) The last implied position the client received from the server.
+* __First Available Client Position__: (64) The earliest position that the client can rewind back to prior to resending frames.
 
 #### Resume OK Frame
 
@@ -999,8 +1006,8 @@ RESUME OK frames MUST always use Stream ID 0 as they pertain to the connection.
     +-----------+-+-+---------------+-------------------------------+
     |Frame Type |0|0|    Flags      |
     +-------------------------------+-------------------------------+
-    |                 Last Received Position (Server)               |
-    +                                                               +
+    |                                                               |
+    +               Last Received Client Position                   +
     |                                                               |
     +---------------------------------------------------------------+
 ```
@@ -1009,7 +1016,7 @@ RESUME OK frames MUST always use Stream ID 0 as they pertain to the connection.
 * __Flags__:
     * (__I__)gnore: Frame can __NOT__ be ignored if not understood.
     * (__M__)etadata: Metadata __never__ Present.
-* __Last Received Position__: (64) The last implied position the server received from the client
+* __Last Received Client Position__: (64) The last implied position the server received from the client
 
 #### Keepalive Position Field
 
