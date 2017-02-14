@@ -613,7 +613,7 @@ The general format for an extension frame is given below.
                           Depends on Extended Type...
 ```
 
-* __Frame Type__: (16) 0xFFFF for Extension Header.
+* __Frame Type__: (16) 0xFFFF
 * __Flags__:
     * (__I__)gnore: Can be frame be ignored if not understood?
     * (__M__)etadata: Metadata Present.
@@ -996,7 +996,7 @@ RESUME frames MUST always use Stream ID 0 as they pertain to the connection.
     +---------------------------------------------------------------+
 ```
 
-* __Frame Type__: (16) 0x0D for Resume Header.
+* __Frame Type__: (16) 0x0D
 * __Flags__:
     * (__I__)gnore: Frame can __NOT__ be ignored if not understood.
     * (__M__)etadata: Metadata __never__ Present.
@@ -1027,7 +1027,7 @@ RESUME OK frames MUST always use Stream ID 0 as they pertain to the connection.
     +---------------------------------------------------------------+
 ```
 
-* __Frame Type__: (16) 0x0E for Resume OK Header.
+* __Frame Type__: (16) 0x0E
 * __Flags__:
     * (__I__)gnore: Frame can __NOT__ be ignored if not understood.
     * (__M__)etadata: Metadata __never__ Present.
