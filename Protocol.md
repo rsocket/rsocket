@@ -26,7 +26,7 @@ See [Fragmentation and Reassembly](#fragmentation-and-reassembly).
 provide capabilities mentioned in the [transport protocol](#transport-protocol) section.
 * __Stream__: Unit of operation (request/response, etc.). See [Motivations](Motivations.md).
 * __Request__: A stream request. May be one of four types. As well as request for more items or cancellation of previous request.
-* __Response__: A stream response. Contains data associated with previous request.
+* __Payload__: A stream message (upstream or downstream). Contains data associated with a stream created by a previous request.
 * __Client__: The side initiating a connection.
 * __Server__: The side accepting connections from clients.
 * __Connection__: The instance of a transport session between client and server.
@@ -53,7 +53,7 @@ The following are features of Data and Metadata.
 - Metadata can be encoded differently than Data. Default metadata encoding is specified in [this document](https://github.com/ReactiveSocket/reactivesocket/blob/master/MimeTypes.md)
 - Metadata can be "attached" (i.e. correlated) with the following entities:
     - Connection via Metadata Push and Stream ID of 0
-    - Individual Request or Response
+    - Individual Request or Payload (upstream or downstream)
 
 ## Framing
 
@@ -532,7 +532,7 @@ Frame Contents
 * __Flags__:
      * (__M__)etadata: Metadata present
 
-### Response Frame
+### Payload Frame
 
 Frame Contents
 
@@ -544,28 +544,28 @@ Frame Contents
     +-----------+-+-+-+-+-+---------+-------------------------------+
     |Frame Type |0|M|F|N|C|  Flags  |
     +-------------------------------+-------------------------------+
-                         Metadata & Response Data
+                         Metadata & Payload Data
 ```
 
 * __Flags__:
     * (__M__)etadata: Metadata Present.
     * (__F__)ollows: More fragments follow this fragment.
-    * (__N__)ext: bit to indicate Next (Response Data and/or Metadata present).
+    * (__N__)ext: bit to indicate Next (Payload Data and/or Metadata present).
        * If set, `onNext(Payload)` or equivalent will be invoked on Subscriber/Observer.
     * (__C__)omplete: bit to indicate COMPLETE.
        * If set, `onComplete()` or equivalent will be invoked on Subscriber/Observer.
-* __Response Data__: payload for Reactive Streams onNext.
+* __Payload Data__: payload for Reactive Streams onNext.
 
-A Response is generally referred to as a NEXT.
+A Payload is generally referred to as a NEXT.
 
-A Response with the Complete Bit set is referred to as a COMPLETE.
+A Payload with the Complete Bit set is referred to as a COMPLETE.
 
 ### Metadata Push Frame
 
 A Metadata Push frame can be used to send asynchronous metadata notifications from a Requester or
 Responder to its peer. Metadata MUST be scoped to the connection by setting Stream ID to 0.
 
-Metadata tied to a particular Request, Response, etc. uses the individual frames Metadata flag.
+Metadata tied to a particular stream uses the individual Payload frame Metadata flag.
 
 Frame Contents
 
