@@ -229,7 +229,7 @@ Frame Contents
     +-----------+-+-+-+-+-+---------+-------------------------------+
     |Frame Type |0|R|M|L|S|  Flags  |
     +-----------+-+-+-+-+-+---------+-------------------------------+
-    |     Major Version             |         Minor Version         |
+    |         Major Version         |        Minor Version          |
     +-------------------------------+-------------------------------+
     |                   Time Between KEEPALIVE Frames               |
     +---------------------------------------------------------------+
@@ -970,6 +970,8 @@ RESUME frames MUST always use Stream ID 0 as they pertain to the connection.
     +-----------+-+-+---------------+-------------------------------+
     |Frame Type |0|0|    Flags      |
     +-------------------------------+-------------------------------+
+    |        Major Version          |         Minor Version         |
+    +-------------------------------+-------------------------------+
     |         Token Length          | Resume Identification Token  ...
     +---------------------------------------------------------------+
     |                                                               |
@@ -986,7 +988,8 @@ RESUME frames MUST always use Stream ID 0 as they pertain to the connection.
 * __Flags__:
     * (__I__)gnore: Frame can __NOT__ be ignored if not understood.
     * (__M__)etadata: Metadata __never__ Present.
-* __Resume Identification Token__: (128) Token used for client resume identification. Same Resume Identification used in the initial SETUP by the client.
+* __Major Version__: (16) Major version number of the protocol.
+* __Minor Version__: (16) Minor version number of the protocol.
 * __Resume Identification Token Length__: (16 = max 65,536 bytes) Resume Identification Token Length in bytes. 
 * __Resume Identification Token__: TToken used for client resume identification. Same Resume Identification used in the initial SETUP by the client.
 * __Last Received Server Position__: (64) The last implied position the client received from the server.
