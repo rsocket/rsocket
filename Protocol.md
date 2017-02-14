@@ -204,7 +204,7 @@ to odd/even values. In other words, a client MUST generate odd Stream IDs and a 
 | __RESUME_OK__                  | 0x0E | __Resume OK__ : Sent in response to a RESUME if resuming operation possible (optional) |
 | __EXT__                        | 0x3F | __Extension Header__: Used To Extend more frame types as well as extensions. |
 
-### Setup Frame
+### SETUP Frame (0x01)
 
 Setup frames MUST always use Stream ID 0 as they pertain to the connection.
 
@@ -244,6 +244,7 @@ Frame Contents
                           Metadata & Setup Payload
 ```
 
+* __Frame Type__: (16) 0x01
 * __Flags__:
      * (__R__)esume Enable: Client requests resume capability if possible. Resume Identification Token present.
      * (__M__)etadata: Metadata present
@@ -270,7 +271,7 @@ Setup header.
 
 __NOTE__: A server that receives a SETUP frame that has (__R__)esume Enabled set, but does not support resuming operation, must reject the SETUP with an ERROR. 
 
-### Error Frame
+### ERROR Frame (0x0B)
 
 Error frames are used for errors on individual requests/streams as well as connection errors and in response
 to SETUP frames. The latter is referred to as a SETUP_ERROR.
@@ -290,6 +291,7 @@ Frame Contents
                         Metadata & Error Data
 ```
 
+* __Frame Type__: (16) 0x0B
 * __Flags__:
      * (__M__)etadata: Metadata present
 * __Error Code__: Type of Error.
@@ -321,7 +323,7 @@ __NOTE__: Values in the range of 0x0001 to 0x00FF are reserved for use as SETUP 
 0x00101 to 0x001FF are reserved for connection error codes. Values in the range of 0x00201 to 0xFFFFFFFE are reserved for application layer
 errors.
 
-### Lease Frame
+### LEASE Frame (0x02)
 
 Lease frames MUST always use Stream ID 0 as they pertain to the Connection.
 
@@ -348,6 +350,7 @@ Frame Contents
                                 Metadata
 ```
 
+* __Frame Type__: (16) 0x02 
 * __Flags__:
      * (__M__)etadata: Metadata present
 * __Time-To-Live (TTL)__: Time (in milliseconds) for validity of LEASE from time of reception
@@ -357,7 +360,7 @@ A Responder implementation MAY stop all further requests by sending a LEASE with
 
 When a LEASE expires due to time, the value of the __Number of Requests__ that a Requester may make is implicitly 0.
 
-### Keepalive Frame
+### KEEPALIVE Frame (0x03)
 
 KEEPALIVE frames MUST always use Stream ID 0 as they pertain to the Connection.
 
@@ -391,13 +394,14 @@ Frame Contents
                                   Data
 ```
 
+* __Frame Type__: (16) 0x03
 * __Flags__:
      * (__M__)etadata: Metadata __never__ present
      * (__R__)espond with KEEPALIVE or not
 * __Last Received Position__: (64) Resume Last Received Position (optional. Set to all 0s when not supported.)
 * __Data__: Data attached to a KEEPALIVE.
 
-### Request Response Frame
+### REQUEST_RESPONSE Frame (0x04)
 
 Frame Contents
 
@@ -412,12 +416,13 @@ Frame Contents
                          Metadata & Request Data
 ```
 
+* __Frame Type__: (16) 0x04
 * __Flags__:
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More Fragments Follow This Fragment.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
-### Request Fire-n-Forget Frame
+### REQUEST_FNF (Fire-n-Forget) Frame (0x05)
 
 Frame Contents
 
@@ -432,12 +437,13 @@ Frame Contents
                           Metadata & Request Data
 ```
 
+* __Frame Type__: (16) 0x05
 * __Flags__:
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More Fragments Follow This Fragment.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
-### Request Stream Frame
+### REQUEST_STREAM Frame (0x06)
 
 Frame Contents
 
@@ -454,6 +460,7 @@ Frame Contents
                           Metadata & Request Data
 ```
 
+* __Frame Type__: (16) 0x06
 * __Flags__:
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More Fragments Follow This Fragment.
@@ -462,7 +469,7 @@ Frame Contents
 
 See Flow Control: Reactive Stream Semantics for more information on RequestN behavior.
 
-### Request Channel Frame
+### REQUEST_CHANNEL Frame (0x07)
 
 Frame Contents
 
@@ -479,6 +486,7 @@ Frame Contents
                            Metadata & Request Data
 ```
 
+* __Frame Type__: (16) 0x07
 * __Flags__:
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More Fragments Follow This Fragment.
@@ -492,7 +500,7 @@ A requester MUST __not__ send PAYLOAD frames after the REQUEST_CHANNEL frame unt
 
 See Flow Control: Reactive Stream Semantics for more information on RequestN behavior.
 
-### Request N Frame
+### REQUEST_N Frame (0x08)
 
 Frame Contents
 
@@ -508,13 +516,14 @@ Frame Contents
     +---------------------------------------------------------------+
 ```
 
+* __Frame Type__: (16) 0x08
 * __Flags__:
      * (__M__)etadata: Metadata __NOT__ present
 * __Request N__: 32-bit signed integer value of items to request. Only positive values are allowed.
 
 See Flow Control: Reactive Stream Semantics for more information on RequestN behavior.
 
-### Cancel Frame
+### CANCEL Frame (0x09)
 
 Frame Contents
 
@@ -529,10 +538,11 @@ Frame Contents
                                 Metadata
 ```
 
+* __Frame Type__: (16) 0x09
 * __Flags__:
      * (__M__)etadata: Metadata present
 
-### Response Frame
+### PAYLOAD Frame (0x0A)
 
 Frame Contents
 
@@ -547,6 +557,7 @@ Frame Contents
                          Metadata & Response Data
 ```
 
+* __Frame Type__: (16) 0x0A
 * __Flags__:
     * (__M__)etadata: Metadata Present.
     * (__F__)ollows: More fragments follow this fragment.
@@ -560,7 +571,7 @@ A Response is generally referred to as a NEXT.
 
 A Response with the Complete Bit set is referred to as a COMPLETE.
 
-### Metadata Push Frame
+### METADATA_PUSH Frame (0x0C)
 
 A Metadata Push frame can be used to send asynchronous metadata notifications from a Requester or
 Responder to its peer. Metadata MUST be scoped to the connection by setting Stream ID to 0.
@@ -580,11 +591,12 @@ Frame Contents
                                 Metadata
 ```
 
+* __Frame Type__: (16) 0x0C
 * __Flags__:
      * (__M__)etadata: Metadata _always_ present
 * __Stream ID__: Must be 0 to pertain to the entire connection.
 
-### Extension Frame
+### EXT (Extension) Frame (0x3F)
 
 The general format for an extension frame is given below.
 
@@ -956,7 +968,7 @@ A Server implementation MAY use CONNECTION_ERROR or REJECTED_RESUME as it sees f
 
 Leasing semantics are NOT assumed to carry over from previous connections when resuming. LEASE semantics MUST be restarted upon a new connection by sending a LEASE frame from the server.
 
-#### Resume Frame
+#### RESUME Frame (0x0D)
 
 The general format for a Resume frame is given below.
 
@@ -995,7 +1007,7 @@ RESUME frames MUST always use Stream ID 0 as they pertain to the connection.
 * __Last Received Server Position__: (64) The last implied position the client received from the server.
 * __First Available Client Position__: (64) The earliest position that the client can rewind back to prior to resending frames.
 
-#### Resume OK Frame
+#### RESUME_OK Frame
 
 The general format for a Resume OK frame is given below.
 
