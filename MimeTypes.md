@@ -5,7 +5,7 @@ This document provides a guidance for the mime types of these payloads.
 
 #### Metadata
 
-Reactive Socket provides a default mime type for metadata payloads and all implementations of the protocol MUST use this default, unless overridden by the user.
+ReactiveSocket provides a default mime type for metadata payloads and all implementations of the protocol MUST use this default, unless overridden by the user.
 
 ##### Overview
 
@@ -31,4 +31,4 @@ Indefinite length map (CBOR Major Type 5)
 
 #### Data
 
-Reactive Socket does not provide any default mime type for the data payload. Applications must pass an appropriate data payload mime type in the setup frame as specified by the protocol.
+ReactiveSocket does not provide any default mime type for the data payload. Applications must pass an appropriate data payload mime type in the setup frame as specified by the protocol.

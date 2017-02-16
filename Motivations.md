@@ -156,7 +156,7 @@ Beyond the interaction models above, there are other behaviors that can benefit 
 
 ##### single-response vs multi-response
 
-One key difference between single-response and multi-response is how the Reactive Socket stack delivers data to the application: A single-response might be carried across multiple frames, and be part of a larger RS connection that is streaming multiple messages multiplexed. But single-response means the application only gets its data when the entire response is received. While multi-response delivers it piecemeal. This could allow the user to design its service with multi-response in mind, and then the client can start processing the data as soon as it receives the first chunk.
+One key difference between single-response and multi-response is how the ReactiveSocket stack delivers data to the application: A single-response might be carried across multiple frames, and be part of a larger RS connection that is streaming multiple messages multiplexed. But single-response means the application only gets its data when the entire response is received. While multi-response delivers it piecemeal. This could allow the user to design its service with multi-response in mind, and then the client can start processing the data as soon as it receives the first chunk.
 
 ##### Bi-Directional
 
@@ -202,7 +202,7 @@ There is no defined mechanism for flow control from responder (typically server)
 
 Despite its ubiquity, REST alone is insufficient and inappropriate for defining application semantics. 
 
-What about HTTP/2 though? Doesn't it resolve the HTTP/1 issues and address the motivations of ReactiveSockets?
+What about HTTP/2 though? Doesn't it resolve the HTTP/1 issues and address the motivations of ReactiveSocket?
 
 Unfortunately, no. HTTP/2 is MUCH better for browsers and request/response document transfer, but does not expose the desired behaviors and interaction models for applications as described earlier in this document.
 
