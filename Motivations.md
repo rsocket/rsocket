@@ -1,6 +1,6 @@
 ## Motivations
 
-Large distributed systems are often implemented in a modular fashion by different teams using a variety of technologies and programming languages. The pieces need to communicate reliably and support rapid, independent evolution. Effective and scalable communication between modules is a crucial concern in distributed systems. It significantly affects how much latency users experience and the amount of resources required to build and run the system. 
+Large distributed systems are often implemented in a modular fashion by different teams using a variety of technologies and programming languages. The pieces need to communicate reliably and support rapid, independent evolution. Effective and scalable communication between modules is a crucial concern in distributed systems. It significantly affects how much latency users experience and the amount of resources required to build and run the system.
 
 Architectural patterns documented in the [Reactive Manifesto](http://www.reactivemanifesto.org) and implemented in libraries such as [Reactive Streams](http://www.reactive-streams.org) and [Reactive Extensions](http://reactivex.io) favor asynchronous messaging and embrace communication patterns beyond request/response. This "ReactiveSocket" protocol is a formal communication protocol that embraces the "reactive" principles.
 
@@ -8,7 +8,7 @@ Following are motivations for defining a new protocol:
 
 #### Message Driven
 
-Network communication is asynchronous. The ReactiveSocket protocol embraces this and models all communication as multiplexed streams of messages over a single network connection and never synchronously blocks while waiting for a response. 
+Network communication is asynchronous. The ReactiveSocket protocol embraces this and models all communication as multiplexed streams of messages over a single network connection and never synchronously blocks while waiting for a response.
 
 The [Reactive Manifesto](http://www.reactivemanifesto.org) states:
 
@@ -39,7 +39,7 @@ It continues, discussing persistent connections:
 
 ReactiveSocket supports two forms of application-level flow control to help protect both client and server resources from being overwhelmed.
 
-This protocol is designed for use both in datacenter, server-to-server, use cases, as well as server-to-device use cases over the internet, such as to mobile devices or browsers. 
+This protocol is designed for use both in datacenter, server-to-server, use cases, as well as server-to-device use cases over the internet, such as to mobile devices or browsers.
 
 ##### "Reactive Stream" `request(n)` Async Pull
 
@@ -49,7 +49,7 @@ ReactiveSocket allows for the `request(n)` signal to be composed over network bo
 
 ##### Leasing
 
-The second form of flow control is primarily focused on server-to-server use cases in a data center. When enabled, a responder (typically a server) can issue leases to the requester based upon its knowledge of its capacity in order to control requests rates. On the requester side, this enables application level load balancing for sending messages only to responders (servers) that have signalled capacity. This signal from server to client allows for more intelligent routing and load balancing algorithms in data centers with clusters of machines. 
+The second form of flow control is primarily focused on server-to-server use cases in a data center. When enabled, a responder (typically a server) can issue leases to the requester based upon its knowledge of its capacity in order to control requests rates. On the requester side, this enables application level load balancing for sending messages only to responders (servers) that have signalled capacity. This signal from server to client allows for more intelligent routing and load balancing algorithms in data centers with clusters of machines.
 
 
 #### Polyglot Support
@@ -68,7 +68,7 @@ Thus, ReactiveSocket defines application layer semantics over these network tran
 
 A protocol that uses network resources inefficiently (repeated handshakes and connection setup and tear down overhead, bloated message format, etc.) can greatly increase the perceived latency of a system. Also, without flow control semantics, a single poorly written module can overrun the rest of the system when dependent services slow down, potentially causing retry storms that put further pressure on the system. [Hystrix](https://github.com/Netflix/Hystrix/wiki#problem) is an example solution trying to address the problems of synchronous request/response. It comes [at a cost](https://github.com/Netflix/Hystrix/wiki/FAQ#what-is-the-processing-overhead-of-using-hystrix) though in overhead and complexity.
 
-Additionally, a poorly chosen communication protocol wastes server resources (CPU, memory, network bandwidth). While that may be acceptable for smaller deployments, large systems with hundreds or thousands of nodes multiply the somewhat small inefficiencies into noticeable excess. Running with a huge footprint leaves less room for expansion as server resources are relatively cheap but not infinite. Managing giant clusters is much more expensive and less nimble even with good tools. And often forgotten, the larger a cluster is, the more operationally complex it is, which becomes an availability concern. 
+Additionally, a poorly chosen communication protocol wastes server resources (CPU, memory, network bandwidth). While that may be acceptable for smaller deployments, large systems with hundreds or thousands of nodes multiply the somewhat small inefficiencies into noticeable excess. Running with a huge footprint leaves less room for expansion as server resources are relatively cheap but not infinite. Managing giant clusters is much more expensive and less nimble even with good tools. And often forgotten, the larger a cluster is, the more operationally complex it is, which becomes an availability concern.
 
 ReactiveSocket seeks to:
 
@@ -87,16 +87,16 @@ ReactiveSocket seeks to:
 
 An inappropriate protocol increases the costs of developing a system. It can be a mismatched abstraction that forces the design of the system into the mold it allows. Then developers spend extra time working around its shortcomings to handle errors and achieve acceptable performance. In a polyglot environment this problem is amplified as different languages will use different approaches to solve this problem and requires extra coordination among teams to do so. To date the defacto standard is HTTP and everything is a request/response. In some cases this might not be the ideal communication model for a given feature.
 
-One such example is push notifications. Using request/response forces an application to do polling where the client consistently sends requests to check the server for data. One does not need to look far to find examples of applications doing high volumes of requests/second just to poll and be told there is nothing for them. This is wasteful for clients, servers, and networks, costs money, increases infrastructure size, operational complexity and thus availability. Generally it also adds latency to the user experience in receiving a notification, as polling is scaled back to longer intervals in an attempt to reduce costs. 
+One such example is push notifications. Using request/response forces an application to do polling where the client consistently sends requests to check the server for data. One does not need to look far to find examples of applications doing high volumes of requests/second just to poll and be told there is nothing for them. This is wasteful for clients, servers, and networks, costs money, increases infrastructure size, operational complexity and thus availability. Generally it also adds latency to the user experience in receiving a notification, as polling is scaled back to longer intervals in an attempt to reduce costs.
 
 For this and other reasons, ReactiveSocket is not limited to just one interaction model. The various supported interaction models described below open up powerful new possibilities for system design:
 
 
 ##### Fire-and-Forget
 
-Fire-and-forget is an optimization of request/response that is useful when a response is not needed. It allows for significant performance optimizations, not just in saved network usage by skipping the response, but also in client and server processing time as no bookkeeping is needed to wait for and associate a response or cancellation request. 
+Fire-and-forget is an optimization of request/response that is useful when a response is not needed. It allows for significant performance optimizations, not just in saved network usage by skipping the response, but also in client and server processing time as no bookkeeping is needed to wait for and associate a response or cancellation request.
 
-This interaction model is useful for use cases that support lossiness, such as non-critical event logging. 
+This interaction model is useful for use cases that support lossiness, such as non-critical event logging.
 
 Usage can be thought of like this:
 
@@ -106,7 +106,7 @@ Future<Void> completionSignalOfSend = socketClient.fireAndForget(message);
 
 ##### Request/Response (single-response)
 
-Standard request/response semantics are still supported, and still expected to represent the majority of requests over a ReactiveSocket connection. These request/response interactions can be considered optimized "streams of only 1 response", and are asynchronous messages multiplexed over a single connection. 
+Standard request/response semantics are still supported, and still expected to represent the majority of requests over a ReactiveSocket connection. These request/response interactions can be considered optimized "streams of only 1 response", and are asynchronous messages multiplexed over a single connection.
 
 The consumer "waits" for the response message, so it looks like a typical request/response, but underneath it never synchronously blocks.
 
@@ -116,7 +116,7 @@ Usage can be thought of like this:
 Future<Payload> response = socketClient.requestResponse(requestPayload);
 ```
 
-##### Request/Stream (multi-response, finite) 
+##### Request/Stream (multi-response, finite)
 
 Extending from request/response is request/stream, which allows multiple values to be streamed back. Think of this as a "collection" or "list" response, but instead of getting back all the data as a single response, each element is streamed back in order.
 
@@ -134,7 +134,7 @@ Publisher<Payload> response = socketClient.requestStream(requestPayload);
 
 ##### Channel
 
-A channel is bi-directional, with a stream in both directions. 
+A channel is bi-directional, with a stream in both directions.
 
 An example use case that benefits from this interaction model is:
 
@@ -142,7 +142,7 @@ An example use case that benefits from this interaction model is:
 - deltas/diffs are emitted from server to client as changes occur
 - client update the subscription over time to add/remove criteria/topics/etc
 
-Without a bi-directional channel, the client would have to cancel the initial request, re-request and receive all data from scratch, rather than just updating the subscription and efficiently getting just the difference. 
+Without a bi-directional channel, the client would have to cancel the initial request, re-request and receive all data from scratch, rather than just updating the subscription and efficiently getting just the difference.
 
 Usage can be thought of like this:
 
@@ -152,15 +152,15 @@ Publisher<Payload> output = socketClient.requestChannel(Publisher<Payload> input
 
 #### Behaviors
 
-Beyond the interaction models above, there are other behaviors that can benefit applications and system efficiency. 
+Beyond the interaction models above, there are other behaviors that can benefit applications and system efficiency.
 
 ##### single-response vs multi-response
 
-One key difference between single-response and multi-response is how the Reactive Socket stack delivers data to the application: A single-response might be carried across multiple frames, and be part of a larger RS connection that is streaming multiple messages multiplexed. But single-response means the application only gets its data when the entire response is received. While multi-response delivers it piecemeal. This could allow the user to design its service with multi-response in mind, and then the client can start processing the data as soon as it receives the first chunk.
+One key difference between single-response and multi-response is how the ReactiveSocket stack delivers data to the application: A single-response might be carried across multiple frames, and be part of a larger RS connection that is streaming multiple messages multiplexed. But single-response means the application only gets its data when the entire response is received. While multi-response delivers it piecemeal. This could allow the user to design its service with multi-response in mind, and then the client can start processing the data as soon as it receives the first chunk.
 
 ##### Bi-Directional
 
-ReactiveSocket supports bi-directional requests where both client and server can act as requester or responder. This allows a client (such as a user device) to act as a responder to requests from the server. 
+ReactiveSocket supports bi-directional requests where both client and server can act as requester or responder. This allows a client (such as a user device) to act as a responder to requests from the server.
 
 For example, a server could query clients for trace debug information, state, etc. This can be used to reduce infrastructure scaling requirements by allowing server-side to query when needed instead of having millions/billions of clients constantly submitting data that may only occasionally be needed. This also opens up future interaction models currently not envisioned between client and server.
 
@@ -173,9 +173,9 @@ All streams (including request/response) support cancellation to allow efficient
 
 Following is a brief review of some protocols reviewed before deciding to create ReactiveSocket. It is not trying to be exhaustive or detailed. It also does not seek to criticize the various protocols, as they all are good at what they are built for. This section is meant solely to express that existing protocols did not sufficiently meet the requirements that motivated the creation of ReactiveSocket.
 
-For context: 
+For context:
 
-- ReactiveSocket is an OSI Layer 5/6, or TCP/IP Application Layer protocol. 
+- ReactiveSocket is an OSI Layer 5/6, or TCP/IP Application Layer protocol.
 - It is intended for use over duplex, binary transport protocols that are TCP-like in behavior (described further [here](https://github.com/ReactiveSocket/reactivesocket/blob/master/Protocol.md#transport-protocol)).
 
 #### TCP & QUIC
@@ -200,9 +200,9 @@ These limited application semantics generally requires an application protocol t
 
 There is no defined mechanism for flow control from responder (typically server) to requestor (typically client). HTTP/2 does flow control at the byte level, not the application level. There is no defined mechanism for communicating requestor (typically server) availability other than failing a request (503). It does not support interaction models such as fire-and-forget, and streaming models are inefficient (chunked encoding or SSE, which is ASCII based).
 
-Despite its ubiquity, REST alone is insufficient and inappropriate for defining application semantics. 
+Despite its ubiquity, REST alone is insufficient and inappropriate for defining application semantics.
 
-What about HTTP/2 though? Doesn't it resolve the HTTP/1 issues and address the motivations of ReactiveSockets?
+What about HTTP/2 though? Doesn't it resolve the HTTP/1 issues and address the motivations of ReactiveSocket?
 
 Unfortunately, no. HTTP/2 is MUCH better for browsers and request/response document transfer, but does not expose the desired behaviors and interaction models for applications as described earlier in this document.
 
@@ -220,7 +220,7 @@ Additionally, "push promises" are focused on filling browser caches for standard
 
 This means we still need SSE or WebSockets (and SSE is a text protocol so requires Base64 encoding to UTF-8) for push.
 
-HTTP/2 was meant as a better HTTP/1.1, primarily for document retrieval in browsers for websites. We can do better than HTTP/2 for applications. 
+HTTP/2 was meant as a better HTTP/1.1, primarily for document retrieval in browsers for websites. We can do better than HTTP/2 for applications.
 
 #### MQTT, AMQP, ZMTP
 

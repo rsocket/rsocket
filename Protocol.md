@@ -1,14 +1,14 @@
 ## Status
 
-This protocol is currently a draft for the final specifications. 
+This protocol is currently a draft for the final specifications.
 Current version of the protocol is __0.2__ (Major Version: 0, Minor Version: 2).
 
 ## Introduction
 
 Specify an application protocol for [Reactive Streams](http://www.reactive-streams.org/) semantics across an asynchronous, binary
-boundary. For more information, please see [Reactive Socket](http://reactivesocket.io/).
+boundary. For more information, please see [ReactiveSocket](http://reactivesocket.io/).
 
-ReactiveSockets assumes an operating paradigm. These assumptions are:
+ReactiveSocket assumes an operating paradigm. These assumptions are:
 - one-to-one communication
 - non-proxied communication. Or if proxied, the ReactiveSocket semantics and assumptions are preserved across the proxy.
 - no state preserved across [transport protocol](#transport-protocol) sessions by the protocol
@@ -22,7 +22,7 @@ Byte ordering is big endian for all fields.
 * __Frame__: A single message containing a request, response, or protocol processing.
 * __Fragment__: A portion of an application message that has been partitioned for inclusion in a Frame.
 See [Fragmentation and Reassembly](#fragmentation-and-reassembly).
-* __Transport__: Protocol used to carry ReactiveSockets protocol. One of WebSockets, TCP, or Aeron. The transport MUST
+* __Transport__: Protocol used to carry ReactiveSocket protocol. One of WebSockets, TCP, or Aeron. The transport MUST
 provide capabilities mentioned in the [transport protocol](#transport-protocol) section.
 * __Stream__: Unit of operation (request/response, etc.). See [Motivations](Motivations.md).
 * __Request__: A stream request. May be one of four types. As well as request for more items or cancellation of previous request.
@@ -90,7 +90,7 @@ When using a transport protocol providing framing, the ReactiveSocket frame is s
 ```
     +-----------------------------------------------+
     |                ReactiveSocket Frame          ...
-    |                                              
+    |
     +-----------------------------------------------+
 ```
 
@@ -103,7 +103,7 @@ When using a transport protocol that does not provide compatible framing, the Fr
     |                    Frame Length               |
     +-----------------------------------------------+
     |                ReactiveSocket Frame          ...
-    |                                              
+    |
     +-----------------------------------------------+
 ```
 
@@ -128,7 +128,7 @@ ReactiveSocket frames begin with a ReactiveSocket Frame Header. The general layo
 ```
 
 * __Stream ID__: (32) Positive signed integer representing the stream Identifier for this frame or 0 to indicate the entire connection.
-  * Transport protocols that include demultiplexing, such as HTTP/2, MAY omit the Stream ID field if all parties agree. The means of negotiation and agreement is left to the transport protocol. 
+  * Transport protocols that include demultiplexing, such as HTTP/2, MAY omit the Stream ID field if all parties agree. The means of negotiation and agreement is left to the transport protocol.
 * __Frame Type__: (6 = max 64) Type of Frame.
 * __Flags__: Any Flag bit not specifically indicated in the frame type should be set to 0 when sent and not interpreted on
 reception. Flags generally depend on Frame Type, but all frame types must provide space for the following flags:
@@ -269,7 +269,7 @@ rules MAY be used for handling layout. For example, `application/x.netflix+cbor`
 * __Setup Data__: includes payload describing connection capabilities of the endpoint sending the
 Setup header.
 
-__NOTE__: A server that receives a SETUP frame that has (__R__)esume Enabled set, but does not support resuming operation, must reject the SETUP with an ERROR. 
+__NOTE__: A server that receives a SETUP frame that has (__R__)esume Enabled set, but does not support resuming operation, must reject the SETUP with an ERROR.
 
 ### ERROR Frame (0x0B)
 
@@ -300,7 +300,7 @@ Frame Contents
 A Stream ID of 0 means the error pertains to the connection. Including connection establishment. A positive non-0 Stream ID
 means the error pertains to a given stream.
 
-The Error Data is typically an Exception message, but could include stringified stacktrace information if appropriate.  
+The Error Data is typically an Exception message, but could include stringified stacktrace information if appropriate.
 
 #### Error Codes
 
@@ -350,7 +350,7 @@ Frame Contents
                                 Metadata
 ```
 
-* __Frame Type__: (16) 0x02 
+* __Frame Type__: (16) 0x02
 * __Flags__:
      * (__M__)etadata: Metadata present
 * __Time-To-Live (TTL)__: Time (in milliseconds) for validity of LEASE from time of reception
@@ -494,7 +494,7 @@ Frame Contents
 * __Initial Request N__: 32-bit signed integer representing the initial request N value for channel. Only positive values are allowed.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
-A requester MUST send only __one__ REQUEST_CHANNEL frame. Subsequent messages from requester to responder MUST be sent as PAYLOAD frames. 
+A requester MUST send only __one__ REQUEST_CHANNEL frame. Subsequent messages from requester to responder MUST be sent as PAYLOAD frames.
 
 A requester MUST __not__ send PAYLOAD frames after the REQUEST_CHANNEL frame until the responder sends a REQUEST_N frame granting credits for number of PAYLOADs able to be sent.
 
@@ -1002,7 +1002,7 @@ RESUME frames MUST always use Stream ID 0 as they pertain to the connection.
     * (__M__)etadata: Metadata __never__ Present.
 * __Major Version__: (16) Major version number of the protocol.
 * __Minor Version__: (16) Minor version number of the protocol.
-* __Resume Identification Token Length__: (16 = max 65,536 bytes) Resume Identification Token Length in bytes. 
+* __Resume Identification Token Length__: (16 = max 65,536 bytes) Resume Identification Token Length in bytes.
 * __Resume Identification Token__: TToken used for client resume identification. Same Resume Identification used in the initial SETUP by the client.
 * __Last Received Server Position__: (64) The last implied position the client received from the server.
 * __First Available Client Position__: (64) The earliest position that the client can rewind back to prior to resending frames.
