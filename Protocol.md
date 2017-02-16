@@ -1007,7 +1007,7 @@ RESUME frames MUST always use Stream ID 0 as they pertain to the connection.
 * __Last Received Server Position__: (64) The last implied position the client received from the server.
 * __First Available Client Position__: (64) The earliest position that the client can rewind back to prior to resending frames.
 
-#### RESUME_OK Frame
+#### RESUME_OK Frame (0x0E)
 
 The general format for a Resume OK frame is given below.
 
