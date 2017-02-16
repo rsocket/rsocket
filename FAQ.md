@@ -1,6 +1,6 @@
 ### FAQ
 
-#### Why a new protocol? 
+#### Why a new protocol?
 
 The full explanation of motivations can be found in [Motivations.md](https://github.com/ReactiveSocket/reactivesocket/blob/master/Motivations.md).
 
@@ -15,7 +15,7 @@ Some of the key reasons include:
 
 #### Why not HTTP/2?
 
-HTTP/2 is **much** better for browsers and request/response document transfer, but unfortunately does not expose interaction models beyond request/response, nor support application-level flow control. 
+HTTP/2 is **much** better for browsers and request/response document transfer, but unfortunately does not expose interaction models beyond request/response, nor support application-level flow control.
 
 Here are some quotes from the HTTP/2 spec and FAQ that are useful to provide context on what HTTP/2 was targeting:
 
@@ -37,9 +37,9 @@ See also the ReactiveSocket [Motivations document](https://github.com/ReactiveSo
 
 #### Why "Reactive Streams" `request(n)` Flow Control?
 
-Without application feedback in terms of work units done (not bytes), it is easy to cause "head of line blocking", overwhelm network and application buffers, and produce more data on the server than the client can handle. This is particularly bad when multiplexing multiple streams over a single connection where one stream can starve all others. Application layer `request(n)` semantics allows the consumer to signal how much it can receive on each stream, and allow the producer to interleave multiple streams together. 
+Without application feedback in terms of work units done (not bytes), it is easy to cause "head of line blocking", overwhelm network and application buffers, and produce more data on the server than the client can handle. This is particularly bad when multiplexing multiple streams over a single connection where one stream can starve all others. Application layer `request(n)` semantics allows the consumer to signal how much it can receive on each stream, and allow the producer to interleave multiple streams together.
 
-Following are further details on some problems that can occur when using TCP and relying solely on its flow control: 
+Following are further details on some problems that can occur when using TCP and relying solely on its flow control:
 
 - Data is buffered by TCP on the sender and receiver side which means that understanding what is done on the subscriber is not possible.
 - A sender who needs to send a large work unit (larger than the buffering on the TCP sender or receiver sides) is stuck in a scenario of poor behavior where the TCP connection will cycle between full and empty, and under-utilize the buffering drastically (as well as the throughput).
@@ -47,7 +47,7 @@ Following are further details on some problems that can occur when using TCP and
 
 It all comes down to what TCP is designed to do (not overrun the receiver OS buffer space or network queues) and what Reactive Streams flow control is designed to do (allow for push/pull application work unit semantics, additional dissemination models, and application control of when it is ready for more or not). This clear separation of concerns is necessary for any real system to operate efficiently.
 
-This illustrates why every single solution that doesn't have built-in flow control at the application level (pretty much every solution mentioned aside from MQTT, AMQP, and STOMP) is not well-suited for usage, and why ReactiveSocket incorporates application-level flow control as a first-class requirement. 
+This illustrates why every single solution that doesn't have built-in flow control at the application level (pretty much every solution mentioned aside from MQTT, AMQP, and STOMP) is not well-suited for usage, and why ReactiveSocket incorporates application-level flow control as a first-class requirement.
 
 #### What about Session Continuation across connections?
 
@@ -60,7 +60,7 @@ This is effectively the same as the HTTP/2 requirement to exchange SETTINGS fram
 - <https://http2.github.io/http2-spec/#ConnectionHeader>
 - <https://http2.github.io/http2-spec/#discover-http>
 
-HTTP/2 and ReactiveSocket both require a stateful connection with an initial exchange. 
+HTTP/2 and ReactiveSocket both require a stateful connection with an initial exchange.
 
 #### Transport Layer
 
@@ -74,9 +74,9 @@ Proxies that behave correctly for HTTP/2 will behave correctly for ReactiveSocke
 
 #### Frame Length
 
-On TCP, it will be included. On Aeron or WebSockets it is not needed. 
+On TCP, it will be included. On Aeron or WebSockets it is not needed.
 
-If there is some reason to include it in Aeron or WebSockets we are fine with changing. 
+If there is some reason to include it in Aeron or WebSockets we are fine with changing.
 
 #### State Spanning Connections
 
@@ -94,9 +94,9 @@ There is no way to fully future-proof something, but we have made attempts to fu
 - Separation of data and metadata
 - Use of MimeType in Setup to eliminate coupling with encoding
 
-Additionally, we have stuck within connection-oriented semantics of HTTP/2 and TCP so that connection behavior is not abnormal or special. 
+Additionally, we have stuck within connection-oriented semantics of HTTP/2 and TCP so that connection behavior is not abnormal or special.
 
-Beyond those factors, TCP has existed since 1977. We do not expect it to be eliminated in the near future. Quic looks to be a legit alternative to TCP in the coming years. Since HTTP/2 is already working over Quic, we see no reason why Reactive Socket will not also work over Quic. 
+Beyond those factors, TCP has existed since 1977. We do not expect it to be eliminated in the near future. Quic looks to be a legit alternative to TCP in the coming years. Since HTTP/2 is already working over Quic, we see no reason why ReactiveSocket will not also work over Quic.
 
 #### Prioritization, QoS, OOB
 
@@ -147,7 +147,7 @@ Relying on the TCP flow control doesn't work, because we multiplex the streams o
 
 #### How does ReactiveSocket flow control behave?
 
-There are two types of flow control: 
+There are two types of flow control:
 
 - One is provided by the request-n semantics defined in Reactive Streams (please [read the spec][Reactive Streams] for exhaustive details).
 - The second is provided via the lease semantics defined in the [Protocol document](https://github.com/ReactiveSocket/reactivesocket/blob/master/Protocol.md#lease-semantics).
@@ -164,7 +164,7 @@ For instance, when a client doesn't have a valid lease, it exposes a "0.0" avail
 
 #### Is multiplexing equivalent to pipelining?
 
-No, pipelining requires reading the responses in the order of the requests. 
+No, pipelining requires reading the responses in the order of the requests.
 
 For example, with pipelining: a client sends `reqA`, `reqB`, `reqC`. It has to receive the responses in this order: `respA`, `respB`, `respC`.
 
@@ -188,9 +188,9 @@ The interaction models could be reduced to just one "request-channel". Every oth
 - Ease of use from the client point of view.
 - Performance.
 
-#### So why the "ReactiveSocket" name? 
+#### So why the "ReactiveSocket" name?
 
-Isn't "Reactive" a totally [hyped](http://www.gartner.com/technology/research/methodologies/hype-cycle.jsp) buzzword? 
+Isn't "Reactive" a totally [hyped](http://www.gartner.com/technology/research/methodologies/hype-cycle.jsp) buzzword?
 
 This library is directly related to several projects where "Reactive" is an important part of their name and architectural pattern. Thus the choice was made to retain this relationship in the name. Specifically:
 
@@ -199,7 +199,7 @@ This library is directly related to several projects where "Reactive" is an impo
 - [Reactive Extensions] with [RxJava] and [RxJS] in particular.
 - [Reactive Manifesto] – particularly the "message-driven" aspect.
 
-ReactiveSocket implements, uses, or follows the principles in these projects and libraries, thus the name. 
+ReactiveSocket implements, uses, or follows the principles in these projects and libraries, thus the name.
 
 [Reactive Streams]: http://www.reactive-streams.org
 [Reactive Streams IO]: https://github.com/reactive-streams/reactive-streams-io
