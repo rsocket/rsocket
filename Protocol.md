@@ -204,6 +204,7 @@ to odd/even values. In other words, a client MUST generate odd Stream IDs and a 
 | __RESUME_OK__                  | 0x0E | __Resume OK__ : Sent in response to a RESUME if resuming operation possible (optional) |
 | __EXT__                        | 0x3F | __Extension Header__: Used To Extend more frame types as well as extensions. |
 
+<a name="setup-frame"></a>
 ### SETUP Frame (0x01)
 
 Setup frames MUST always use Stream ID 0 as they pertain to the connection.
@@ -360,6 +361,7 @@ A Responder implementation MAY stop all further requests by sending a LEASE with
 
 When a LEASE expires due to time, the value of the __Number of Requests__ that a Requester may make is implicitly 0.
 
+<a name="keepalive-frame"></a>
 ### KEEPALIVE Frame (0x03)
 
 KEEPALIVE frames MUST always use Stream ID 0 as they pertain to the Connection.
