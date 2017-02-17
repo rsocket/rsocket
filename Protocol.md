@@ -553,7 +553,7 @@ Frame Contents
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                           Stream ID                           |
     +-----------+-+-+-+-+-+---------+-------------------------------+
-    |Frame Type |0|M|F|N|C|  Flags  |
+    |Frame Type |0|M|F|C|N|  Flags  |
     +-------------------------------+-------------------------------+
                          Metadata & Data
 ```
@@ -562,10 +562,10 @@ Frame Contents
 * __Flags__:
     * (__M__)etadata: Metadata Present.
     * (__F__)ollows: More fragments follow this fragment.
-    * (__N__)ext: bit to indicate Next (Payload Data and/or Metadata present).
-       * If set, `onNext(Payload)` or equivalent will be invoked on Subscriber/Observer.
     * (__C__)omplete: bit to indicate COMPLETE.
        * If set, `onComplete()` or equivalent will be invoked on Subscriber/Observer.
+    * (__N__)ext: bit to indicate Next (Payload Data and/or Metadata present).
+       * If set, `onNext(Payload)` or equivalent will be invoked on Subscriber/Observer.
 * __Payload Data__: payload for Reactive Streams onNext.
 
 A Payload is generally referred to as a NEXT.
