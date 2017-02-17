@@ -106,7 +106,7 @@ When using a transport protocol that does not provide compatible framing, the Fr
     +-----------------------------------------------+
 ```
 
-* __Frame Length__: (24 = max 16,777,216 bytes) Length of Frame. Excluding Framing Length Field.
+* __Frame Length__: (24 bits = max value 16,777,215) Length of Frame in bytes. Excluding Framing Length Field.
 
 __NOTE__: Byte ordering is big endian.
 
@@ -126,10 +126,10 @@ ReactiveSocket frames begin with a ReactiveSocket Frame Header. The general layo
     +-------------------------------+
 ```
 
-* __Stream ID__: (32) Positive signed integer representing the stream Identifier for this frame or 0 to indicate the entire connection.
+* __Stream ID__: (32 bits = max value 2^31-1 = 2,147,483,647) Positive signed integer representing the stream Identifier for this frame or 0 to indicate the entire connection.
   * Transport protocols that include demultiplexing, such as HTTP/2, MAY omit the Stream ID field if all parties agree. The means of negotiation and agreement is left to the transport protocol. 
-* __Frame Type__: (6 = max 64) Type of Frame.
-* __Flags__: Any Flag bit not specifically indicated in the frame type should be set to 0 when sent and not interpreted on
+* __Frame Type__: (6 bits = max value 63) Type of Frame.
+* __Flags__: (8 bits) Any Flag bit not specifically indicated in the frame type should be set to 0 when sent and not interpreted on
 reception. Flags generally depend on Frame Type, but all frame types must provide space for the following flags:
      * (__I__)gnore: Ignore frame if not understood
      * (__M__)etadata: Metadata present
@@ -166,7 +166,7 @@ If Metadata Length is greater than this value, the entire frame MUST be ignored.
     +---------------------------------------------------------------+
 ```
 
-* __Metadata Length__: (24 = max 16,777,216 bytes) unsigned positive Integer representing the length of Metadata in bytes. Excluding Metadata Length field.
+* __Metadata Length__: (24 bits = max value 16,777,215) Unsigned positive Integer representing the length of Metadata in bytes. Excluding Metadata Length field.
 
 ### Stream Identifiers
 
@@ -244,16 +244,16 @@ Frame Contents
                           Metadata & Setup Payload
 ```
 
-* __Frame Type__: (16) 0x01
-* __Flags__:
+* __Frame Type__: (6 bits = max value 63) 0x01
+* __Flags__: (8 bits)
      * (__R__)esume Enable: Client requests resume capability if possible. Resume Identification Token present.
      * (__M__)etadata: Metadata present
      * (__L__)ease: Will honor LEASE (or not).
      * (__S__)trict: Adhere to strict interpretation of Data and Metadata.
-* __Major Version__: (16) Major version number of the protocol.
-* __Minor Version__: (16) Minor version number of the protocol.
-* __Time Between KEEPALIVE Frames__: Time (in milliseconds) between KEEPALIVE frames that the client will send.
-* __Max Lifetime__: Time (in milliseconds) that a client will allow a server to not respond to a KEEPALIVE before
+* __Major Version__: (16 bits = max value 65,535) Signed positive Integer of Major version number of the protocol.
+* __Minor Version__: (16 bits = max value 65,535) Signed positive Integer of Minor version number of the protocol.
+* __Time Between KEEPALIVE Frames__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed Integer of Time (in milliseconds) between KEEPALIVE frames that the client will send.
+* __Max Lifetime__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed positive Integer of Time (in milliseconds) that a client will allow a server to not respond to a KEEPALIVE before
 it is assumed to be dead.
 * __Resume Identification Token Length__: (16 = max 65,535 bytes) Resume Identification Token Length in bytes. (Not present if R flag is not set)
 * __Resume Identification Token__: Token used for client resume identification (Not present if R flag is not set)
@@ -291,11 +291,12 @@ Frame Contents
                         Metadata & Error Data
 ```
 
-* __Frame Type__: (16) 0x0B
-* __Flags__:
+* __Frame Type__: (6 bits = max value 63) 0x0B
+* __Flags__: (8 bits)
      * (__M__)etadata: Metadata present
-* __Error Code__: Type of Error.
-* __Error Data__: includes payload describing error information. Error Data SHOULD be a UTF-8 encoded string. The string MUST NOT be null terminated.
+* __Error Code__: (32 bits = max value 2^31-1 = 2,147,483,647) Type of Error.
+     * See list of valid Error Codes below.
+* __Error Data__: includes Payload describing error information. Error Data SHOULD be a UTF-8 encoded string. The string MUST NOT be null terminated.
 
 A Stream ID of 0 means the error pertains to the connection. Including connection establishment. A positive non-0 Stream ID
 means the error pertains to a given stream.
@@ -350,11 +351,11 @@ Frame Contents
                                 Metadata
 ```
 
-* __Frame Type__: (16) 0x02 
-* __Flags__:
+* __Frame Type__: (6 bits = max value 63) 0x02 
+* __Flags__: (8 bits)
      * (__M__)etadata: Metadata present
-* __Time-To-Live (TTL)__: Time (in milliseconds) for validity of LEASE from time of reception
-* __Number of Requests__: Number of Requests that may be sent until next LEASE
+* __Time-To-Live (TTL)__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed positive Integer of Time (in milliseconds) for validity of LEASE from time of reception
+* __Number of Requests__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed positive Integer of Number of Requests that may be sent until next LEASE
 
 A Responder implementation MAY stop all further requests by sending a LEASE with a value of 0 for __Number of Requests__ or __Time-To-Live__.
 
@@ -395,11 +396,11 @@ Frame Contents
                                   Data
 ```
 
-* __Frame Type__: (16) 0x03
-* __Flags__:
+* __Frame Type__: (6 bits = max value 63) 0x03
+* __Flags__: (8 bits)
      * (__M__)etadata: Metadata __never__ present
      * (__R__)espond with KEEPALIVE or not
-* __Last Received Position__: (64) Resume Last Received Position (optional. Set to all 0s when not supported.)
+* __Last Received Position__: (64 bits = max value 2^63-1) Signed positive Long of Resume Last Received Position (optional. Set to all 0s when not supported.)
 * __Data__: Data attached to a KEEPALIVE.
 
 ### REQUEST_RESPONSE Frame (0x04)
@@ -417,8 +418,8 @@ Frame Contents
                          Metadata & Request Data
 ```
 
-* __Frame Type__: (16) 0x04
-* __Flags__:
+* __Frame Type__: (6 bits = max value 63) 0x04
+* __Flags__: (8 bits)
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More Fragments Follow This Fragment.
 * __Request Data__: identification of the service being requested along with parameters for the request.
@@ -438,8 +439,8 @@ Frame Contents
                           Metadata & Request Data
 ```
 
-* __Frame Type__: (16) 0x05
-* __Flags__:
+* __Frame Type__: (6 bits = max value 63) 0x05
+* __Flags__: (8 bits)
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More Fragments Follow This Fragment.
 * __Request Data__: identification of the service being requested along with parameters for the request.
@@ -461,11 +462,11 @@ Frame Contents
                           Metadata & Request Data
 ```
 
-* __Frame Type__: (16) 0x06
-* __Flags__:
+* __Frame Type__: (6 bits = max value 63) 0x06
+* __Flags__: (8 bits)
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More Fragments Follow This Fragment.
-* __Initial Request N__: 32-bit signed integer representing the initial request N value for the stream. Only positive values are allowed.
+* __Initial Request N__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed positive Integer representing the initial request N value for the stream. Value must be > 0.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
 See Flow Control: Reactive Stream Semantics for more information on RequestN behavior.
@@ -487,12 +488,12 @@ Frame Contents
                            Metadata & Request Data
 ```
 
-* __Frame Type__: (16) 0x07
-* __Flags__:
+* __Frame Type__: (6 bits = max value 63) 0x07
+* __Flags__: (8 bits)
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More Fragments Follow This Fragment.
     * (__C__)omplete: bit to indicate COMPLETE.
-* __Initial Request N__: 32-bit signed integer representing the initial request N value for channel. Only positive values are allowed.
+* __Initial Request N__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed positive Integer representing the initial request N value for channel. Value must be > 0.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
 A requester MUST send only __one__ REQUEST_CHANNEL frame. Subsequent messages from requester to responder MUST be sent as PAYLOAD frames. 
@@ -517,10 +518,10 @@ Frame Contents
     +---------------------------------------------------------------+
 ```
 
-* __Frame Type__: (16) 0x08
-* __Flags__:
+* __Frame Type__: (6 bits = max value 63) 0x08
+* __Flags__: (8 bits)
      * (__M__)etadata: Metadata __NOT__ present
-* __Request N__: 32-bit signed integer value of items to request. Only positive values are allowed.
+* __Request N__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed positive Integer of value of items to request. Value must be > 0.
 
 See Flow Control: Reactive Stream Semantics for more information on RequestN behavior.
 
@@ -539,8 +540,8 @@ Frame Contents
                                 Metadata
 ```
 
-* __Frame Type__: (16) 0x09
-* __Flags__:
+* __Frame Type__: (6 bits = max value 63) 0x09
+* __Flags__: (8 bits)
      * (__M__)etadata: Metadata present
 
 ### PAYLOAD Frame (0x0A)
@@ -558,8 +559,8 @@ Frame Contents
                          Metadata & Data
 ```
 
-* __Frame Type__: (16) 0x0A
-* __Flags__:
+* __Frame Type__: (6 bits = max value 63) 0x0A
+* __Flags__: (8 bits)
     * (__M__)etadata: Metadata Present.
     * (__F__)ollows: More fragments follow this fragment.
     * (__N__)ext: bit to indicate Next (Payload Data and/or Metadata present).
@@ -592,10 +593,10 @@ Frame Contents
                                 Metadata
 ```
 
-* __Frame Type__: (16) 0x0C
-* __Flags__:
+* __Stream ID__: (32 bits = max value 2^31-1 = 2,147,483,647) Must be 0 to pertain to the entire connection.
+* __Frame Type__: (6 bits = max value 63) 0x0C
+* __Flags__: (8 bits)
      * (__M__)etadata: Metadata _always_ present
-* __Stream ID__: Must be 0 to pertain to the entire connection.
 
 ### EXT (Extension) Frame (0x3F)
 
@@ -614,11 +615,11 @@ The general format for an extension frame is given below.
                           Depends on Extended Type...
 ```
 
-* __Frame Type__: (16) 0x3F
-* __Flags__:
+* __Frame Type__: (6 bits = max value 63) 0x3F
+* __Flags__: (8 bits)
     * (__I__)gnore: Can the frame be ignored if not understood?
     * (__M__)etadata: Metadata Present.
-* __Extended Type__: Extended type information
+* __Extended Type__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed positive Integer of Extended type information
 
 ## Connection Establishment
 
@@ -997,16 +998,16 @@ RESUME frames MUST always use Stream ID 0 as they pertain to the connection.
     +---------------------------------------------------------------+
 ```
 
-* __Frame Type__: (16) 0x0D
-* __Flags__:
+* __Frame Type__: (6 bits = max value 63) 0x0D
+* __Flags__: (8 bits)
     * (__I__)gnore: Frame can __NOT__ be ignored if not understood.
     * (__M__)etadata: Metadata __never__ Present.
-* __Major Version__: (16) Major version number of the protocol.
-* __Minor Version__: (16) Minor version number of the protocol.
-* __Resume Identification Token Length__: (16 = max 65,536 bytes) Resume Identification Token Length in bytes. 
-* __Resume Identification Token__: TToken used for client resume identification. Same Resume Identification used in the initial SETUP by the client.
-* __Last Received Server Position__: (64) The last implied position the client received from the server.
-* __First Available Client Position__: (64) The earliest position that the client can rewind back to prior to resending frames.
+* __Major Version__: (16 bits = max value 65,535) Signed positive Integer of Major version number of the protocol.
+* __Minor Version__: (16 bits = max value 65,535) Signed positive Integer of Minor version number of the protocol.
+* __Resume Identification Token Length__: (16 bits = max value 65,535) Signed positive Integer of Resume Identification Token Length in bytes. 
+* __Resume Identification Token__: Token used for client resume identification. Same Resume Identification used in the initial SETUP by the client.
+* __Last Received Server Position__: (64 bits = max value 2^63-1) Signed positive Long of the last implied position the client received from the server.
+* __First Available Client Position__: (64 bits = max value 2^63-1) Signed positive Long of the earliest position that the client can rewind back to prior to resending frames.
 
 #### RESUME_OK Frame (0x0E)
 
@@ -1028,11 +1029,11 @@ RESUME OK frames MUST always use Stream ID 0 as they pertain to the connection.
     +---------------------------------------------------------------+
 ```
 
-* __Frame Type__: (16) 0x0E
-* __Flags__:
+* __Frame Type__: (6 bits = max value 63) 0x0E
+* __Flags__: (8 bits)
     * (__I__)gnore: Frame can __NOT__ be ignored if not understood.
     * (__M__)etadata: Metadata __never__ Present.
-* __Last Received Client Position__: (64) The last implied position the server received from the client
+* __Last Received Client Position__: (64 bits = max value 2^63-1) Signed positive Long of the last implied position the server received from the client
 
 #### Keepalive Position Field
 
