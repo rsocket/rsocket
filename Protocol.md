@@ -106,7 +106,7 @@ When using a transport protocol that does not provide compatible framing, the Fr
     +-----------------------------------------------+
 ```
 
-* __Frame Length__: (24 bits = max value 16,777,215) Length of Frame in bytes. Excluding Framing Length Field.
+* __Frame Length__: (24 bits = max value 16,777,215) Positive integer representing the length of Frame in bytes. Excluding Framing Length Field.
 
 __NOTE__: Byte ordering is big endian.
 
@@ -166,7 +166,7 @@ If Metadata Length is greater than this value, the entire frame MUST be ignored.
     +---------------------------------------------------------------+
 ```
 
-* __Metadata Length__: (24 bits = max value 16,777,215) Unsigned positive Integer representing the length of Metadata in bytes. Excluding Metadata Length field.
+* __Metadata Length__: (24 bits = max value 16,777,215) Positive Integer representing the length of Metadata in bytes. Excluding Metadata Length field.
 
 ### Stream Identifiers
 
