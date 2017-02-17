@@ -517,8 +517,6 @@ Frame Contents
 ```
 
 * __Frame Type__: (16) 0x08
-* __Flags__:
-     * (__M__)etadata: Metadata __NOT__ present
 * __Request N__: 32-bit signed integer value of items to request. Only positive values are allowed.
 
 See Flow Control: Reactive Stream Semantics for more information on RequestN behavior.
@@ -592,8 +590,6 @@ Frame Contents
 ```
 
 * __Frame Type__: (16) 0x0C
-* __Flags__:
-     * (__M__)etadata: Metadata _always_ present
 * __Stream ID__: Must be 0 to pertain to the entire connection.
 
 ### EXT (Extension) Frame (0x3F)
