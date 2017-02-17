@@ -96,7 +96,7 @@ There is no way to fully future-proof something, but we have made attempts to fu
 
 Additionally, we have stuck within connection-oriented semantics of HTTP/2 and TCP so that connection behavior is not abnormal or special. 
 
-Beyond those factors, TCP has existed since 1977. We do not expect it to be eliminated in the near future. Quic looks to be a legit alternative to TCP in the coming years. Since HTTP/2 is already working over Quic, we see no reason why Reactive Socket will not also work over Quic. 
+Beyond those factors, TCP has existed since 1977. We do not expect it to be eliminated in the near future. Quic looks to be a legit alternative to TCP in the coming years. Since HTTP/2 is already working over Quic, we see no reason why ReactiveSocket will not also work over Quic. 
 
 #### Prioritization, QoS, OOB
 

@@ -6,9 +6,9 @@ Current version of the protocol is __0.2__ (Major Version: 0, Minor Version: 2).
 ## Introduction
 
 Specify an application protocol for [Reactive Streams](http://www.reactive-streams.org/) semantics across an asynchronous, binary
-boundary. For more information, please see [Reactive Socket](http://reactivesocket.io/).
+boundary. For more information, please see [ReactiveSocket](http://reactivesocket.io/).
 
-ReactiveSockets assumes an operating paradigm. These assumptions are:
+ReactiveSocket assumes an operating paradigm. These assumptions are:
 - one-to-one communication
 - non-proxied communication. Or if proxied, the ReactiveSocket semantics and assumptions are preserved across the proxy.
 - no state preserved across [transport protocol](#transport-protocol) sessions by the protocol
@@ -22,7 +22,7 @@ Byte ordering is big endian for all fields.
 * __Frame__: A single message containing a request, response, or protocol processing.
 * __Fragment__: A portion of an application message that has been partitioned for inclusion in a Frame.
 See [Fragmentation and Reassembly](#fragmentation-and-reassembly).
-* __Transport__: Protocol used to carry ReactiveSockets protocol. One of WebSockets, TCP, or Aeron. The transport MUST
+* __Transport__: Protocol used to carry ReactiveSocket protocol. One of WebSockets, TCP, or Aeron. The transport MUST
 provide capabilities mentioned in the [transport protocol](#transport-protocol) section.
 * __Stream__: Unit of operation (request/response, etc.). See [Motivations](Motivations.md).
 * __Request__: A stream request. May be one of four types. As well as request for more items or cancellation of previous request.
