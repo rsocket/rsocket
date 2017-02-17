@@ -129,7 +129,7 @@ ReactiveSocket frames begin with a ReactiveSocket Frame Header. The general layo
 * __Stream ID__: (32 bits = max value 2^31-1 = 2,147,483,647) Positive signed integer representing the stream Identifier for this frame or 0 to indicate the entire connection.
   * Transport protocols that include demultiplexing, such as HTTP/2, MAY omit the Stream ID field if all parties agree. The means of negotiation and agreement is left to the transport protocol. 
 * __Frame Type__: (6 bits = max value 63) Type of Frame.
-* __Flags__: (8 bits) Any Flag bit not specifically indicated in the frame type should be set to 0 when sent and not interpreted on
+* __Flags__: (10 bits) Any Flag bit not specifically indicated in the frame type should be set to 0 when sent and not interpreted on
 reception. Flags generally depend on Frame Type, but all frame types must provide space for the following flags:
      * (__I__)gnore: Ignore frame if not understood
      * (__M__)etadata: Metadata present
@@ -245,7 +245,7 @@ Frame Contents
 ```
 
 * __Frame Type__: (6 bits = max value 63) 0x01
-* __Flags__: (8 bits)
+* __Flags__: (10 bits)
      * (__R__)esume Enable: Client requests resume capability if possible. Resume Identification Token present.
      * (__M__)etadata: Metadata present
      * (__R__)esume Enable: Client requests resume capability if possible. Resume Identification Token present.
@@ -293,7 +293,7 @@ Frame Contents
 ```
 
 * __Frame Type__: (6 bits = max value 63) 0x0B
-* __Flags__: (8 bits)
+* __Flags__: (10 bits)
      * (__M__)etadata: Metadata present
 * __Error Code__: (32 bits = max value 2^31-1 = 2,147,483,647) Type of Error.
      * See list of valid Error Codes below.
@@ -353,7 +353,7 @@ Frame Contents
 ```
 
 * __Frame Type__: (6 bits = max value 63) 0x02 
-* __Flags__: (8 bits)
+* __Flags__: (10 bits)
      * (__M__)etadata: Metadata present
 * __Time-To-Live (TTL)__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed positive Integer of Time (in milliseconds) for validity of LEASE from time of reception
 * __Number of Requests__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed positive Integer of Number of Requests that may be sent until next LEASE
@@ -398,7 +398,7 @@ Frame Contents
 ```
 
 * __Frame Type__: (6 bits = max value 63) 0x03
-* __Flags__: (8 bits)
+* __Flags__: (10 bits)
      * (__R__)espond with KEEPALIVE or not
 * __Last Received Position__: (64 bits = max value 2^63-1) Signed positive Long of Resume Last Received Position (optional. Set to all 0s when not supported.)
 * __Data__: Data attached to a KEEPALIVE.
@@ -419,7 +419,7 @@ Frame Contents
 ```
 
 * __Frame Type__: (6 bits = max value 63) 0x04
-* __Flags__: (8 bits)
+* __Flags__: (10 bits)
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More fragments follow this fragment.
 * __Request Data__: identification of the service being requested along with parameters for the request.
@@ -440,7 +440,7 @@ Frame Contents
 ```
 
 * __Frame Type__: (6 bits = max value 63) 0x05
-* __Flags__: (8 bits)
+* __Flags__: (10 bits)
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More fragments follow this fragment.
 * __Request Data__: identification of the service being requested along with parameters for the request.
@@ -463,7 +463,7 @@ Frame Contents
 ```
 
 * __Frame Type__: (6 bits = max value 63) 0x06
-* __Flags__: (8 bits)
+* __Flags__: (10 bits)
     * (__M__)etadata: Metadata present
 * __Initial Request N__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed positive Integer representing the initial request N value for the stream. Value must be > 0.
     * (__F__)ollows: More fragments follow this fragment.
@@ -490,7 +490,7 @@ Frame Contents
 ```
 
 * __Frame Type__: (6 bits = max value 63) 0x07
-* __Flags__: (8 bits)
+* __Flags__: (10 bits)
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More fragments follow this fragment.
     * (__C__)omplete: bit to indicate COMPLETE.
@@ -540,7 +540,7 @@ Frame Contents
 ```
 
 * __Frame Type__: (6 bits = max value 63) 0x09
-* __Flags__: (8 bits)
+* __Flags__: (10 bits)
      * (__M__)etadata: Metadata present
 
 ### PAYLOAD Frame (0x0A)
@@ -559,7 +559,7 @@ Frame Contents
 ```
 
 * __Frame Type__: (6 bits = max value 63) 0x0A
-* __Flags__: (8 bits)
+* __Flags__: (10 bits)
     * (__M__)etadata: Metadata Present.
     * (__F__)ollows: More fragments follow this fragment.
     * (__C__)omplete: bit to indicate COMPLETE.
@@ -613,7 +613,7 @@ The general format for an extension frame is given below.
 ```
 
 * __Frame Type__: (6 bits = max value 63) 0x3F
-* __Flags__: (8 bits)
+* __Flags__: (10 bits)
     * (__I__)gnore: Can the frame be ignored if not understood?
     * (__M__)etadata: Metadata Present.
 * __Extended Type__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed positive Integer of Extended type information
