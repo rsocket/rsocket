@@ -251,8 +251,8 @@ Frame Contents
      * (__R__)esume Enable: Client requests resume capability if possible. Resume Identification Token present.
      * (__L__)ease: Will honor LEASE (or not).
      * (__S__)trict: Adhere to strict interpretation of Data and Metadata.
-* __Major Version__: (16 bits = max value 65,535) Signed positive Integer of Major version number of the protocol.
-* __Minor Version__: (16 bits = max value 65,535) Signed positive Integer of Minor version number of the protocol.
+* __Major Version__: (16 bits = max value 65,535) Positive Integer of Major version number of the protocol.
+* __Minor Version__: (16 bits = max value 65,535) Positive Integer of Minor version number of the protocol.
 * __Time Between KEEPALIVE Frames__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed Integer of Time (in milliseconds) between KEEPALIVE frames that the client will send.
 * __Max Lifetime__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed positive Integer of Time (in milliseconds) that a client will allow a server to not respond to a KEEPALIVE before
 it is assumed to be dead.
@@ -996,9 +996,9 @@ RESUME frames MUST always use Stream ID 0 as they pertain to the connection.
 ```
 
 * __Frame Type__: (6 bits = max value 63) 0x0D
-* __Major Version__: (16 bits = max value 65,535) Signed positive Integer of Major version number of the protocol.
-* __Minor Version__: (16 bits = max value 65,535) Signed positive Integer of Minor version number of the protocol.
-* __Resume Identification Token Length__: (16 bits = max value 65,535) Signed positive Integer of Resume Identification Token Length in bytes. 
+* __Major Version__: (16 bits = max value 65,535) Positive Integer of Major version number of the protocol.
+* __Minor Version__: (16 bits = max value 65,535) Positive Integer of Minor version number of the protocol.
+* __Resume Identification Token Length__: (16 bits = max value 65,535) Positive Integer of Resume Identification Token Length in bytes. 
 * __Resume Identification Token__: Token used for client resume identification. Same Resume Identification used in the initial SETUP by the client.
 * __Last Received Server Position__: (64 bits = max value 2^63-1) Signed positive Long of the last implied position the client received from the server.
 * __First Available Client Position__: (64 bits = max value 2^63-1) Signed positive Long of the earliest position that the client can rewind back to prior to resending frames.
