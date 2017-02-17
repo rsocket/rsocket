@@ -227,7 +227,7 @@ Frame Contents
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                           Stream ID                           |
     +-----------+-+-+-+-+-+---------+-------------------------------+
-    |Frame Type |0|R|M|L|S|  Flags  |
+    |Frame Type |0|M|R|L|S|  Flags  |
     +-----------+-+-+-+-+-+---------+-------------------------------+
     |         Major Version         |        Minor Version          |
     +-------------------------------+-------------------------------+
@@ -246,8 +246,8 @@ Frame Contents
 
 * __Frame Type__: (16) 0x01
 * __Flags__:
-     * (__R__)esume Enable: Client requests resume capability if possible. Resume Identification Token present.
      * (__M__)etadata: Metadata present
+     * (__R__)esume Enable: Client requests resume capability if possible. Resume Identification Token present.
      * (__L__)ease: Will honor LEASE (or not).
      * (__S__)trict: Adhere to strict interpretation of Data and Metadata.
 * __Major Version__: (16) Major version number of the protocol.
