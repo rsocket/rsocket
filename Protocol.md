@@ -464,7 +464,6 @@ Frame Contents
 * __Frame Type__: (6 bits = max value 63) 0x06
 * __Flags__: (10 bits)
     * (__M__)etadata: Metadata present
-* __Initial Request N__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed positive Integer representing the initial request N value for the stream. Value must be > 0.
     * (__F__)ollows: More fragments follow this fragment.
 * __Initial Request N__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed positive Integer representing the initial request N value for the stream. Value must be > 0.
 * __Request Data__: identification of the service being requested along with parameters for the request.
