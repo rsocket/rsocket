@@ -397,7 +397,6 @@ Frame Contents
 
 * __Frame Type__: (16) 0x03
 * __Flags__:
-     * (__M__)etadata: Metadata __never__ present
      * (__R__)espond with KEEPALIVE or not
 * __Last Received Position__: (64) Resume Last Received Position (optional. Set to all 0s when not supported.)
 * __Data__: Data attached to a KEEPALIVE.
