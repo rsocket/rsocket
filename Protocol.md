@@ -246,7 +246,6 @@ Frame Contents
 
 * __Frame Type__: (6 bits = max value 63) 0x01
 * __Flags__: (10 bits)
-     * (__R__)esume Enable: Client requests resume capability if possible. Resume Identification Token present.
      * (__M__)etadata: Metadata present
      * (__R__)esume Enable: Client requests resume capability if possible. Resume Identification Token present.
      * (__L__)ease: Will honor LEASE (or not).
