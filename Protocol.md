@@ -126,7 +126,7 @@ ReactiveSocket frames begin with a ReactiveSocket Frame Header. The general layo
     +-------------------------------+
 ```
 
-* __Stream ID__: (32 bits = max value 2^31-1 = 2,147,483,647) Positive signed integer representing the stream Identifier for this frame or 0 to indicate the entire connection.
+* __Stream ID__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed positive Integer representing the stream Identifier for this frame or 0 to indicate the entire connection.
   * Transport protocols that include demultiplexing, such as HTTP/2, MAY omit the Stream ID field if all parties agree. The means of negotiation and agreement is left to the transport protocol. 
 * __Frame Type__: (6 bits = max value 63) Type of Frame.
 * __Flags__: (10 bits) Any Flag bit not specifically indicated in the frame type should be set to 0 when sent and not interpreted on
@@ -252,7 +252,7 @@ Frame Contents
      * (__S__)trict: Adhere to strict interpretation of Data and Metadata.
 * __Major Version__: (16 bits = max value 65,535) Positive Integer of Major version number of the protocol.
 * __Minor Version__: (16 bits = max value 65,535) Positive Integer of Minor version number of the protocol.
-* __Time Between KEEPALIVE Frames__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed Integer of Time (in milliseconds) between KEEPALIVE frames that the client will send.
+* __Time Between KEEPALIVE Frames__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed positive Integer of Time (in milliseconds) between KEEPALIVE frames that the client will send.
 * __Max Lifetime__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed positive Integer of Time (in milliseconds) that a client will allow a server to not respond to a KEEPALIVE before
 it is assumed to be dead.
 * __Resume Identification Token Length__: (16 = max 65,535 bytes) Resume Identification Token Length in bytes. (Not present if R flag is not set)
