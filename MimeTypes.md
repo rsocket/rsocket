@@ -11,8 +11,8 @@ ReactiveSocket provides a default mime type for metadata payloads and all implem
 
 The default mime type assumes key-value metadata fields with the following encodings:
 
-* __Key__   : The value is always a UTF-8 string.
-* __Value__ : Value is an opaque binary value and the encoding can vary from one field to another.
+* __Key__: a UTF-8 string.
+* __Value__: an opaque binary value and the encoding can vary from one field to another.
 
 ##### Name
 
