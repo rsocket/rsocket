@@ -420,7 +420,7 @@ Frame Contents
 * __Frame Type__: (16) 0x04
 * __Flags__:
     * (__M__)etadata: Metadata present
-    * (__F__)ollows: More Fragments Follow This Fragment.
+    * (__F__)ollows: More fragments follow this fragment.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
 ### REQUEST_FNF (Fire-n-Forget) Frame (0x05)
@@ -441,7 +441,7 @@ Frame Contents
 * __Frame Type__: (16) 0x05
 * __Flags__:
     * (__M__)etadata: Metadata present
-    * (__F__)ollows: More Fragments Follow This Fragment.
+    * (__F__)ollows: More fragments follow this fragment.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
 ### REQUEST_STREAM Frame (0x06)
@@ -464,7 +464,7 @@ Frame Contents
 * __Frame Type__: (16) 0x06
 * __Flags__:
     * (__M__)etadata: Metadata present
-    * (__F__)ollows: More Fragments Follow This Fragment.
+    * (__F__)ollows: More fragments follow this fragment.
 * __Initial Request N__: 32-bit signed integer representing the initial request N value for the stream. Only positive values are allowed.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
@@ -490,7 +490,7 @@ Frame Contents
 * __Frame Type__: (16) 0x07
 * __Flags__:
     * (__M__)etadata: Metadata present
-    * (__F__)ollows: More Fragments Follow This Fragment.
+    * (__F__)ollows: More fragments follow this fragment.
     * (__C__)omplete: bit to indicate COMPLETE.
 * __Initial Request N__: 32-bit signed integer representing the initial request N value for channel. Only positive values are allowed.
 * __Request Data__: identification of the service being requested along with parameters for the request.
