@@ -616,7 +616,7 @@ The general format for an extension frame is given below.
 
 * __Frame Type__: (16) 0x3F
 * __Flags__:
-    * (__I__)gnore: Can be frame be ignored if not understood?
+    * (__I__)gnore: Can the frame be ignored if not understood?
     * (__M__)etadata: Metadata Present.
 * __Extended Type__: Extended type information
 
