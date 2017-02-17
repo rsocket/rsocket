@@ -397,7 +397,6 @@ Frame Contents
 
 * __Frame Type__: (16) 0x03
 * __Flags__:
-     * (__M__)etadata: Metadata __never__ present
      * (__R__)espond with KEEPALIVE or not
 * __Last Received Position__: (64) Resume Last Received Position (optional. Set to all 0s when not supported.)
 * __Data__: Data attached to a KEEPALIVE.
@@ -518,8 +517,6 @@ Frame Contents
 ```
 
 * __Frame Type__: (16) 0x08
-* __Flags__:
-     * (__M__)etadata: Metadata __NOT__ present
 * __Request N__: 32-bit signed integer value of items to request. Only positive values are allowed.
 
 See Flow Control: Reactive Stream Semantics for more information on RequestN behavior.
@@ -593,8 +590,6 @@ Frame Contents
 ```
 
 * __Frame Type__: (16) 0x0C
-* __Flags__:
-     * (__M__)etadata: Metadata _always_ present
 * __Stream ID__: Must be 0 to pertain to the entire connection.
 
 ### EXT (Extension) Frame (0x3F)
@@ -998,9 +993,6 @@ RESUME frames MUST always use Stream ID 0 as they pertain to the connection.
 ```
 
 * __Frame Type__: (16) 0x0D
-* __Flags__:
-    * (__I__)gnore: Frame can __NOT__ be ignored if not understood.
-    * (__M__)etadata: Metadata __never__ Present.
 * __Major Version__: (16) Major version number of the protocol.
 * __Minor Version__: (16) Minor version number of the protocol.
 * __Resume Identification Token Length__: (16 = max 65,536 bytes) Resume Identification Token Length in bytes. 
@@ -1029,9 +1021,6 @@ RESUME OK frames MUST always use Stream ID 0 as they pertain to the connection.
 ```
 
 * __Frame Type__: (16) 0x0E
-* __Flags__:
-    * (__I__)gnore: Frame can __NOT__ be ignored if not understood.
-    * (__M__)etadata: Metadata __never__ Present.
 * __Last Received Client Position__: (64) The last implied position the server received from the client
 
 #### Keepalive Position Field
