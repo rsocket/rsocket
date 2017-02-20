@@ -62,7 +62,7 @@ The following are features of Data and Metadata.
 The ReactiveSocket protocol uses a lower level transport protocol to carry ReactiveSocket frames. A transport protocol MUST provide the following:
 
 1. Unicast [Reliable Delivery](https://en.wikipedia.org/wiki/Reliability_(computer_networking)).
-1. [Connection-Oriented](https://en.wikipedia.org/wiki/Connection-oriented_communication) and preservation of frame ordering. Frame A sent before Frame B must arrive in source order. i.e. if Frame A is sent by the same source as Frame B, then Frame A will always arrive before Frame B. No assumptions about ordering across sources is assumed.
+1. [Connection-Oriented](https://en.wikipedia.org/wiki/Connection-oriented_communication) and preservation of frame ordering. Frame A sent before Frame B MUST arrive in source order. i.e. if Frame A is sent by the same source as Frame B, then Frame A will always arrive before Frame B. No assumptions about ordering across sources is assumed.
 1. [FCS](https://en.wikipedia.org/wiki/Frame_check_sequence) is assumed to be in use either at the transport protocol or at each MAC layer hop. But no protection against malicious corruption is assumed.
 
 An implementation MAY "close" a transport connection due to protocol processing. When this occurs, it is assumed that the connection will have no further frames sent and all frames will be ignored.
@@ -71,7 +71,7 @@ ReactiveSocket as specified here has been designed for and tested with TCP, WebS
 
 ### Framing Protocol Usage
 
-Some of the supported transport protocols for ReactiveSocket may not support specific framing that preserves message boundaries. For these protocols, a framing protocol must be used with the ReactiveSocket frame that prepends the ReactiveSocket Frame Length.
+Some of the supported transport protocols for ReactiveSocket may not support specific framing that preserves message boundaries. For these protocols, a framing protocol MUST be used with the ReactiveSocket frame that prepends the ReactiveSocket Frame Length.
 
 The frame length field MUST be omitted if the transport protocol preserves message boundaries e.g. provides compatible framing. If, however, the transport protocol only provides a stream abstraction or can merge messages without preserving boundaries, or multiple transport protocols may be used, then the frame header MUST be used.
 
@@ -93,7 +93,7 @@ When using a transport protocol providing framing, the ReactiveSocket frame is s
     +-----------------------------------------------+
 ```
 
-When using a transport protocol that does not provide compatible framing, the Frame Length must be prepended to the ReactiveSocket Frame.
+When using a transport protocol that does not provide compatible framing, the Frame Length MUST be prepended to the ReactiveSocket Frame.
 
 ```
      0                   1                   2
@@ -130,7 +130,7 @@ ReactiveSocket frames begin with a ReactiveSocket Frame Header. The general layo
   * Transport protocols that include demultiplexing, such as HTTP/2, MAY omit the Stream ID field if all parties agree. The means of negotiation and agreement is left to the transport protocol. 
 * __Frame Type__: (6 bits = max value 63) Type of Frame.
 * __Flags__: (10 bits) Any Flag bit not specifically indicated in the frame type should be set to 0 when sent and not interpreted on
-reception. Flags generally depend on Frame Type, but all frame types must provide space for the following flags:
+reception. Flags generally depend on Frame Type, but all frame types MUST provide space for the following flags:
      * (__I__)gnore: Ignore frame if not understood
      * (__M__)etadata: Metadata present
 
@@ -177,7 +177,7 @@ the semantics of the stream based on its type.
 
 Stream ID value of 0 is reserved for any operation involving the connection.
 
-A stream ID must be locally unique for a Requester in a connection.
+A stream ID MUST be locally unique for a Requester in a connection.
 
 Stream ID generation follows general guidelines for [HTTP/2](https://tools.ietf.org/html/rfc7540) with respect
 to odd/even values. In other words, a client MUST generate odd Stream IDs and a server MUST generate even Stream IDs.
@@ -268,7 +268,7 @@ rules MAY be used for handling layout. For example, `application/x.netflix+cbor`
 * __Setup Data__: includes payload describing connection capabilities of the endpoint sending the
 Setup header.
 
-__NOTE__: A server that receives a SETUP frame that has (__R__)esume Enabled set, but does not support resuming operation, must reject the SETUP with an ERROR. 
+__NOTE__: A server that receives a SETUP frame that has (__R__)esume Enabled set, but does not support resuming operation, MUST reject the SETUP with an ERROR. 
 
 ### ERROR Frame (0x0B)
 
@@ -930,7 +930,7 @@ When a client sends a RESUME frame, it sends two implied positions: the last fra
 
 ### Client Lifetime Management
 
-Client lifetime management for servers must be extended to incorporate the length of time a client may successfully attempt resumption passed a transport disconnect. The means of client lifetime management are totally up to the implementation.
+Client lifetime management for servers MUST be extended to incorporate the length of time a client may successfully attempt resumption passed a transport disconnect. The means of client lifetime management are totally up to the implementation.
 
 ### Resume Operation
 
@@ -938,7 +938,7 @@ All ERROR frames sent MUST be CONNECTION_ERROR or REJECTED_RESUME error code.
 
 Client side resumption operation starts when the client desires to try to resume and starts a new transport connection. The operation then proceeds as the following:
 
-* Client sends RESUME frame. The client must NOT send any other frame types until resumption succeeds. The RESUME Identification Token MUST be the token used in the original SETUP frame. The RESUME Last Received Position field MUST be the last successfully received implied position from the server.
+* Client sends RESUME frame. The client MUST NOT send any other frame types until resumption succeeds. The RESUME Identification Token MUST be the token used in the original SETUP frame. The RESUME Last Received Position field MUST be the last successfully received implied position from the server.
 * Client waits for either a RESUME_OK or ERROR frame from the server.
 * On receiving an ERROR frame, the client MUST NOT attempt resumption again if the error code was REJECTED_RESUME.
 * On receiving a RESUME_OK, the client:
@@ -1036,7 +1036,7 @@ The requirements for the Resume Identification Token are implementation dependen
 * Tokens may be generated by the client.
 * Tokens may be generated outside the client and the server and managed externally to the protocol.
 * Tokens should uniquely identify a connection on the server. The server should not assume a generation method of the token and should consider the token opaque. This allows a client to be compatible with any ReactiveSocket implementation that supports resuming operation and allows the client full control of Identification Token generation.
-* Tokens must be valid for the lifetime of an individual ReactiveSocket including possible resumption.
+* Tokens MUST be valid for the lifetime of an individual ReactiveSocket including possible resumption.
 * A server should not accept a SETUP with a Token that is currently already being used
 * Tokens should be resilient to replay attacks and thus should only be valid for the lifetime of an individual connection
 * Tokens should not be predictable by an attacking 3rd party
