@@ -633,7 +633,7 @@ The client-side Requester that has NOT set the __L__ flag in the SETUP frame may
 requests immediately if it so desires without waiting for a LEASE from the server.
 
 The client-side Requester that has set the __L__ flag in the SETUP frame MUST wait
-for the server-side Responder to send a LEASE frame before it can send Requests.
+for the server-side Responder to send a LEASE frame before it can send requests.
 
 If the server accepts the contents of the SETUP frame, it MUST send a LEASE frame if
 the SETUP frame set the __L__ flag. The server-side Requester may send requests
@@ -839,7 +839,7 @@ There are multiple flow control mechanics provided by the protocol.
 
 Please note that this explicitly does NOT follow rule number 17 in https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/README.md#3-subscription-code
 
-While ReactiveStreams supports a demand of up to 2^63-1, and treats 2^63-1 as a magic number signaling to not track demand, this is not the case for ReactiveSocket. ReactiveSocket prioritizes byte size and only uses 4 bytes instead of 8 so the magic number is unavailable.
+While ReactiveStreams support a demand of up to 2^63-1, and treats 2^63-1 as a magic number signaling to not track demand, this is not the case for ReactiveSocket. ReactiveSocket prioritizes byte size and only uses 4 bytes instead of 8 so the magic number is unavailable.
 
 The Requester and the Responder MUST respect the reactive-streams semantics.
 
@@ -850,7 +850,7 @@ e.g. here's an example of a successful stream call with flow-control.
 1. RS -> RQ: PAYLOAD
 1. RS -> RQ: PAYLOAD
 1. RS needs to wait for a new REQUEST_N at that point
-1. RQ -> RS: REQUEST_N (n=3)
+1. RQ -> RS: REQUEST_N (N=3)
 1. RS -> RQ: PAYLOAD
 1. RS -> RQ: PAYLOAD with COMPLETE
 
