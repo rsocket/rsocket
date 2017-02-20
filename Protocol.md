@@ -106,7 +106,7 @@ When using a transport protocol that does not provide compatible framing, the Fr
     +-----------------------------------------------+
 ```
 
-* __Frame Length__: (24 = max 16,777,216 bytes) Length of Frame. Excluding Framing Length Field.
+* __Frame Length__: (24 = max 16,777,216 bits) Length of Frame. Excluding Framing Length Field.
 
 __NOTE__: Byte ordering is big endian.
 
@@ -166,7 +166,7 @@ If Metadata Length is greater than this value, the entire frame MUST be ignored.
     +---------------------------------------------------------------+
 ```
 
-* __Metadata Length__: (24 = max 16,777,216 bytes) unsigned positive Integer representing the length of Metadata in bytes. Excluding Metadata Length field.
+* __Metadata Length__: (24 = max 16,777,216 bits) unsigned positive Integer representing the length of Metadata in bits. Excluding Metadata Length field.
 
 ### Stream Identifiers
 
@@ -255,7 +255,7 @@ Frame Contents
 * __Time Between KEEPALIVE Frames__: Time (in milliseconds) between KEEPALIVE frames that the client will send.
 * __Max Lifetime__: Time (in milliseconds) that a client will allow a server to not respond to a KEEPALIVE before
 it is assumed to be dead.
-* __Resume Identification Token Length__: (16 = max 65,535 bytes) Resume Identification Token Length in bytes. (Not present if R flag is not set)
+* __Resume Identification Token Length__: (16 = max 65,535 bits) Resume Identification Token Length in bits. (Not present if R flag is not set)
 * __Resume Identification Token__: Token used for client resume identification (Not present if R flag is not set)
 * __MIME Length__: Encoding MIME Type Length in bytes.
 * __Encoding MIME Type__: MIME Type for encoding of Data and Metadata. This SHOULD be a US-ASCII string
@@ -995,7 +995,7 @@ RESUME frames MUST always use Stream ID 0 as they pertain to the connection.
 * __Frame Type__: (16) 0x0D
 * __Major Version__: (16) Major version number of the protocol.
 * __Minor Version__: (16) Minor version number of the protocol.
-* __Resume Identification Token Length__: (16 = max 65,536 bytes) Resume Identification Token Length in bytes. 
+* __Resume Identification Token Length__: (16 = max 65,536 bits) Resume Identification Token Length in bits. 
 * __Resume Identification Token__: TToken used for client resume identification. Same Resume Identification used in the initial SETUP by the client.
 * __Last Received Server Position__: (64) The last implied position the client received from the server.
 * __First Available Client Position__: (64) The earliest position that the client can rewind back to prior to resending frames.
