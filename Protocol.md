@@ -998,7 +998,7 @@ RESUME frames MUST always use Stream ID 0 as they pertain to the connection.
 * __Resume Identification Token Length__: (16 bits = max value 65,535) Unsigned integer of Resume Identification Token Length in bytes. 
 * __Resume Identification Token__: Token used for client resume identification. Same Resume Identification used in the initial SETUP by the client.
 * __Last Received Server Position__: (64 bits = max value 2^63-1) Signed long of the last implied position the client received from the server. Value MUST be >= 0.
-* __First Available Client Position__: (64 bits = max value 2^63-1) Signed long of the earliest position that the client can rewind back to prior to resending frames.Value MUST be >= 0.
+* __First Available Client Position__: (64 bits = max value 2^63-1) Signed long of the earliest position that the client can rewind back to prior to resending frames. Value MUST be >= 0.
 
 #### RESUME_OK Frame (0x0E)
 
