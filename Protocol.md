@@ -354,7 +354,7 @@ Frame Contents
 * __Flags__: (10 bits)
      * (__M__)etadata: Metadata present
 * __Time-To-Live (TTL)__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed integer of Time (in milliseconds) for validity of LEASE from time of reception. Value MUST be > 0. 
-* __Number of Requests__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed Integer of Number of Requests that may be sent until next LEASE. Value MUST be > 0. 
+* __Number of Requests__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed integer of Number of Requests that may be sent until next LEASE. Value MUST be > 0. 
 
 A Responder implementation MAY stop all further requests by sending a LEASE with a value of 0 for __Number of Requests__ or __Time-To-Live__.
 
