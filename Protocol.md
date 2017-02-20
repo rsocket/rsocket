@@ -159,7 +159,7 @@ If Metadata Length is greater than this value, the entire frame MUST be ignored.
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |              Metadata Length                  |
-    +-+-------------------------------------------------------------+
+    +---------------------------------------------------------------+
     |                       Metadata Payload                       ...
     +---------------------------------------------------------------+
     |                       Payload of Frame                       ...
@@ -225,9 +225,9 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                           Stream ID                           |
+    |                         Stream ID = 0                         |
     +-----------+-+-+-+-+-+---------+-------------------------------+
-    |Frame Type |0|R|M|L|S|  Flags  |
+    |Frame Type |0|M|R|L|S|  Flags  |
     +-----------+-+-+-+-+-+---------+-------------------------------+
     |         Major Version         |        Minor Version          |
     +-------------------------------+-------------------------------+
@@ -246,8 +246,8 @@ Frame Contents
 
 * __Frame Type__: (16) 0x01
 * __Flags__:
-     * (__R__)esume Enable: Client requests resume capability if possible. Resume Identification Token present.
      * (__M__)etadata: Metadata present
+     * (__R__)esume Enable: Client requests resume capability if possible. Resume Identification Token present.
      * (__L__)ease: Will honor LEASE (or not).
      * (__S__)trict: Adhere to strict interpretation of Data and Metadata.
 * __Major Version__: (16) Major version number of the protocol.
@@ -339,7 +339,7 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                           Stream ID                           |
+    |                         Stream ID = 0                         |
     +-----------+-+-+---------------+-------------------------------+
     |Frame Type |0|M|     Flags     |
     +-----------+-+-+---------------+-------------------------------+
@@ -384,7 +384,7 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                           Stream ID                           |
+    |                         Stream ID = 0                         |
     +-----------+-+-+-+-------------+-------------------------------+
     |Frame Type |0|0|R|    Flags    |
     +-----------+-+-+-+-------------+-------------------------------+
@@ -397,7 +397,6 @@ Frame Contents
 
 * __Frame Type__: (16) 0x03
 * __Flags__:
-     * (__M__)etadata: Metadata __never__ present
      * (__R__)espond with KEEPALIVE or not
 * __Last Received Position__: (64) Resume Last Received Position (optional. Set to all 0s when not supported.)
 * __Data__: Data attached to a KEEPALIVE.
@@ -420,7 +419,7 @@ Frame Contents
 * __Frame Type__: (16) 0x04
 * __Flags__:
     * (__M__)etadata: Metadata present
-    * (__F__)ollows: More Fragments Follow This Fragment.
+    * (__F__)ollows: More fragments follow this fragment.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
 ### REQUEST_FNF (Fire-n-Forget) Frame (0x05)
@@ -441,7 +440,7 @@ Frame Contents
 * __Frame Type__: (16) 0x05
 * __Flags__:
     * (__M__)etadata: Metadata present
-    * (__F__)ollows: More Fragments Follow This Fragment.
+    * (__F__)ollows: More fragments follow this fragment.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
 ### REQUEST_STREAM Frame (0x06)
@@ -464,7 +463,7 @@ Frame Contents
 * __Frame Type__: (16) 0x06
 * __Flags__:
     * (__M__)etadata: Metadata present
-    * (__F__)ollows: More Fragments Follow This Fragment.
+    * (__F__)ollows: More fragments follow this fragment.
 * __Initial Request N__: 32-bit signed integer representing the initial request N value for the stream. Only positive values are allowed.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
@@ -479,7 +478,7 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                           Stream ID                           |
-    +-----------+-+-+-+-+-+---------+-------------------------------+
+    +-----------+-+-+-+-+-----------+-------------------------------+
     |Frame Type |0|M|F|C|  Flags    |
     +-------------------------------+-------------------------------+
     |                      Initial Request N                        |
@@ -490,7 +489,7 @@ Frame Contents
 * __Frame Type__: (16) 0x07
 * __Flags__:
     * (__M__)etadata: Metadata present
-    * (__F__)ollows: More Fragments Follow This Fragment.
+    * (__F__)ollows: More fragments follow this fragment.
     * (__C__)omplete: bit to indicate COMPLETE.
 * __Initial Request N__: 32-bit signed integer representing the initial request N value for channel. Only positive values are allowed.
 * __Request Data__: identification of the service being requested along with parameters for the request.
@@ -518,8 +517,6 @@ Frame Contents
 ```
 
 * __Frame Type__: (16) 0x08
-* __Flags__:
-     * (__M__)etadata: Metadata __NOT__ present
 * __Request N__: 32-bit signed integer value of items to request. Only positive values are allowed.
 
 See Flow Control: Reactive Streams Semantics for more information on RequestN behavior.
@@ -553,7 +550,7 @@ Frame Contents
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                           Stream ID                           |
     +-----------+-+-+-+-+-+---------+-------------------------------+
-    |Frame Type |0|M|F|N|C|  Flags  |
+    |Frame Type |0|M|F|C|N|  Flags  |
     +-------------------------------+-------------------------------+
                          Metadata & Data
 ```
@@ -562,10 +559,10 @@ Frame Contents
 * __Flags__:
     * (__M__)etadata: Metadata Present.
     * (__F__)ollows: More fragments follow this fragment.
-    * (__N__)ext: bit to indicate Next (Payload Data and/or Metadata present).
-       * If set, `onNext(Payload)` or equivalent will be invoked on Subscriber/Observer.
     * (__C__)omplete: bit to indicate COMPLETE.
        * If set, `onComplete()` or equivalent will be invoked on Subscriber/Observer.
+    * (__N__)ext: bit to indicate Next (Payload Data and/or Metadata present).
+       * If set, `onNext(Payload)` or equivalent will be invoked on Subscriber/Observer.
 * __Payload Data__: payload for Reactive Streams onNext.
 
 A Payload is generally referred to as a NEXT.
@@ -585,7 +582,7 @@ Frame Contents
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                           Stream ID                           |
+    |                         Stream ID = 0                         |
     +-----------+-+-+---------------+-------------------------------+
     |Frame Type |0|1|     Flags     |
     +-------------------------------+-------------------------------+
@@ -593,8 +590,6 @@ Frame Contents
 ```
 
 * __Frame Type__: (16) 0x0C
-* __Flags__:
-     * (__M__)etadata: Metadata _always_ present
 * __Stream ID__: Must be 0 to pertain to the entire connection.
 
 ### EXT (Extension) Frame (0x3F)
@@ -616,7 +611,7 @@ The general format for an extension frame is given below.
 
 * __Frame Type__: (16) 0x3F
 * __Flags__:
-    * (__I__)gnore: Can be frame be ignored if not understood?
+    * (__I__)gnore: Can the frame be ignored if not understood?
     * (__M__)etadata: Metadata Present.
 * __Extended Type__: Extended type information
 
@@ -638,7 +633,7 @@ The client-side Requester that has NOT set the __L__ flag in the SETUP frame may
 requests immediately if it so desires without waiting for a LEASE from the server.
 
 The client-side Requester that has set the __L__ flag in the SETUP frame MUST wait
-for the server-side Responder to send a LEASE frame before it can send Requests.
+for the server-side Responder to send a LEASE frame before it can send requests.
 
 If the server accepts the contents of the SETUP frame, it MUST send a LEASE frame if
 the SETUP frame set the __L__ flag. The server-side Requester may send requests
@@ -844,7 +839,7 @@ There are multiple flow control mechanics provided by the protocol.
 
 Please note that this explicitly does NOT follow rule number 17 in https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/README.md#3-subscription-code
 
-While Reactive Streams supports a demand of up to 2^63-1, and treats 2^63-1 as a magic number signaling to not track demand, this is not the case for ReactiveSocket. ReactiveSocket prioritizes byte size and only uses 4 bytes instead of 8 so the magic number is unavailable.
+While Reactive Streams support a demand of up to 2^63-1, and treats 2^63-1 as a magic number signaling to not track demand, this is not the case for ReactiveSocket. ReactiveSocket prioritizes byte size and only uses 4 bytes instead of 8 so the magic number is unavailable.
 
 The Requester and the Responder MUST respect the Reactive Streams semantics.
 
@@ -855,7 +850,7 @@ e.g. here's an example of a successful stream call with flow-control.
 1. RS -> RQ: PAYLOAD
 1. RS -> RQ: PAYLOAD
 1. RS needs to wait for a new REQUEST_N at that point
-1. RQ -> RS: REQUEST_N (n=3)
+1. RQ -> RS: REQUEST_N (N=3)
 1. RS -> RQ: PAYLOAD
 1. RS -> RQ: PAYLOAD with COMPLETE
 
@@ -979,7 +974,7 @@ RESUME frames MUST always use Stream ID 0 as they pertain to the connection.
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                           Stream ID                           |
+    |                         Stream ID = 0                         |
     +-----------+-+-+---------------+-------------------------------+
     |Frame Type |0|0|    Flags      |
     +-------------------------------+-------------------------------+
@@ -998,9 +993,6 @@ RESUME frames MUST always use Stream ID 0 as they pertain to the connection.
 ```
 
 * __Frame Type__: (16) 0x0D
-* __Flags__:
-    * (__I__)gnore: Frame can __NOT__ be ignored if not understood.
-    * (__M__)etadata: Metadata __never__ Present.
 * __Major Version__: (16) Major version number of the protocol.
 * __Minor Version__: (16) Minor version number of the protocol.
 * __Resume Identification Token Length__: (16 = max 65,536 bytes) Resume Identification Token Length in bytes. 
@@ -1018,7 +1010,7 @@ RESUME OK frames MUST always use Stream ID 0 as they pertain to the connection.
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                           Stream ID                           |
+    |                         Stream ID = 0                         |
     +-----------+-+-+---------------+-------------------------------+
     |Frame Type |0|0|    Flags      |
     +-------------------------------+-------------------------------+
@@ -1029,9 +1021,6 @@ RESUME OK frames MUST always use Stream ID 0 as they pertain to the connection.
 ```
 
 * __Frame Type__: (16) 0x0E
-* __Flags__:
-    * (__I__)gnore: Frame can __NOT__ be ignored if not understood.
-    * (__M__)etadata: Metadata __never__ Present.
 * __Last Received Client Position__: (64) The last implied position the server received from the client
 
 #### Keepalive Position Field
