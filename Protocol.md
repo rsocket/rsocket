@@ -106,7 +106,7 @@ When using a transport protocol that does not provide compatible framing, the Fr
     +-----------------------------------------------+
 ```
 
-* __Frame Length__: (24 bits = max value 16,777,215) Unsigned integer representing the length of Frame in bytes. Excluding Framing Length Field.
+* __Frame Length__: (24 bits = max value 16,777,215) Unsigned integer representing the length of Frame in bytes. Excluding the Frame Length field.
 
 __NOTE__: Byte ordering is big endian.
 
@@ -177,7 +177,7 @@ the semantics of the stream based on its type.
 
 Stream ID value of 0 is reserved for any operation involving the connection.
 
-A stream ID MUST be locally unique for a Requester in a connection.
+A Stream ID MUST be locally unique for a Requester in a connection.
 
 Stream ID generation follows general guidelines for [HTTP/2](https://tools.ietf.org/html/rfc7540) with respect
 to odd/even values. In other words, a client MUST generate odd Stream IDs and a server MUST generate even Stream IDs.
@@ -297,7 +297,7 @@ Frame Contents
      * See list of valid Error Codes below.
 * __Error Data__: includes Payload describing error information. Error Data SHOULD be a UTF-8 encoded string. The string MUST NOT be null terminated.
 
-A Stream ID of 0 means the error pertains to the connection. Including connection establishment. A positive non-0 Stream ID
+A Stream ID of 0 means the error pertains to the connection. Including connection establishment. A Stream ID > 0
 means the error pertains to a given stream.
 
 The Error Data is typically an Exception message, but could include stringified stacktrace information if appropriate.  
@@ -313,10 +313,10 @@ The Error Data is typically an Exception message, but could include stringified 
 | __REJECTED_RESUME__            | 0x00000004 | The server rejected the resume, it can specify the reason in the payload. Stream ID MUST be 0. |
 | __CONNECTION_ERROR__           | 0x00000101 | The connection is being terminated. Stream ID MUST be 0. Sender or Receiver of this frame MAY close the connection immediately without waiting for outstanding streams to terminate.|
 | __CONNECTION_CLOSE__           | 0x00000102 | The connection is being terminated. Stream ID MUST be 0. Sender or Receiver of this frame MUST wait for outstanding streams to terminate before closing the connection. New requests MAY not be accepted.|
-| __APPLICATION_ERROR__          | 0x00000201 | Application layer logic generating a Reactive Streams _onError_ event. Stream ID MUST be non-0. |
-| __REJECTED__                   | 0x00000202 | Despite being a valid request, the Responder decided to reject it. The Responder guarantees that it didn't process the request. The reason for the rejection is explained in the metadata section. Stream ID MUST be non-0. |
-| __CANCELED__                   | 0x00000203 | The responder canceled the request but potentially have started processing it (almost identical to REJECTED but doesn't garantee that no side-effect have been started). Stream ID MUST be non-0. |
-| __INVALID__                    | 0x00000204 | The request is invalid. Stream ID MUST be non-0. |
+| __APPLICATION_ERROR__          | 0x00000201 | Application layer logic generating a Reactive Streams _onError_ event. Stream ID MUST be > 0. |
+| __REJECTED__                   | 0x00000202 | Despite being a valid request, the Responder decided to reject it. The Responder guarantees that it didn't process the request. The reason for the rejection is explained in the metadata section. Stream ID MUST be > 0. |
+| __CANCELED__                   | 0x00000203 | The responder canceled the request but potentially have started processing it (almost identical to REJECTED but doesn't garantee that no side-effect have been started). Stream ID MUST be > 0. |
+| __INVALID__                    | 0x00000204 | The request is invalid. Stream ID MUST be > 0. |
 | __RESERVED__                   | 0xFFFFFFFF | __Reserved for Extension Use__ |
 
 __NOTE__: Values in the range of 0x0001 to 0x00FF are reserved for use as SETUP error codes. Values in the range of
@@ -325,13 +325,13 @@ errors.
 
 ### LEASE Frame (0x02)
 
-Lease frames MUST always use Stream ID 0 as they pertain to the Connection.
-
 Lease frames MAY be sent by the client-side or server-side Responders and inform the
 Requester that it may send Requests for a period of time and how many it may send during that duration.
 See [Lease Semantics](#lease-semantics) for more information.
 
 The last received LEASE frame overrides all previous LEASE frame values.
+
+Lease frames MUST always use Stream ID 0 as they pertain to the Connection.
 
 Frame Contents
 
@@ -464,7 +464,7 @@ Frame Contents
 * __Flags__: (10 bits)
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More fragments follow this fragment.
-* __Initial Request N__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed integer representing the initial request N value for the stream. Value MUST be > 0.
+* __Initial Request N__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed integer representing the initial number of items to request. Value MUST be > 0.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
 See Flow Control: Reactive Stream Semantics for more information on RequestN behavior.
@@ -517,7 +517,7 @@ Frame Contents
 ```
 
 * __Frame Type__: (6 bits = max value 63) 0x08
-* __Request N__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed integer of value of items to request. Value MUST be > 0.
+* __Request N__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed integer representing the number of items to request. Value MUST be > 0.
 
 See Flow Control: Reactive Stream Semantics for more information on RequestN behavior.
 
@@ -572,7 +572,9 @@ A Payload with the Complete Bit set is referred to as a COMPLETE.
 ### METADATA_PUSH Frame (0x0C)
 
 A Metadata Push frame can be used to send asynchronous metadata notifications from a Requester or
-Responder to its peer. Metadata MUST be scoped to the connection by setting Stream ID to 0.
+Responder to its peer.
+
+METADATA_PUSH frames MUST always use Stream ID 0 as they pertain to the Connection.
 
 Metadata tied to a particular stream uses the individual Payload frame Metadata flag.
 
@@ -589,7 +591,6 @@ Frame Contents
                                 Metadata
 ```
 
-* __Stream ID__: (32 bits = max value 2^31-1 = 2,147,483,647) Value MUST == 0 to pertain to the entire connection.
 * __Frame Type__: (6 bits = max value 63) 0x0C
 
 ### EXT (Extension) Frame (0x3F)
@@ -624,7 +625,7 @@ that indicates a SETUP error.
 
 Immediately upon successful connection, the client MUST send a SETUP frame with
 Stream ID of 0. Any other frame received that is NOT a SETUP frame or a SETUP frame with
-a non-0 Stream ID, MUST cause the server to send a SETUP_ERROR (with INVALID_SETUP) and close the connection.
+a Stream ID > 0, MUST cause the server to send a SETUP_ERROR (with INVALID_SETUP) and close the connection.
 
 The client-side Requester can inform the server-side Responder as to whether it will
 honor LEASEs or not based on the presence of the __L__ flag in the SETUP frame.
@@ -816,14 +817,14 @@ Upon sending a COMPLETE or ERROR, the stream is terminated on the Responder.
 
 #### Requester
 
-1. CLOSED: implicit starting/ending state of all stream IDs
+1. CLOSED: implicit starting/ending state of all Stream IDs
 1. Requested (sent REQUEST_*)
 1. CLOSED (received COMPLETE or sent REQUEST_FNF)
 1. CLOSED (received ERROR)
 
 #### Responder
 
-1. CLOSED: implicit starting/ending state of all stream IDs
+1. CLOSED: implicit starting/ending state of all Stream IDs
 1. Responding: sending PAYLOADs and processing REQUEST_N
 1. CLOSED (received CANCEL)
 1. CLOSED (sent COMPLETE or received REQUEST_FNF)
