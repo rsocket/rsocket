@@ -21,7 +21,7 @@ Byte ordering is big endian for all fields.
 
 - [Terminology](#terminology)
 - [Versioning Scheme](#versioning-scheme) 
-- [Data and Metdata](#data-and-metadata) 
+- [Data and Metadata](#data-and-metadata) 
 - [Framing](#framing)
   - [Transport Protocol](#transport-protocol)
   - [Framing Protocol Usage](#framing-protocol-usage)
