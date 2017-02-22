@@ -26,7 +26,6 @@ Byte ordering is big endian for all fields.
   - [Transport Protocol](#transport-protocol)
   - [Framing Protocol Usage](#framing-protocol-usage)
   - [Framing Format](#framing-format)
-- [Operation](#operation)
   - [Frame Header Format](#frame-header-format)
   - [Stream Identifiers](#stream-identifiers)
   - [Frame Types](#frame-types)
@@ -137,8 +136,6 @@ When using a transport protocol that does not provide compatible framing, the Fr
 * __Frame Length__: (24 bits = max value 16,777,215) Unsigned integer representing the length of Frame in bytes. Excluding the Frame Length field.
 
 __NOTE__: Byte ordering is big endian.
-
-## Operation
 
 ### Frame Header Format
 
