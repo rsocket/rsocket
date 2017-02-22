@@ -17,6 +17,34 @@ Key words used by this document conform to the meanings in [RFC 2119](https://to
 
 Byte ordering is big endian for all fields.
 
+## Table of Contents
+
+- [Terminology](#terminology)
+- [Versioning Scheme](#versioning-scheme) 
+- [Data and Metdata](#data-and-metadata) 
+- [Framing](#framing)
+  - [Transport Protocol](#transport-protocol)
+  - [Framing Protocol Usage](#framing-protocol-usage)
+  - [Framing Format](#framing-format)
+- [Operation](#operation)
+  - [Frame Header Format](#frame-header-format)
+  - [Stream Identifiers](#stream-identifiers)
+  - [Frame Types](#frame-types)
+- [Connection Establishment](#connection-establishment)
+- [Fragmentation and Reassembly](#fragmentation-and-reassembly)
+- [Stream Sequences and Lifetimes](#stream-sequences-and-lifetimes)
+  - [Request Response](#stream-sequences-request-response)
+  - [Fire and Forget](#stream-sequences-fire-and-forget)
+  - [Request Stream](#stream-sequences-request-stream)
+  - [Request Channel](#stream-sequences-channel)
+- [Flow Control](#flow-control)
+  - [Reactive Stream Semantics](#flow-control-reactive-streams)
+  - [Lease Semantics](#flow-control-lease)
+  - [QoS and Prioritization](#flow-control-qos)
+- [Handling the Unexpected](#handling-the-unexpected)
+- [Resuming Operation](#resuming-operation)
+
+
 ## Terminology
 
 * __Frame__: A single message containing a request, response, or protocol processing.
@@ -722,6 +750,7 @@ In the section below, "*" refers to 0 or more and "+" refers to 1 or more.
 Once a stream has "terminated", the Stream ID can be "forgotten" by the Requester and Responder. An implementation MAY re-use an ID at this
 time, but it is recommended that an implementation not aggressively re-use IDs.
 
+<a name="stream-sequences-request-response"></a>
 ### Request Response
 
 1. RQ -> RS: REQUEST_RESPONSE
@@ -745,6 +774,7 @@ Upon sending a CANCEL, the stream is terminated on the Requester.
 
 Upon receiving a COMPLETE or ERROR, the stream is terminated on the Requester.
 
+<a name="stream-sequences-fire-and-forget"></a>
 ### Request Fire-n-Forget
 
 1. RQ -> RS: REQUEST_FNF
@@ -755,6 +785,7 @@ Upon being sent, the stream is terminated by the Requester.
 
 REQUEST_FNF are assumed to be best effort and MAY not be processed due to: (1) SETUP rejection, (2) mis-formatting, (3) etc.
 
+<a name="stream-sequences-request-stream"></a>
 ### Request Stream
 
 1. RQ -> RS: REQUEST_STREAM
@@ -783,6 +814,7 @@ Upon receiving a COMPLETE or ERROR, the stream is terminated on the Requester.
 
 Upon sending a COMPLETE or ERROR, the stream is terminated on the Responder.
 
+<a name="stream-sequences-channel"></a>
 ### Request Channel
 
 1. RQ -> RS: REQUEST_CHANNEL* intermixed with
@@ -834,6 +866,7 @@ Upon sending a COMPLETE or ERROR, the stream is terminated on the Responder.
 
 There are multiple flow control mechanics provided by the protocol.
 
+<a name="flow-control-reactive-streams"></a>
 #### Reactive Stream Semantics
 
 [Reactive Stream](http://www.reactive-streams.org/) semantics for flow control of Streams, Subscriptions, and Channels.
@@ -855,6 +888,7 @@ e.g. here's an example of a successful stream call with flow-control.
 1. RS -> RQ: PAYLOAD
 1. RS -> RQ: PAYLOAD with COMPLETE
 
+<a name="flow-control-lease"></a>
 #### Lease Semantics
 
 The LEASE semantics are to control the number of indivdiual requests (all types) that a Requester may send in a given period.
@@ -867,6 +901,7 @@ in the LEASE frame within the __Time-To-Live__ value in the LEASE.
 A Responder that receives a REQUEST that it can not honor due to LEASE restrictions MUST respond with an ERROR frame with error code
 of LEASE_ERROR. This includes an initial LEASE sent as part of [Connection Establishment](#connection-establishment).
 
+<a name="flow-control-qos"></a>
 #### QoS and Prioritization
 
 Quality of Service and Prioritization of streams are considered application or network layer concerns and are better dealt with
