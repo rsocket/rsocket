@@ -222,7 +222,7 @@ to odd/even values. In other words, a client MUST generate odd Stream IDs and a 
 | [__REQUEST_FNF__](#frame-fnf)                     | 0x05 | __Fire And Forget__: A single one-way message. |
 | [__REQUEST_STREAM__](#frame-request-stream)       | 0x06 | __Request Stream__: Request a completable stream. |
 | [__REQUEST_CHANNEL__](#frame-request-channel)     | 0x07 | __Request Channel__: Request a completable stream in both directions. |
-| [__REQUEST_N__](#frame-request-n)                 | 0x08 | __Request N__: Request N more items with ReactiveStreams semantics. |
+| [__REQUEST_N__](#frame-request-n)                 | 0x08 | __Request N__: Request N more items with Reactive Streams semantics. |
 | [__CANCEL__](#frame-cancel)                       | 0x09 | __Cancel Request__: Cancel outstanding request. |
 | [__PAYLOAD__](#frame-payload)                     | 0x0A | __Payload__: Payload on a stream. For example, response to a request, or message on a channel. |
 | [__ERROR__](#frame-error)                         | 0x0B | __Error__: Error at connection or application level. |
@@ -500,7 +500,7 @@ Frame Contents
 * __Initial Request N__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed integer representing the initial number of items to request. Value MUST be > 0.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
-See Flow Control: Reactive Stream Semantics for more information on RequestN behavior.
+See Flow Control: Reactive Streams Semantics for more information on RequestN behavior.
 
 <a name="frame-request-channel"></a>
 ### REQUEST_CHANNEL Frame (0x07)
@@ -532,7 +532,7 @@ A requester MUST send only __one__ REQUEST_CHANNEL frame. Subsequent messages fr
 
 A requester MUST __not__ send PAYLOAD frames after the REQUEST_CHANNEL frame until the responder sends a REQUEST_N frame granting credits for number of PAYLOADs able to be sent.
 
-See Flow Control: Reactive Stream Semantics for more information on RequestN behavior.
+See Flow Control: Reactive Streams Semantics for more information on RequestN behavior.
 
 <a name="frame-request-n"></a>
 ### REQUEST_N Frame (0x08)
@@ -554,7 +554,7 @@ Frame Contents
 * __Frame Type__: (6 bits = max value 63) 0x08
 * __Request N__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed integer representing the number of items to request. Value MUST be > 0.
 
-See Flow Control: Reactive Stream Semantics for more information on RequestN behavior.
+See Flow Control: Reactive Streams Semantics for more information on RequestN behavior.
 
 <a name="frame-cancel"></a>
 ### CANCEL Frame (0x09)
@@ -878,15 +878,15 @@ Upon sending a COMPLETE or ERROR, the stream is terminated on the Responder.
 There are multiple flow control mechanics provided by the protocol.
 
 <a name="flow-control-reactive-streams"></a>
-#### Reactive Stream Semantics
+#### Reactive Streams Semantics
 
-[Reactive Stream](http://www.reactive-streams.org/) semantics for flow control of Streams, Subscriptions, and Channels.
+[Reactive Streams](http://www.reactive-streams.org/) semantics for flow control of Streams, Subscriptions, and Channels.
 
 Please note that this explicitly does NOT follow rule number 17 in https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/README.md#3-subscription-code
 
-While ReactiveStreams support a demand of up to 2^63-1, and treats 2^63-1 as a magic number signaling to not track demand, this is not the case for ReactiveSocket. ReactiveSocket prioritizes byte size and only uses 4 bytes instead of 8 so the magic number is unavailable.
+While Reactive Streams support a demand of up to 2^63-1, and treats 2^63-1 as a magic number signaling to not track demand, this is not the case for ReactiveSocket. ReactiveSocket prioritizes byte size and only uses 4 bytes instead of 8 so the magic number is unavailable.
 
-The Requester and the Responder MUST respect the reactive-streams semantics.
+The Requester and the Responder MUST respect the Reactive Streams semantics.
 
 e.g. here's an example of a successful stream call with flow-control.
 
