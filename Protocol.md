@@ -6,7 +6,7 @@ Current version of the protocol is __0.2__ (Major Version: 0, Minor Version: 2).
 ## Introduction
 
 Specify an application protocol for [Reactive Streams](http://www.reactive-streams.org/) semantics across an asynchronous, binary
-boundary. For more information, please see [ReactiveSocket](http://reactivesocket.io/).
+boundary. For more information, please see [ReactiveSocket.io](http://reactivesocket.io/).
 
 ReactiveSocket assumes an operating paradigm. These assumptions are:
 - one-to-one communication
