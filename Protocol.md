@@ -215,21 +215,21 @@ to odd/even values. In other words, a client MUST generate odd Stream IDs and a 
 |  Type                          | Value  | Description |
 |:-------------------------------|:-------|:------------|
 | __RESERVED__                                     | 0x00 | __Reserved__ |
-| [__SETUP__](frame-setup)                         | 0x01 | __Setup__: Sent by client to initiate protocol processing. |
-| [__LEASE__](frame-lease)                         | 0x02 | __Lease__: Sent by Responder to grant the ability to send requests. |
-| [__KEEPALIVE__](frame-keepalive)                 | 0x03 | __Keepalive__: Connection keepalive. |
-| [__REQUEST_RESPONSE__](frame-request-response)   | 0x04 | __Request Response__: Request single response. |
-| [__REQUEST_FNF__](frame-fnf)                     | 0x05 | __Fire And Forget__: A single one-way message. |
-| [__REQUEST_STREAM__](frame-request-stream)       | 0x06 | __Request Stream__: Request a completable stream. |
-| [__REQUEST_CHANNEL__](frame-request-channel)     | 0x07 | __Request Channel__: Request a completable stream in both directions. |
-| [__REQUEST_N__](frame-request-n)                 | 0x08 | __Request N__: Request N more items with ReactiveStreams semantics. |
-| [__CANCEL__](frame-cancel)                       | 0x09 | __Cancel Request__: Cancel outstanding request. |
-| [__PAYLOAD__](frame-payload)                     | 0x0A | __Payload__: Payload on a stream. For example, response to a request, or message on a channel. |
-| [__ERROR__](frame-error)                         | 0x0B | __Error__: Error at connection or application level. |
-| [__METADATA_PUSH__](frame-metadata-push)         | 0x0C | __Metadata__: Asynchronous Metadata frame |
-| [__RESUME__](frame-resume)                       | 0x0D | __Resume__: Replaces SETUP for Resuming Operation (optional) |
-| [__RESUME_OK__](frame-resume-ok)                 | 0x0E | __Resume OK__ : Sent in response to a RESUME if resuming operation possible (optional) |
-| [__EXT__](frame-ext)                             | 0x3F | __Extension Header__: Used To Extend more frame types as well as extensions. |
+| [__SETUP__](#frame-setup)                         | 0x01 | __Setup__: Sent by client to initiate protocol processing. |
+| [__LEASE__](#frame-lease)                         | 0x02 | __Lease__: Sent by Responder to grant the ability to send requests. |
+| [__KEEPALIVE__](#frame-keepalive)                 | 0x03 | __Keepalive__: Connection keepalive. |
+| [__REQUEST_RESPONSE__](#frame-request-response)   | 0x04 | __Request Response__: Request single response. |
+| [__REQUEST_FNF__](#frame-fnf)                     | 0x05 | __Fire And Forget__: A single one-way message. |
+| [__REQUEST_STREAM__](#frame-request-stream)       | 0x06 | __Request Stream__: Request a completable stream. |
+| [__REQUEST_CHANNEL__](#frame-request-channel)     | 0x07 | __Request Channel__: Request a completable stream in both directions. |
+| [__REQUEST_N__](#frame-request-n)                 | 0x08 | __Request N__: Request N more items with ReactiveStreams semantics. |
+| [__CANCEL__](#frame-cancel)                       | 0x09 | __Cancel Request__: Cancel outstanding request. |
+| [__PAYLOAD__](#frame-payload)                     | 0x0A | __Payload__: Payload on a stream. For example, response to a request, or message on a channel. |
+| [__ERROR__](#frame-error)                         | 0x0B | __Error__: Error at connection or application level. |
+| [__METADATA_PUSH__](#frame-metadata-push)         | 0x0C | __Metadata__: Asynchronous Metadata frame |
+| [__RESUME__](#frame-resume)                       | 0x0D | __Resume__: Replaces SETUP for Resuming Operation (optional) |
+| [__RESUME_OK__](#frame-resume-ok)                 | 0x0E | __Resume OK__ : Sent in response to a RESUME if resuming operation possible (optional) |
+| [__EXT__](#frame-ext)                             | 0x3F | __Extension Header__: Used To Extend more frame types as well as extensions. |
 
 <a name="frame-setup"></a>
 ### SETUP Frame (0x01)
