@@ -68,7 +68,7 @@ ReactiveSocket follows a versioning scheme consisting of a numeric major version
 ### Cross version compatibility
 
 ReactiveSocket assumes that all version changes (major and minor) are backward incompatible.
-A client can pass a version that it supports via the [Setup Frame](#setup-frame).
+A client can pass a version that it supports via the [Setup Frame](#frame-setup).
 It is up to a server to accept clients of lower versions than what it supports.
 
 ## Data And Metadata
@@ -214,24 +214,24 @@ to odd/even values. In other words, a client MUST generate odd Stream IDs and a 
 
 |  Type                          | Value  | Description |
 |:-------------------------------|:-------|:------------|
-| __RESERVED__                   | 0x00 | __Reserved__ |
-| __SETUP__                      | 0x01 | __Setup__: Sent by client to initiate protocol processing. |
-| __LEASE__                      | 0x02 | __Lease__: Sent by Responder to grant the ability to send requests. |
-| __KEEPALIVE__                  | 0x03 | __Keepalive__: Connection keepalive. |
-| __REQUEST_RESPONSE__           | 0x04 | __Request Response__: Request single response. |
-| __REQUEST_FNF__                | 0x05 | __Fire And Forget__: A single one-way message. |
-| __REQUEST_STREAM__             | 0x06 | __Request Stream__: Request a completable stream. |
-| __REQUEST_CHANNEL__            | 0x07 | __Request Channel__: Request a completable stream in both directions. |
-| __REQUEST_N__                  | 0x08 | __Request N__: Request N more items with ReactiveStreams semantics. |
-| __CANCEL__                     | 0x09 | __Cancel Request__: Cancel outstanding request. |
-| __PAYLOAD__                    | 0x0A | __Payload__: Payload on a stream. For example, response to a request, or message on a channel. |
-| __ERROR__                      | 0x0B | __Error__: Error at connection or application level. |
-| __METADATA_PUSH__              | 0x0C | __Metadata__: Asynchronous Metadata frame |
-| __RESUME__                     | 0x0D | __Resume__: Replaces SETUP for Resuming Operation (optional) |
-| __RESUME_OK__                  | 0x0E | __Resume OK__ : Sent in response to a RESUME if resuming operation possible (optional) |
-| __EXT__                        | 0x3F | __Extension Header__: Used To Extend more frame types as well as extensions. |
+| __RESERVED__                                     | 0x00 | __Reserved__ |
+| [__SETUP__](frame-setup)                         | 0x01 | __Setup__: Sent by client to initiate protocol processing. |
+| [__LEASE__](frame-lease)                         | 0x02 | __Lease__: Sent by Responder to grant the ability to send requests. |
+| [__KEEPALIVE__](frame-keepalive)                 | 0x03 | __Keepalive__: Connection keepalive. |
+| [__REQUEST_RESPONSE__](frame-request-response)   | 0x04 | __Request Response__: Request single response. |
+| [__REQUEST_FNF__](frame-fnf)                     | 0x05 | __Fire And Forget__: A single one-way message. |
+| [__REQUEST_STREAM__](frame-request-stream)       | 0x06 | __Request Stream__: Request a completable stream. |
+| [__REQUEST_CHANNEL__](frame-request-channel)     | 0x07 | __Request Channel__: Request a completable stream in both directions. |
+| [__REQUEST_N__](frame-request-n)                 | 0x08 | __Request N__: Request N more items with ReactiveStreams semantics. |
+| [__CANCEL__](frame-cancel)                       | 0x09 | __Cancel Request__: Cancel outstanding request. |
+| [__PAYLOAD__](frame-payload)                     | 0x0A | __Payload__: Payload on a stream. For example, response to a request, or message on a channel. |
+| [__ERROR__](frame-error)                         | 0x0B | __Error__: Error at connection or application level. |
+| [__METADATA_PUSH__](frame-metadata-push)         | 0x0C | __Metadata__: Asynchronous Metadata frame |
+| [__RESUME__](frame-resume)                       | 0x0D | __Resume__: Replaces SETUP for Resuming Operation (optional) |
+| [__RESUME_OK__](frame-resume-ok)                 | 0x0E | __Resume OK__ : Sent in response to a RESUME if resuming operation possible (optional) |
+| [__EXT__](frame-ext)                             | 0x3F | __Extension Header__: Used To Extend more frame types as well as extensions. |
 
-<a name="setup-frame"></a>
+<a name="frame-setup"></a>
 ### SETUP Frame (0x01)
 
 Setup frames MUST always use Stream ID 0 as they pertain to the connection.
@@ -298,6 +298,7 @@ Setup header.
 
 __NOTE__: A server that receives a SETUP frame that has (__R__)esume Enabled set, but does not support resuming operation, MUST reject the SETUP with an ERROR. 
 
+<a name="frame-error"></a>
 ### ERROR Frame (0x0B)
 
 Error frames are used for errors on individual requests/streams as well as connection errors and in response
@@ -351,6 +352,7 @@ __NOTE__: Values in the range of 0x0001 to 0x00FF are reserved for use as SETUP 
 0x00101 to 0x001FF are reserved for connection error codes. Values in the range of 0x00201 to 0xFFFFFFFE are reserved for application layer
 errors.
 
+<a name="frame-lease"></a>
 ### LEASE Frame (0x02)
 
 Lease frames MAY be sent by the client-side or server-side Responders and inform the
@@ -388,7 +390,7 @@ A Responder implementation MAY stop all further requests by sending a LEASE with
 
 When a LEASE expires due to time, the value of the __Number of Requests__ that a Requester may make is implicitly 0.
 
-<a name="keepalive-frame"></a>
+<a name="frame-keepalive"></a>
 ### KEEPALIVE Frame (0x03)
 
 KEEPALIVE frames MUST always use Stream ID 0 as they pertain to the Connection.
@@ -429,6 +431,7 @@ Frame Contents
 * __Last Received Position__: (64 bits = max value 2^63-1) Signed long of Resume Last Received Position. Value MUST be > 0. (optional. Set to all 0s when not supported.)
 * __Data__: Data attached to a KEEPALIVE.
 
+<a name="frame-request-response"></a>
 ### REQUEST_RESPONSE Frame (0x04)
 
 Frame Contents
@@ -450,6 +453,7 @@ Frame Contents
     * (__F__)ollows: More fragments follow this fragment.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
+<a name="frame-fnf"></a>
 ### REQUEST_FNF (Fire-n-Forget) Frame (0x05)
 
 Frame Contents
@@ -471,6 +475,7 @@ Frame Contents
     * (__F__)ollows: More fragments follow this fragment.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
+<a name="frame-request-stream"></a>
 ### REQUEST_STREAM Frame (0x06)
 
 Frame Contents
@@ -497,6 +502,7 @@ Frame Contents
 
 See Flow Control: Reactive Stream Semantics for more information on RequestN behavior.
 
+<a name="frame-request-channel"></a>
 ### REQUEST_CHANNEL Frame (0x07)
 
 Frame Contents
@@ -528,6 +534,7 @@ A requester MUST __not__ send PAYLOAD frames after the REQUEST_CHANNEL frame unt
 
 See Flow Control: Reactive Stream Semantics for more information on RequestN behavior.
 
+<a name="frame-request-n"></a>
 ### REQUEST_N Frame (0x08)
 
 Frame Contents
@@ -549,6 +556,7 @@ Frame Contents
 
 See Flow Control: Reactive Stream Semantics for more information on RequestN behavior.
 
+<a name="frame-cancel"></a>
 ### CANCEL Frame (0x09)
 
 Frame Contents
@@ -568,6 +576,7 @@ Frame Contents
 * __Flags__: (10 bits)
      * (__M__)etadata: Metadata present
 
+<a name="frame-payload"></a>
 ### PAYLOAD Frame (0x0A)
 
 Frame Contents
@@ -597,6 +606,7 @@ A Payload is generally referred to as a NEXT.
 
 A Payload with the Complete Bit set is referred to as a COMPLETE.
 
+<a name="frame-metadata-push"></a>
 ### METADATA_PUSH Frame (0x0C)
 
 A Metadata Push frame can be used to send asynchronous metadata notifications from a Requester or
@@ -621,6 +631,7 @@ Frame Contents
 
 * __Frame Type__: (6 bits = max value 63) 0x0C
 
+<a name="frame-ext"></a>
 ### EXT (Extension) Frame (0x3F)
 
 The general format for an extension frame is given below.
@@ -914,7 +925,7 @@ This protocol attempts to be very lenient in processing of received frames and S
 conditions that do not make sense given the current context. Clarifications are given below:
 
 1. TCP half-open connections (and WebSockets) or other dead transports are detectable by lack of KEEPALIVE frames as specified
-under [Keepalive Frame](#keepalive-frame). The decision to close a connection due to inactivity is the applications choice.
+under [Keepalive Frame](#frame-keepalive). The decision to close a connection due to inactivity is the applications choice.
 1. Request keepalive and timeout semantics are the responsibility of the application.
 1. Lack of REQUEST_N frames that stops a stream is an application concern and SHALL NOT be handled by the protocol.
 1. Lack of LEASE frames that stops new Requests is an application concern and SHALL NOT be handled by the protocol.
@@ -1000,6 +1011,7 @@ A Server implementation MAY use CONNECTION_ERROR or REJECTED_RESUME as it sees f
 
 Leasing semantics are NOT assumed to carry over from previous connections when resuming. LEASE semantics MUST be restarted upon a new connection by sending a LEASE frame from the server.
 
+<a name="frame-resume"></a>
 #### RESUME Frame (0x0D)
 
 The general format for a Resume frame is given below.
@@ -1036,6 +1048,7 @@ RESUME frames MUST always use Stream ID 0 as they pertain to the connection.
 * __Last Received Server Position__: (64 bits = max value 2^63-1) Signed long of the last implied position the client received from the server. Value MUST be >= 0.
 * __First Available Client Position__: (64 bits = max value 2^63-1) Signed long of the earliest position that the client can rewind back to prior to resending frames. Value MUST be >= 0.
 
+<a name="frame-resume-ok"></a>
 #### RESUME_OK Frame (0x0E)
 
 The general format for a Resume OK frame is given below.
