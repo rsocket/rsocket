@@ -349,7 +349,7 @@ The Error Data is typically an Exception message, but could include stringified 
 | __RESERVED__                   | 0xFFFFFFFF | __Reserved for Extension Use__ |
 
 __NOTE__: Values in the range of 0x0001 to 0x00FF are reserved for use as SETUP error codes. Values in the range of
-0x00101 to 0x001FF are reserved for connection error codes. Values in the range of 0x00205 to 0xFFFFFFFE are reserved for application layer
+0x00101 to 0x001FF are reserved for connection error codes. Values in the range of 0x00301 to 0xFFFFFFFE are reserved for application layer
 errors.
 
 <a name="frame-lease"></a>
