@@ -29,6 +29,7 @@ Byte ordering is big endian for all fields.
   - [Frame Header Format](#frame-header-format)
   - [Stream Identifiers](#stream-identifiers)
   - [Frame Types](#frame-types)
+- [Resuming Operation](#resuming-operation)
 - [Connection Establishment](#connection-establishment)
 - [Fragmentation and Reassembly](#fragmentation-and-reassembly)
 - [Stream Sequences and Lifetimes](#stream-sequences-and-lifetimes)
@@ -41,7 +42,6 @@ Byte ordering is big endian for all fields.
   - [Lease Semantics](#flow-control-lease)
   - [QoS and Prioritization](#flow-control-qos)
 - [Handling the Unexpected](#handling-the-unexpected)
-- [Resuming Operation](#resuming-operation)
 
 
 ## Terminology
@@ -652,6 +652,151 @@ The general format for an extension frame is given below.
     * (__M__)etadata: Metadata Present.
 * __Extended Type__: (32 bits = max value 2^31-1 = 2,147,483,647) Signed integer of Extended type information. Value MUST be > 0.
 
+## Resuming Operation
+
+Due to the large number of active requests for ReactiveSocket, it is often necessary to provide the ability for resuming operation on transport failure. This behavior is totally optional for operation and may be supported or not based on an implementation choice.
+
+### Assumptions
+
+ReactiveSocket resumption exists only for specific cases. It is not intended to be an “always works” solution. If resuming operation is not possible, the connection should be terminated with an ERROR as specified by the protocol definition.
+
+1. Resumption is optional behavior for implementations. But highly suggested. Clients and Servers should assume NO resumption capability by default.
+1. Resumption is an optimistic operation. It may not always succeed.
+1. Resumption is desired to be fast and require a minimum of state to be exchanged.
+1. Resumption is designed for loss of connectivity and assumes client and server state is maintained across connectivity loss. I.e. there is no assumption of loss of state by either end. This is very important as without it, all the requirements of "guaranteed messaging" come into play.
+1. Resumption assumes no changes to Lease, Data format (encoding), etc. for resuming operation. i.e. A client is not allowed to change the metadata MIME type or the data MIME type or version, etc. when resuming operation.
+1. Resumption is always initiated by the client and either allowed or denied by the server.
+1. Resumption makes no assumptions of application state for delivered frames with respect to atomicity, transactionality, etc. See above.
+
+### Implied Position
+
+Resuming operation requires knowing the position of data reception of the previous connection. For this to be simplified, the underlying transport is assumed to support contiguous delivery of data on a per frame basis. In other words, partial frames are not delivered for processing nor are gaps allowed in the stream of frames sent by either the client or server. The current list of supported transports (TCP, WebSocket, and Aeron) all satisfy this requirement or can be made to do so in the case of TCP.
+
+As a Requester or Responder __sends__ REQUEST, CANCEL, or PAYLOAD frames, it maintains a __position__ of that frame within the connection in that direction. This is a 64-bit value that starts at 0. As a Requester or Responder __receives__ REQUEST, CANCEL, or PAYLOAD frames, it maintains an __implied position__ of that frame within the connection in that direction. This is also a 64-bit value that starts at 0.
+
+The reason this is “implied” is that the position is not included in each frame and is inferred simply by the message being sent/received on the connection in relation to previous frames.
+
+This position will be used to identify the location for resuming operation to begin.
+
+Frame types outside REQUEST, CANCEL, ERROR, and PAYLOAD do not have assigned (nor implied) positions.
+
+When a client sends a RESUME frame, it sends two implied positions: the last frame that was received from the server; the earliest frame position it still retains.  The server can make a determination on whether resumption is possible: have all frames past the client's last-received position been retained? and has the client retained all frames past the server's last-retained position.  If resumption is allowed to continue, the server sends a RESUME_OK frame, indicating its last-received position.
+
+### Client Lifetime Management
+
+Client lifetime management for servers MUST be extended to incorporate the length of time a client may successfully attempt resumption passed a transport disconnect. The means of client lifetime management are totally up to the implementation.
+
+### Resume Operation
+
+All ERROR frames sent MUST be CONNECTION_ERROR or REJECTED_RESUME error code.
+
+Client side resumption operation starts when the client desires to try to resume and starts a new transport connection. The operation then proceeds as the following:
+
+* Client sends RESUME frame. The client MUST NOT send any other frame types until resumption succeeds. The RESUME Identification Token MUST be the token used in the original SETUP frame. The RESUME Last Received Position field MUST be the last successfully received implied position from the server.
+* Client waits for either a RESUME_OK or ERROR frame from the server.
+* On receiving an ERROR frame, the client MUST NOT attempt resumption again if the error code was REJECTED_RESUME.
+* On receiving a RESUME_OK, the client:
+    * MUST assume that the next REQUEST, CANCEL, ERROR, and PAYLOAD frames have an implied position commencing from the last implied positions
+    * MAY retransmit *all* REQUEST, CANCEL, ERROR, and PAYLOAD frames starting at the RESUME_OK Last Received Position field value from the server.
+    * MAY send an ERROR frame indicating the end of the connection and MUST NOT attempt resumption again
+
+Server side resumption operation starts when the client sends a RESUME frame. The operation then proceeds as the following:
+
+* On receiving a RESUME frame, the server:
+    * MUST send an ERROR frame if the server does not support resuming operation. This is accomplished by handling the Ignore bit in the RESUME frame.
+    * use the RESUME Identification Token field to determine which client the resume pertains to. If the client is identified successfully, resumption MAY be continued. If not identified, then the server MUST send an ERROR frame.
+    * if successfully identified, then the server MAY send a RESUME_OK and then:
+        * MUST assume that the next REQUEST, CANCEL, ERROR, and PAYLOAD frames have an implied position commencing from the last implied positions
+        * MAY retransmit *all* REQUEST, CANCEL, ERROR, and PAYLOAD frames starting at the RESUME Last Received Position field value from the client.
+    * if successfully identified, then the server MAY send an ERROR frame if the server can not resume operation given the value of RESUME Last Received Position if the position is not one it deems valid to resume operation from or other extenuating circumstances.
+
+A Server that receives a RESUME frame after a SETUP frame, SHOULD send an ERROR.
+
+A Server that receives a RESUME frame after a previous RESUME frame, SHOULD send an ERROR.
+
+A Server implementation MAY use CONNECTION_ERROR or REJECTED_RESUME as it sees fit for each error condition.
+
+Leasing semantics are NOT assumed to carry over from previous connections when resuming. LEASE semantics MUST be restarted upon a new connection by sending a LEASE frame from the server.
+
+<a name="frame-resume"></a>
+#### RESUME Frame (0x0D)
+
+The general format for a Resume frame is given below.
+
+RESUME frames MUST always use Stream ID 0 as they pertain to the connection.
+
+```
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                         Stream ID = 0                         |
+    +-----------+-+-+---------------+-------------------------------+
+    |Frame Type |0|0|    Flags      |
+    +-------------------------------+-------------------------------+
+    |        Major Version          |         Minor Version         |
+    +-------------------------------+-------------------------------+
+    |         Token Length          | Resume Identification Token  ...
+    +---------------------------------------------------------------+
+    |                                                               |
+    +                 Last Received Server Position                 +
+    |                                                               |
+    +---------------------------------------------------------------+
+    |                                                               |
+    +                First Available Client Position                +
+    |                                                               |
+    +---------------------------------------------------------------+
+```
+
+* __Frame Type__: (6 bits = max value 63) 0x0D
+* __Major Version__: (16 bits = max value 65,535) Unsigned integer of Major version number of the protocol.
+* __Minor Version__: (16 bits = max value 65,535) Unsigned integer of Minor version number of the protocol.
+* __Resume Identification Token Length__: (16 bits = max value 65,535) Unsigned integer of Resume Identification Token Length in bytes. 
+* __Resume Identification Token__: Token used for client resume identification. Same Resume Identification used in the initial SETUP by the client.
+* __Last Received Server Position__: (64 bits = max value 2^63-1) Signed long of the last implied position the client received from the server. Value MUST be >= 0.
+* __First Available Client Position__: (64 bits = max value 2^63-1) Signed long of the earliest position that the client can rewind back to prior to resending frames. Value MUST be >= 0.
+
+<a name="frame-resume-ok"></a>
+#### RESUME_OK Frame (0x0E)
+
+The general format for a Resume OK frame is given below.
+
+RESUME OK frames MUST always use Stream ID 0 as they pertain to the connection.
+
+```
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                         Stream ID = 0                         |
+    +-----------+-+-+---------------+-------------------------------+
+    |Frame Type |0|0|    Flags      |
+    +-------------------------------+-------------------------------+
+    |                                                               |
+    +               Last Received Client Position                   +
+    |                                                               |
+    +---------------------------------------------------------------+
+```
+
+* __Frame Type__: (6 bits = max value 63) 0x0E
+* __Last Received Client Position__: (64 bits = max value 2^63-1) Signed long of the last implied position the server received from the client. Value MUST be >= 0.
+
+#### Keepalive Position Field
+
+Keepalive frames include the implied position of the client (or server). When sent, they act as a means for the other end of the connection to know the position of the other side.
+
+This information MAY be used to update state for possible retransmission, such as trimming a retransmit buffer, or possible associations with individual stream status.
+
+### Identification Token Handling
+
+The requirements for the Resume Identification Token are implementation dependent. However, some guidelines and considerations are:
+
+* Tokens may be generated by the client.
+* Tokens may be generated outside the client and the server and managed externally to the protocol.
+* Tokens should uniquely identify a connection on the server. The server should not assume a generation method of the token and should consider the token opaque. This allows a client to be compatible with any ReactiveSocket implementation that supports resuming operation and allows the client full control of Identification Token generation.
+* Tokens MUST be valid for the lifetime of an individual ReactiveSocket including possible resumption.
+* A server should not accept a SETUP with a Token that is currently already being used
+* Tokens should be resilient to replay attacks and thus should only be valid for the lifetime of an individual connection
+* Tokens should not be predictable by an attacking 3rd party
+
 ## Connection Establishment
 
 __NOTE__: The semantics are similar to [TLS False Start](https://tools.ietf.org/html/draft-bmoeller-tls-falsestart-00).
@@ -941,148 +1086,3 @@ assume it is set and act accordingly.
 	1. A server MUST ignore a SETUP_ERROR frame.
 	1. A client MUST ignore a SETUP_ERROR after it has completed connection establishment.
 	1. A client MUST ignore a SETUP frame.
-
-## Resuming Operation
-
-Due to the large number of active requests for ReactiveSocket, it is often necessary to provide the ability for resuming operation on transport failure. This behavior is totally optional for operation and may be supported or not based on an implementation choice.
-
-### Assumptions
-
-ReactiveSocket resumption exists only for specific cases. It is not intended to be an “always works” solution. If resuming operation is not possible, the connection should be terminated with an ERROR as specified by the protocol definition.
-
-1. Resumption is optional behavior for implementations. But highly suggested. Clients and Servers should assume NO resumption capability by default.
-1. Resumption is an optimistic operation. It may not always succeed.
-1. Resumption is desired to be fast and require a minimum of state to be exchanged.
-1. Resumption is designed for loss of connectivity and assumes client and server state is maintained across connectivity loss. I.e. there is no assumption of loss of state by either end. This is very important as without it, all the requirements of "guaranteed messaging" come into play.
-1. Resumption assumes no changes to Lease, Data format (encoding), etc. for resuming operation. i.e. A client is not allowed to change the metadata MIME type or the data MIME type or version, etc. when resuming operation.
-1. Resumption is always initiated by the client and either allowed or denied by the server.
-1. Resumption makes no assumptions of application state for delivered frames with respect to atomicity, transactionality, etc. See above.
-
-### Implied Position
-
-Resuming operation requires knowing the position of data reception of the previous connection. For this to be simplified, the underlying transport is assumed to support contiguous delivery of data on a per frame basis. In other words, partial frames are not delivered for processing nor are gaps allowed in the stream of frames sent by either the client or server. The current list of supported transports (TCP, WebSocket, and Aeron) all satisfy this requirement or can be made to do so in the case of TCP.
-
-As a Requester or Responder __sends__ REQUEST, CANCEL, or PAYLOAD frames, it maintains a __position__ of that frame within the connection in that direction. This is a 64-bit value that starts at 0. As a Requester or Responder __receives__ REQUEST, CANCEL, or PAYLOAD frames, it maintains an __implied position__ of that frame within the connection in that direction. This is also a 64-bit value that starts at 0.
-
-The reason this is “implied” is that the position is not included in each frame and is inferred simply by the message being sent/received on the connection in relation to previous frames.
-
-This position will be used to identify the location for resuming operation to begin.
-
-Frame types outside REQUEST, CANCEL, ERROR, and PAYLOAD do not have assigned (nor implied) positions.
-
-When a client sends a RESUME frame, it sends two implied positions: the last frame that was received from the server; the earliest frame position it still retains.  The server can make a determination on whether resumption is possible: have all frames past the client's last-received position been retained? and has the client retained all frames past the server's last-retained position.  If resumption is allowed to continue, the server sends a RESUME_OK frame, indicating its last-received position.
-
-### Client Lifetime Management
-
-Client lifetime management for servers MUST be extended to incorporate the length of time a client may successfully attempt resumption passed a transport disconnect. The means of client lifetime management are totally up to the implementation.
-
-### Resume Operation
-
-All ERROR frames sent MUST be CONNECTION_ERROR or REJECTED_RESUME error code.
-
-Client side resumption operation starts when the client desires to try to resume and starts a new transport connection. The operation then proceeds as the following:
-
-* Client sends RESUME frame. The client MUST NOT send any other frame types until resumption succeeds. The RESUME Identification Token MUST be the token used in the original SETUP frame. The RESUME Last Received Position field MUST be the last successfully received implied position from the server.
-* Client waits for either a RESUME_OK or ERROR frame from the server.
-* On receiving an ERROR frame, the client MUST NOT attempt resumption again if the error code was REJECTED_RESUME.
-* On receiving a RESUME_OK, the client:
-    * MUST assume that the next REQUEST, CANCEL, ERROR, and PAYLOAD frames have an implied position commencing from the last implied positions
-    * MAY retransmit *all* REQUEST, CANCEL, ERROR, and PAYLOAD frames starting at the RESUME_OK Last Received Position field value from the server.
-    * MAY send an ERROR frame indicating the end of the connection and MUST NOT attempt resumption again
-
-Server side resumption operation starts when the client sends a RESUME frame. The operation then proceeds as the following:
-
-* On receiving a RESUME frame, the server:
-    * MUST send an ERROR frame if the server does not support resuming operation. This is accomplished by handling the Ignore bit in the RESUME frame.
-    * use the RESUME Identification Token field to determine which client the resume pertains to. If the client is identified successfully, resumption MAY be continued. If not identified, then the server MUST send an ERROR frame.
-    * if successfully identified, then the server MAY send a RESUME_OK and then:
-        * MUST assume that the next REQUEST, CANCEL, ERROR, and PAYLOAD frames have an implied position commencing from the last implied positions
-        * MAY retransmit *all* REQUEST, CANCEL, ERROR, and PAYLOAD frames starting at the RESUME Last Received Position field value from the client.
-    * if successfully identified, then the server MAY send an ERROR frame if the server can not resume operation given the value of RESUME Last Received Position if the position is not one it deems valid to resume operation from or other extenuating circumstances.
-
-A Server that receives a RESUME frame after a SETUP frame, SHOULD send an ERROR.
-
-A Server that receives a RESUME frame after a previous RESUME frame, SHOULD send an ERROR.
-
-A Server implementation MAY use CONNECTION_ERROR or REJECTED_RESUME as it sees fit for each error condition.
-
-Leasing semantics are NOT assumed to carry over from previous connections when resuming. LEASE semantics MUST be restarted upon a new connection by sending a LEASE frame from the server.
-
-<a name="frame-resume"></a>
-#### RESUME Frame (0x0D)
-
-The general format for a Resume frame is given below.
-
-RESUME frames MUST always use Stream ID 0 as they pertain to the connection.
-
-```
-     0                   1                   2                   3
-     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                         Stream ID = 0                         |
-    +-----------+-+-+---------------+-------------------------------+
-    |Frame Type |0|0|    Flags      |
-    +-------------------------------+-------------------------------+
-    |        Major Version          |         Minor Version         |
-    +-------------------------------+-------------------------------+
-    |         Token Length          | Resume Identification Token  ...
-    +---------------------------------------------------------------+
-    |                                                               |
-    +                 Last Received Server Position                 +
-    |                                                               |
-    +---------------------------------------------------------------+
-    |                                                               |
-    +                First Available Client Position                +
-    |                                                               |
-    +---------------------------------------------------------------+
-```
-
-* __Frame Type__: (6 bits = max value 63) 0x0D
-* __Major Version__: (16 bits = max value 65,535) Unsigned integer of Major version number of the protocol.
-* __Minor Version__: (16 bits = max value 65,535) Unsigned integer of Minor version number of the protocol.
-* __Resume Identification Token Length__: (16 bits = max value 65,535) Unsigned integer of Resume Identification Token Length in bytes. 
-* __Resume Identification Token__: Token used for client resume identification. Same Resume Identification used in the initial SETUP by the client.
-* __Last Received Server Position__: (64 bits = max value 2^63-1) Signed long of the last implied position the client received from the server. Value MUST be >= 0.
-* __First Available Client Position__: (64 bits = max value 2^63-1) Signed long of the earliest position that the client can rewind back to prior to resending frames. Value MUST be >= 0.
-
-<a name="frame-resume-ok"></a>
-#### RESUME_OK Frame (0x0E)
-
-The general format for a Resume OK frame is given below.
-
-RESUME OK frames MUST always use Stream ID 0 as they pertain to the connection.
-
-```
-     0                   1                   2                   3
-     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                         Stream ID = 0                         |
-    +-----------+-+-+---------------+-------------------------------+
-    |Frame Type |0|0|    Flags      |
-    +-------------------------------+-------------------------------+
-    |                                                               |
-    +               Last Received Client Position                   +
-    |                                                               |
-    +---------------------------------------------------------------+
-```
-
-* __Frame Type__: (6 bits = max value 63) 0x0E
-* __Last Received Client Position__: (64 bits = max value 2^63-1) Signed long of the last implied position the server received from the client. Value MUST be >= 0.
-
-#### Keepalive Position Field
-
-Keepalive frames include the implied position of the client (or server). When sent, they act as a means for the other end of the connection to know the position of the other side.
-
-This information MAY be used to update state for possible retransmission, such as trimming a retransmit buffer, or possible associations with individual stream status.
-
-### Identification Token Handling
-
-The requirements for the Resume Identification Token are implementation dependent. However, some guidelines and considerations are:
-
-* Tokens may be generated by the client.
-* Tokens may be generated outside the client and the server and managed externally to the protocol.
-* Tokens should uniquely identify a connection on the server. The server should not assume a generation method of the token and should consider the token opaque. This allows a client to be compatible with any ReactiveSocket implementation that supports resuming operation and allows the client full control of Identification Token generation.
-* Tokens MUST be valid for the lifetime of an individual ReactiveSocket including possible resumption.
-* A server should not accept a SETUP with a Token that is currently already being used
-* Tokens should be resilient to replay attacks and thus should only be valid for the lifetime of an individual connection
-* Tokens should not be predictable by an attacking 3rd party
