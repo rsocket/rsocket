@@ -599,8 +599,6 @@ Frame Contents
        * If set, `onNext(Payload)` or equivalent will be invoked on Subscriber/Observer.
 * __Payload Data__: payload for Reactive Streams onNext.
 
-A Payload is generally referred to as a NEXT.
-
 A Payload with the Complete Bit set is referred to as a COMPLETE.
 
 <a name="frame-metadata-push"></a>
