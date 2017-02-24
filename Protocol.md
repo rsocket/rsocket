@@ -193,6 +193,7 @@ If Metadata Length is greater than this value, the entire frame MUST be ignored.
 
 * __Metadata Length__: (24 bits = max value 16,777,215) Unsigned integer representing the length of Metadata in bytes. Excluding Metadata Length field.
 
+<a name="stream-identifiers"></a>
 ### Stream Identifiers
 
 #### Generation
@@ -209,7 +210,7 @@ to odd/even values. In other words, a client MUST generate odd Stream IDs and a 
 
 #### Lifetime
 
-Stream IDs MUST be used for only one stream per connection without reuse. Once the max Stream ID has been used (2^31-1), no new streams can be created, thus a new connection MUST be established to create new streams once the max has been met. 
+Stream IDs MUST be used for only one stream per connection without re-use. Once the max Stream ID has been used (2^31-1), no new streams can be created, thus a new connection MUST be established to create new streams once the max has been met. 
 
 ### Frame Types
 
@@ -745,22 +746,18 @@ The possible sequences with LEASE are below.
 
 ## Fragmentation And Reassembly
 
-PAYLOAD frames and all REQUEST frames may represent a large object and MAY need to be fragmented to fit within the Frame Data size. When this
-occurs, the __F__ flag indicates if more fragments follow the current frame (or not).
+PAYLOAD frames and all REQUEST frames may represent a large object and MAY need to be fragmented to fit within the Frame Data size. When this occurs, the __F__ flag indicates if more fragments follow the current frame (or not).
 
 ## Stream Sequences and Lifetimes
 
-Streams exists for a specific period of time. So an implementation may assume that Stream IDs are valid for a finite period of time. This period
-of time is bound by, at most, the lifetime of the underlying transport protocol connection lifetime. Beyond that, each interaction pattern imposes
-lifetime based on a sequence of interactions between Requester and Responder.
+Streams exists for a specific period of time. So an implementation may assume that Stream IDs are valid for a finite period of time. This period of time is bound by either a) the lifetime of the underlying transport protocol connection, or b) the lifetime of a session if resumability is used to extend the session across multiple transport protocol connections. Beyond that, each interaction pattern imposes lifetime based on a sequence of interactions between Requester and Responder.
 
 In the section below, "RQ -> RS" refers to Requester sending a frame to a Responder. And "RS -> RQ" refers to Responder sending
 a frame to a Requester.
 
 In the section below, "*" refers to 0 or more and "+" refers to 1 or more.
 
-Once a stream has "terminated", the Stream ID can be "forgotten" by the Requester and Responder. An implementation MAY re-use an ID at this
-time, but it is recommended that an implementation not aggressively re-use IDs.
+Once a stream has "terminated", the Stream ID can be "forgotten" by the Requester and Responder, but the Stream ID MUST NOT be re-used. See [Stream Identifier](#stream-identifiers) for more information.
 
 <a name="stream-sequences-request-response"></a>
 ### Request Response
@@ -933,7 +930,6 @@ under [Keepalive Frame](#frame-keepalive). The decision to close a connection du
 1. If a PAYLOAD for a REQUEST_RESPONSE is received that does not have a COMPLETE flag set, the implementation MUST
 assume it is set and act accordingly.
 1. Reassembly of PAYLOADs and REQUEST_CHANNELs MUST assume the possibility of an infinite stream.
-1. Stream ID values MAY be re-used after completion or error of a stream.
 1. A PAYLOAD with both __F__ and __C__ flags set, implicitly ignores the __F__ flag.
 1. All other received frames that are not accounted for in previous sections MUST be ignored. Thus, for example:
     1. Receiving a Request frame on a Stream ID that is already in use MUST be ignored.
