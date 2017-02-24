@@ -207,6 +207,10 @@ A Stream ID MUST be locally unique for a Requester in a connection.
 Stream ID generation follows general guidelines for [HTTP/2](https://tools.ietf.org/html/rfc7540) with respect
 to odd/even values. In other words, a client MUST generate odd Stream IDs and a server MUST generate even Stream IDs.
 
+#### Lifetime
+
+Stream IDs MUST be used for only one stream per connection without reuse. Once the max Stream ID has been used (2^31-1), no new streams can be created, thus a new connection MUST be established to create new streams once the max has been met. 
+
 ### Frame Types
 
 |  Type                          | Value  | Description |
