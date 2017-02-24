@@ -886,8 +886,39 @@ The possible sequences with LEASE are below.
 
 ## Fragmentation And Reassembly
 
-PAYLOAD frames and all REQUEST frames may represent a large object and MAY need to be fragmented to fit within the Frame Data size. When this
-occurs, the __F__ flag indicates if more fragments follow the current frame (or not).
+PAYLOAD frames and all REQUEST frames may represent a large object and MAY need to be fragmented to fit within the Frame Data size. When this occurs, the __F__ flag indicates if more fragments follow the current frame (or not).
+
+When a PAYLOAD is fragmented, the Metadata MUST be transmitted completely before the Data. 
+
+For example, a single PAYLOAD with 20MB of Metdata and 25MB of Data that is fragmented into 3 frames:
+
+```
+-- PAYLOAD frame 1
+Frame length = 16MB
+(M)etadata present = 1
+(F)ollows = 1 (fragments coming)
+Metadata Length = 16MB
+
+16MB of METADATA
+0MB of Data
+
+-- PAYLOAD frame 2
+Frame length = 16MB
+(M)etadata present = 1
+(F)ollows = 1 (fragments coming)
+Metadata Length = 4MB
+
+4MB of METADATA
+12MB of Data
+
+-- PAYLOAD frame 3
+Frame length = 13MB
+(M)etadata present = 0
+(F)ollows = 0
+
+0MB of METADATA
+13MB of Data
+```
 
 ## Stream Sequences and Lifetimes
 
