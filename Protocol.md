@@ -94,7 +94,7 @@ The ReactiveSocket protocol uses a lower level transport protocol to carry React
 
 An implementation MAY "close" a transport connection due to protocol processing. When this occurs, it is assumed that the connection will have no further frames sent and all frames will be ignored.
 
-ReactiveSocket as specified here has been designed for and tested with TCP, WebSocket, and Aeron as transport protocols.
+ReactiveSocket as specified here has been designed for and tested with TCP, WebSocket, Aeron, and [HTTP/2 streams](https://http2.github.io/http2-spec/#StreamsLayer) as transport protocols.
 
 ### Framing Protocol Usage
 
@@ -107,7 +107,7 @@ The frame length field MUST be omitted if the transport protocol preserves messa
 | TCP                            | __YES__ |
 | WebSocket                      | __NO__  |
 | Aeron                          | __NO__  |
-| HTTP/2                         | __YES__ |
+| HTTP/2 Stream                  | __YES__ |
 
 ### Framing Format
 
