@@ -1085,24 +1085,6 @@ In absence of ERROR or CANCEL, the stream is terminated after both Requester and
 
 A Requester may indicate COMPLETE by setting the C bit on either the initial REQUEST_CHANNEL frame, or on the last PAYLOAD frame sent. A Requester MUST NOT send any additional PAYLOAD frames after sending a frame with the C bit set.
 
-
-### Per Stream State
-
-#### Requester
-
-1. CLOSED: implicit starting/ending state of all Stream IDs
-1. Requested (sent REQUEST_*)
-1. CLOSED (received COMPLETE or sent REQUEST_FNF)
-1. CLOSED (received ERROR)
-
-#### Responder
-
-1. CLOSED: implicit starting/ending state of all Stream IDs
-1. Responding: sending PAYLOADs and processing REQUEST_N
-1. CLOSED (received CANCEL)
-1. CLOSED (sent COMPLETE or received REQUEST_FNF)
-1. CLOSED (sent ERROR)
-
 ### Flow Control
 
 There are multiple flow control mechanics provided by the protocol.
