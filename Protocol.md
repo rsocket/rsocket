@@ -330,8 +330,7 @@ Frame Contents
      * See list of valid Error Codes below.
 * __Error Data__: includes Payload describing error information. Error Data SHOULD be a UTF-8 encoded string. The string MUST NOT be null terminated.
 
-A Stream ID of 0 means the error pertains to the connection. Including connection establishment. A Stream ID > 0
-means the error pertains to a given stream. 
+A Stream ID of 0 means the error pertains to the connection. Including connection establishment. A Stream ID > 0 means the error pertains to a given stream. 
 
 The Error Data is typically an Exception message, but could include stringified stacktrace information if appropriate.  
 
