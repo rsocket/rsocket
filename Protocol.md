@@ -53,7 +53,9 @@ See [Fragmentation and Reassembly](#fragmentation-and-reassembly).
 provide capabilities mentioned in the [transport protocol](#transport-protocol) section.
 * __Stream__: Unit of operation (request/response, etc.). See [Motivations](Motivations.md).
 * __Request__: A stream request. May be one of four types. As well as request for more items or cancellation of previous request.
-* __Payload__: A stream message (upstream or downstream). Contains data associated with a stream created by a previous request.
+* __Payload__: A stream message (upstream or downstream). Contains data associated with a stream created by a previous request. In Reactive Streams and Rx this is the 'onNext' event.
+* __Complete__: Terminal event sent on a stream to signal successful completion. In Reactive Streams and Rx this is the 'onComplete' event.
+  * A frame (PAYLOAD or REQUEST_CHANNEL) with the Complete bit set is sometimes referred to as COMPLETE in this document when reference to the frame is semantically about the Complete bit/event.
 * __Client__: The side initiating a connection.
 * __Server__: The side accepting connections from clients.
 * __Connection__: The instance of a transport session between client and server.
@@ -526,7 +528,8 @@ Frame Contents
 * __Flags__: (10 bits)
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More fragments follow this fragment.
-    * (__C__)omplete: bit to indicate COMPLETE.
+    * (__C__)omplete: bit to indicate stream completion.
+	   * If set, `onComplete()` or equivalent will be invoked on Subscriber/Observer.
 * __Initial Request N__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer representing the initial request N value for channel. Value MUST be > 0.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
@@ -598,13 +601,11 @@ Frame Contents
 * __Flags__: (10 bits)
     * (__M__)etadata: Metadata Present.
     * (__F__)ollows: More fragments follow this fragment.
-    * (__C__)omplete: bit to indicate COMPLETE.
+    * (__C__)omplete: bit to indicate stream completion.
        * If set, `onComplete()` or equivalent will be invoked on Subscriber/Observer.
     * (__N__)ext: bit to indicate Next (Payload Data and/or Metadata present).
        * If set, `onNext(Payload)` or equivalent will be invoked on Subscriber/Observer.
 * __Payload Data__: payload for Reactive Streams onNext.
-
-A Payload with the Complete Bit set is referred to as a COMPLETE.
 
 <a name="frame-metadata-push"></a>
 ### METADATA_PUSH Frame (0x0C)
