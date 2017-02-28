@@ -988,7 +988,7 @@ or
 1. RS -> RQ: PAYLOAD*
 1. RQ -> RS: CANCEL
 
-At any time, a client may send REQUEST_N frames.
+At any time, the Requester may send REQUEST_N frames.
 
 Upon receiving a CANCEL, the stream is terminated on the Responder.
 
@@ -1001,33 +1001,90 @@ Upon sending a COMPLETE or ERROR, the stream is terminated on the Responder.
 <a name="stream-sequences-channel"></a>
 ### Request Channel
 
-1. RQ -> RS: REQUEST_CHANNEL* intermixed with
-1. RS -> RQ: PAYLOAD*
-1. RS -> RQ: COMPLETE | ERROR
+#### COMPLETE from Requester and Responder
 
-or
+1. RQ -> RS: REQUEST_CHANNEL
+1. RQ -> RS: PAYLOAD*
+1. RQ -> RS: COMPLETE
 
-1. RQ -> RS: REQUEST_CHANNEL* intermixed with
+  intermixed with 
+  
 1. RS -> RQ: PAYLOAD*
+1. RS -> RQ: COMPLETE
+
+#### Error from Requester, Responder terminates
+
+1. RQ -> RS: REQUEST_CHANNEL
+1. RQ -> RS: PAYLOAD*
+1. RQ -> RS: ERROR
+
+  intermixed with 
+  
+1. RS -> RQ: PAYLOAD*
+
+#### Error from Requester, Responder already Completed
+
+1. RQ -> RS: REQUEST_CHANNEL
+1. RQ -> RS: PAYLOAD*
+1. RQ -> RS: ERROR
+
+  intermixed with 
+  
+1. RS -> RQ: PAYLOAD*
+1. RS -> RQ: COMPLETE
+
+#### Error from Responder, Requester terminates
+
+1. RQ -> RS: REQUEST_CHANNEL
+1. RQ -> RS: PAYLOAD*
+
+  intermixed with 
+  
+1. RS -> RQ: PAYLOAD*
+1. RS -> RQ: ERROR
+
+#### Error from Responder, Requester already Completed
+
+1. RQ -> RS: REQUEST_CHANNEL
+1. RQ -> RS: PAYLOAD*
+1. RQ -> RS: COMPLETE
+
+  intermixed with 
+  
+1. RS -> RQ: PAYLOAD*
+1. RS -> RQ: ERROR
+
+#### Cancel from Requester, Responder terminates
+
+1. RQ -> RS: REQUEST_CHANNEL
+1. RQ -> RS: PAYLOAD*
+1. RQ -> RS: COMPLETE
 1. RQ -> RS: CANCEL
 
-At any time, a Requester may send REQUEST_CHANNEL frames with F bit set to indicate fragmentation.
+  intermixed with 
+  
+1. RS -> RQ: PAYLOAD*
+
+
+At any time, a Requester may send PAYLOAD frames.
 
 At any time, a Requester, as well as a Responder, may send REQUEST_N frames.
 
 An implementation MUST only send a single initial REQUEST_CHANNEL frame from the Requester to the Responder. And
 a Responder MUST respond to an initial REQUEST_CHANNEL frame with a REQUEST_N frame.
 
-A Requester may indicate end of REQUEST_CHANNEL frames by setting the C bit. A Requester MUST NOT
-send any additional REQUEST_CHANNEL frames after sending a frame with the C bit set.
-
 Upon receiving a CANCEL, the stream is terminated on the Responder.
 
 Upon sending a CANCEL, the stream is terminated on the Requester.
 
-Upon receiving a COMPLETE or ERROR, the stream is terminated on the Requester.
+Upon receiving an ERROR, the stream is terminated on both Requester and Responder.
 
-Upon sending a COMPLETE or ERROR, the stream is terminated on the Responder.
+Upon sending an ERROR, the stream is terminated on both the Requester and Responder.
+
+In absence of ERROR or CANCEL, the stream is terminated after both Requester and Responder have sent and received COMPLETE.
+
+A Requester may indicate COMPLETE by setting the C bit on either the initial REQUEST_CHANNEL frame, or on the last PAYLOAD frame sent. A Requester MUST NOT send any additional PAYLOAD frames after sending a frame with the C bit set.
+
 
 ### Per Stream State
 
