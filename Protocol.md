@@ -1106,6 +1106,7 @@ under [Keepalive Frame](#frame-keepalive). The decision to close a connection du
 assume it is set and act accordingly.
 1. Reassembly of PAYLOADs and REQUEST_CHANNELs MUST assume the possibility of an infinite stream.
 1. A PAYLOAD with both __F__ and __C__ flags set, implicitly ignores the __F__ flag.
+1. Flag bits not specified for a particular frame MUST be ignored. 
 1. All other received frames that are not accounted for in previous sections MUST be ignored. Thus, for example:
     1. Receiving a Request frame on a Stream ID that is already in use MUST be ignored.
     1. Receiving a CANCEL on an unknown Stream ID (including 0) MUST be ignored.
