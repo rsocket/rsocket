@@ -502,7 +502,7 @@ Frame Contents
 * __Initial Request N__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer representing the initial number of items to request. Value MUST be > 0.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
-See Flow Control: Reactive Streams Semantics for more information on RequestN behavior.
+See [Flow Control: Reactive Streams Semantics](#flow-control-reactive-streams) for more information on RequestN behavior.
 
 <a name="frame-request-channel"></a>
 ### REQUEST_CHANNEL Frame (0x07)
@@ -1053,7 +1053,9 @@ There are multiple flow control mechanics provided by the protocol.
 <a name="flow-control-reactive-streams"></a>
 #### Reactive Streams Semantics
 
-[Reactive Streams](http://www.reactive-streams.org/) semantics for flow control of Streams, Subscriptions, and Channels.
+[Reactive Streams](http://www.reactive-streams.org/) semantics are used for flow control of Streams, Subscriptions, and Channels. This is a credit-based model where the Requester grants the Responder credit for the number of PAYLOADs it can send. It is sometimes referred to as "request-n" or "request(n)". 
+
+Credits are cumulative. Once credits are granted from Requester to Responder, they cannot be revoked. For example, sending `request(3)` and `request(2)` accumulates to a value of 5, allowing the Responder to send 5 PAYLOADs.
 
 Please note that this explicitly does NOT follow rule number 17 in https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/README.md#3-subscription-code
 
