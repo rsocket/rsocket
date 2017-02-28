@@ -891,6 +891,8 @@ The possible sequences with LEASE are below.
 
 PAYLOAD frames and all REQUEST frames may represent a large object and MAY need to be fragmented to fit within the Frame Data size. When this occurs, the __F__ flag indicates if more fragments follow the current frame (or not).
 
+Fragmentation does not change the request(n) or lease counts. In other words, a fragmented PAYLOAD frame counts as a single request(n) credit, and a request counts against a single lease count, regardless of how many fragments the frame is split into.
+
 When a PAYLOAD is fragmented, the Metadata MUST be transmitted completely before the Data. 
 
 For example, a single PAYLOAD with 20MB of Metdata and 25MB of Data that is fragmented into 3 frames:
