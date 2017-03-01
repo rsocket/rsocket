@@ -708,7 +708,7 @@ Client side resumption operation starts when the client desires to try to resume
 Server side resumption operation starts when the client sends a RESUME frame. The operation then proceeds as the following:
 
 * On receiving a RESUME frame, the server:
-    * MUST send an ERROR frame if the server does not support resuming operation. This is accomplished by handling the Ignore bit in the RESUME frame.
+    * MUST send an ERROR frame if the server does not support resuming operation. 
     * use the RESUME Identification Token field to determine which client the resume pertains to. If the client is identified successfully, resumption MAY be continued. If not identified, then the server MUST send an ERROR frame.
     * if successfully identified, then the server MAY send a RESUME_OK and then:
         * MUST assume that the next REQUEST, CANCEL, ERROR, and PAYLOAD frames have an implied position commencing from the last implied positions
