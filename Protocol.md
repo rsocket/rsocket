@@ -895,6 +895,10 @@ PAYLOAD frames and all REQUEST frames may represent a large object and MAY need 
 
 Fragmentation does not change the request(n) or lease counts. In other words, a fragmented PAYLOAD frame counts as a single request(n) credit, and a request counts against a single lease count, regardless of how many fragments the frame is split into.
 
+#### PAYLOAD Frame
+
+When a PAYLOAD frame needs to be fragmented, a sequence of PAYLOAD frames is delivered using the (F)ollows flag.
+
 When a PAYLOAD is fragmented, the Metadata MUST be transmitted completely before the Data. 
 
 For example, a single PAYLOAD with 20MB of Metdata and 25MB of Data that is fragmented into 3 frames:
@@ -926,6 +930,46 @@ Frame length = 13MB
 0MB of METADATA
 13MB of Data
 ```
+
+If the sender (Requester or Responder) wants to cancel sending a fragmented sequence, it MAY send a CANCEL frame without finishing delivery of the fragments. 
+
+#### REQUEST Frames
+
+When REQUEST_RESPONSE, REQUEST_FNF, REQUEST_STREAM, or REQUEST_CHANNEL frames need to be fragmented, the first frame is the REQUEST_* frame with the (F)ollows flag set, followed by a sequence of PAYLOAD frames.
+
+When fragmented, the Metadata MUST be transmitted completely before the Data. 
+
+For example, a single PAYLOAD with 20MB of Metdata and 25MB of Data that is fragmented into 3 frames:
+
+```
+-- REQUEST_RESPONSE frame 1
+Frame length = 16MB
+(M)etadata present = 1
+(F)ollows = 1 (fragments coming)
+Metadata Length = 16MB
+
+16MB of METADATA
+0MB of Data
+
+-- PAYLOAD frame 2
+Frame length = 16MB
+(M)etadata present = 1
+(F)ollows = 1 (fragments coming)
+Metadata Length = 4MB
+
+4MB of METADATA
+12MB of Data
+
+-- PAYLOAD frame 3
+Frame length = 13MB
+(M)etadata present = 0
+(F)ollows = 0
+
+0MB of METADATA
+13MB of Data
+```
+
+If the Requester wants to cancel sending a fragmented sequence, it MAY send a CANCEL frame without finishing delivery of the fragments. 
 
 ## Stream Sequences and Lifetimes
 
