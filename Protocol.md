@@ -258,9 +258,9 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                         Stream ID = 0                         |
-    +-----------+-+-+-+-+-+---------+-------------------------------+
-    |Frame Type |0|M|R|L|S|  Flags  |
-    +-----------+-+-+-+-+-+---------+-------------------------------+
+    +-----------+-+-+-+-+-----------+-------------------------------+
+    |Frame Type |0|M|R|L|  Flags    |
+    +-----------+-+-+-+-+-----------+-------------------------------+
     |         Major Version         |        Minor Version          |
     +-------------------------------+-------------------------------+
     |0|                 Time Between KEEPALIVE Frames               |
@@ -281,7 +281,6 @@ Frame Contents
      * (__M__)etadata: Metadata present
      * (__R__)esume Enable: Client requests resume capability if possible. Resume Identification Token present.
      * (__L__)ease: Will honor LEASE (or not).
-     * (__S__)trict: Adhere to strict interpretation of Data and Metadata.
 * __Major Version__: (16 bits = max value 65,535) Unsigned 16-bit integer of Major version number of the protocol.
 * __Minor Version__: (16 bits = max value 65,535) Unsigned 16-bit integer of Minor version number of the protocol.
 * __Time Between KEEPALIVE Frames__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer of Time (in milliseconds) between KEEPALIVE frames that the client will send. Value MUST be > 0. 
