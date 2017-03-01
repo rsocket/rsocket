@@ -166,7 +166,7 @@ __NOTE__: Byte ordering is big endian.
 #### Handling Ignore Flag
 
 The (__I__)gnore flag is used for extension of the protocol. A value of 0 in a frame for this flag indicates the protocol can't
-ignore this frame. An implementation MAY send an ERROR frame (with CONNECTION_ERROR error code) and close the underlying transport
+ignore this frame. An implementation MAY send an ERROR[CONNECTION_ERROR] frame and close the underlying transport
 connection on reception of a frame that it does not understand with this bit not set.
 
 #### Frame Validation
@@ -302,13 +302,12 @@ rules MAY be used for handling layout. For example, `application/x.netflix+cbor`
 * __Setup Data__: includes payload describing connection capabilities of the endpoint sending the
 Setup header.
 
-__NOTE__: A server that receives a SETUP frame that has (__R__)esume Enabled set, but does not support resuming operation, MUST reject the SETUP with an ERROR. 
+__NOTE__: A server that receives a SETUP frame that has (__R__)esume Enabled set, but does not support resuming operation, MUST reject the SETUP with an ERROR[REJECTED_SETUP]. 
 
 <a name="frame-error"></a>
 ### ERROR Frame (0x0B)
 
-Error frames are used for errors on individual requests/streams as well as connection errors and in response
-to SETUP frames. The latter is referred to as a SETUP_ERROR.
+Error frames are used for errors on individual requests/streams as well as connection errors and in response to SETUP frames. 
 
 Frame Contents
 
@@ -332,8 +331,7 @@ Frame Contents
      * See list of valid Error Codes below.
 * __Error Data__: includes Payload describing error information. Error Data SHOULD be a UTF-8 encoded string. The string MUST NOT be null terminated.
 
-A Stream ID of 0 means the error pertains to the connection. Including connection establishment. A Stream ID > 0
-means the error pertains to a given stream.
+A Stream ID of 0 means the error pertains to the connection., including connection establishment. A Stream ID > 0 means the error pertains to a given stream.
 
 The Error Data is typically an Exception message, but could include stringified stacktrace information if appropriate.  
 
@@ -357,6 +355,14 @@ The Error Data is typically an Exception message, but could include stringified 
 __NOTE__: Values in the range of 0x0001 to 0x00FF are reserved for use as SETUP error codes. Values in the range of
 0x00101 to 0x001FF are reserved for connection error codes. Values in the range of 0x00201 to 0xFFFFFFFE are reserved for application layer
 errors.
+
+When this document refers to a specific Error Code as a frame, it uses this pattern: ERROR[error_code] or ERROR[error_code|error_code]
+
+For example:
+
+- ERROR[INVALID_SETUP] means the ERROR frame with the INVALID_SETUP code
+- ERROR[REJECTED] means the ERROR frame with the REJECTED code
+- ERROR[CONNECTION_ERROR|REJECTED_RESUME] means the ERROR frame either either the CONNECTION_ERROR or REJECTED_RESUME code
 
 <a name="frame-lease"></a>
 ### LEASE Frame (0x02)
@@ -698,28 +704,26 @@ All ERROR frames sent MUST be CONNECTION_ERROR or REJECTED_RESUME error code.
 Client side resumption operation starts when the client desires to try to resume and starts a new transport connection. The operation then proceeds as the following:
 
 * Client sends RESUME frame. The client MUST NOT send any other frame types until resumption succeeds. The RESUME Identification Token MUST be the token used in the original SETUP frame. The RESUME Last Received Position field MUST be the last successfully received implied position from the server.
-* Client waits for either a RESUME_OK or ERROR frame from the server.
-* On receiving an ERROR frame, the client MUST NOT attempt resumption again if the error code was REJECTED_RESUME.
+* Client waits for either a RESUME_OK or ERROR[CONNECTION_ERROR|REJECTED_RESUME] frame from the server.
+* On receiving an ERROR[REJECTED_RESUME] frame, the client MUST NOT attempt resumption again.
 * On receiving a RESUME_OK, the client:
     * MUST assume that the next REQUEST, CANCEL, ERROR, and PAYLOAD frames have an implied position commencing from the last implied positions
     * MAY retransmit *all* REQUEST, CANCEL, ERROR, and PAYLOAD frames starting at the RESUME_OK Last Received Position field value from the server.
-    * MAY send an ERROR frame indicating the end of the connection and MUST NOT attempt resumption again
+    * MAY send an ERROR[CONNECTION_ERROR|CONNECTION_CLOSE] frame indicating the end of the connection and MUST NOT attempt resumption again
 
 Server side resumption operation starts when the client sends a RESUME frame. The operation then proceeds as the following:
 
 * On receiving a RESUME frame, the server:
-    * MUST send an ERROR frame if the server does not support resuming operation. This is accomplished by handling the Ignore bit in the RESUME frame.
-    * use the RESUME Identification Token field to determine which client the resume pertains to. If the client is identified successfully, resumption MAY be continued. If not identified, then the server MUST send an ERROR frame.
+    * MUST send an ERROR[REJECTED_RESUME] frame if the server does not support resuming operation. This is accomplished by handling the Ignore bit in the RESUME frame.
+    * use the RESUME Identification Token field to determine which client the resume pertains to. If the client is identified successfully, resumption MAY be continued. If not identified, then the server MUST send an ERROR[REJECTED_RESUME] frame.
     * if successfully identified, then the server MAY send a RESUME_OK and then:
         * MUST assume that the next REQUEST, CANCEL, ERROR, and PAYLOAD frames have an implied position commencing from the last implied positions
         * MAY retransmit *all* REQUEST, CANCEL, ERROR, and PAYLOAD frames starting at the RESUME Last Received Position field value from the client.
-    * if successfully identified, then the server MAY send an ERROR frame if the server can not resume operation given the value of RESUME Last Received Position if the position is not one it deems valid to resume operation from or other extenuating circumstances.
+    * if successfully identified, then the server MAY send an ERROR[REJECTED_RESUME] frame if the server can not resume operation given the value of RESUME Last Received Position if the position is not one it deems valid to resume operation from or other extenuating circumstances.
 
-A Server that receives a RESUME frame after a SETUP frame, SHOULD send an ERROR.
+A Server that receives a RESUME frame after a SETUP frame, SHOULD send an ERROR[CONNECTION_ERROR].
 
-A Server that receives a RESUME frame after a previous RESUME frame, SHOULD send an ERROR.
-
-A Server implementation MAY use CONNECTION_ERROR or REJECTED_RESUME as it sees fit for each error condition.
+A Server that receives a RESUME frame after a previous RESUME frame, SHOULD send an ERROR[CONNECTION_ERROR].
 
 Leasing semantics are NOT assumed to carry over from previous connections when resuming. LEASE semantics MUST be restarted upon a new connection by sending a LEASE frame from the server.
 
@@ -806,12 +810,11 @@ The requirements for the Resume Identification Token are implementation dependen
 
 __NOTE__: The semantics are similar to [TLS False Start](https://tools.ietf.org/html/draft-bmoeller-tls-falsestart-00).
 
-The term SETUP_ERROR is used below to indicate an ERROR frame that has a Stream ID of 0 and an Error Code
-that indicates a SETUP error.
+Immediately upon successful connection, the client MUST send either a SETUP or RESUME frame with
+Stream ID of 0. Any other frame received that is NOT a SETUP|RESUME frame or a SETUP|RESUME frame with
+a Stream ID > 0, MUST cause the server to send an ERROR[INVALID_SETUP] and close the connection. 
 
-Immediately upon successful connection, the client MUST send a SETUP frame with
-Stream ID of 0. Any other frame received that is NOT a SETUP frame or a SETUP frame with
-a Stream ID > 0, MUST cause the server to send a SETUP_ERROR (with INVALID_SETUP) and close the connection.
+See [Resume Operation](#resume-operation) for more information about resuming. The rest of this section assumes use of SETUP for establishing a connection.
 
 The client-side Requester can inform the server-side Responder as to whether it will
 honor LEASEs or not based on the presence of the __L__ flag in the SETUP frame.
@@ -827,7 +830,7 @@ the SETUP frame set the __L__ flag. The server-side Requester may send requests
 immediately upon receiving a SETUP frame that it accepts if the __L__ flag is not set in the SETUP frame.
 
 If the server does NOT accept the contents of the SETUP frame, the server MUST send
-back a SETUP_ERROR and then close the connection.
+back an ERROR[INVALID_SETUP|UNSUPPORTED_SETUP] and then close the connection.
 
 The __S__ flag of the SETUP indicates the client requires the server to adhere to strict interpretation
 of the Data and Metadata of the SETUP. Anything in the Data and/or Metadata that is not understood or can
@@ -841,7 +844,7 @@ send a LEASE frame after a SETUP frame with the __L__ flag set.
 A client assumes a SETUP is accepted if it receives a response to a request, a LEASE
 frame, or if it sees a REQUEST type.
 
-A client assumes a SETUP is rejected if it receives a SETUP_ERROR.
+A client assumes a SETUP is rejected if it receives an ERROR.
 
 Until connection establishment is complete, a Requester MUST NOT send any Request frames.
 
@@ -850,7 +853,7 @@ Until connection establishment is complete, a Responder MUST NOT emit any PAYLOA
 ### Negotiation
 
 The assumption is that the client will be dictating to the server what it desires to do. The server will decide to support
-that SETUP (accept it) or not (reject it). The SETUP_ERROR error code indicates the reason for the rejection.
+that SETUP (accept it) or not (reject it). The ERROR[INVALID_SETUP|UNSUPPORTED_SETUP|REJECTED_SETUP] error code indicates the reason for the rejection.
 
 ### Sequences without LEASE
 
@@ -861,13 +864,13 @@ The possible sequences without LEASE are below.
     * Server accepts SETUP, handles REQUEST, sends back normal sequence based on REQUEST type
 1. Client-side Request, Server-side __rejects__ SETUP
     * Client connects & sends SETUP & sends REQUEST
-    * Server rejects SETUP, sends back SETUP_ERROR, closes connection
+    * Server rejects SETUP, sends back ERROR[INVALID_SETUP|UNSUPPORTED_SETUP|REJECTED_SETUP], closes connection
 1. Server-side Request, Server-side __accepts__ SETUP
     * Client connects & sends SETUP
     * Server accepts SETUP, sends back REQUEST type
 1. Server-side Request, Server-side __rejects__ SETUP
     * Client connects & sends SETUP
-    * Server rejects SETUP, sends back SETUP_ERROR, closes connection
+    * Server rejects SETUP, sends back ERROR[INVALID_SETUP|UNSUPPORTED_SETUP|REJECTED_SETUP], closes connection
 
 ### Sequences with LEASE
 
@@ -879,7 +882,7 @@ The possible sequences with LEASE are below.
     * Client-side sends REQUEST
 1. Client-side Request, Server-side __rejects__ SETUP
     * Client connects & sends SETUP with __L__ flag
-    * Server rejects SETUP, sends back SETUP_ERROR, closes connection
+    * Server rejects SETUP, sends back ERROR[INVALID_SETUP|UNSUPPORTED_SETUP|REJECTED_SETUP], closes connection
 1. Server-side Request, Server-side __accepts__ SETUP
     * Client connects & sends SETUP with __L__ flag
     * Server accepts SETUP, sends back LEASE frame
@@ -887,7 +890,7 @@ The possible sequences with LEASE are below.
     * Server sends REQUEST
 1. Server-side Request, Server-side __rejects__ SETUP
     * Client connects & sends SETUP with __L__ flag
-    * Server rejects SETUP, sends back SETUP_ERROR, closes connection
+    * Server rejects SETUP, sends back ERROR[INVALID_SETUP|UNSUPPORTED_SETUP|REJECTED_SETUP], closes connection
 
 ## Fragmentation And Reassembly
 
@@ -947,7 +950,7 @@ Once a stream has "terminated", the Stream ID can be "forgotten" by the Requeste
 or
 
 1. RQ -> RS: REQUEST_RESPONSE
-1. RS -> RQ: ERROR
+1. RS -> RQ: ERROR[APPLICATION_ERROR|REJECTED|INVALID]
 
 or
 
@@ -960,7 +963,7 @@ Upon receiving a CANCEL, the stream is terminated on the Responder and the respo
 
 Upon sending a CANCEL, the stream is terminated on the Requester.
 
-Upon receiving a COMPLETE or ERROR, the stream is terminated on the Requester.
+Upon receiving a COMPLETE or ERROR[APPLICATION_ERROR|REJECTED|INVALID], the stream is terminated on the Requester.
 
 <a name="stream-sequences-fire-and-forget"></a>
 ### Request Fire-n-Forget
@@ -978,7 +981,7 @@ REQUEST_FNF are assumed to be best effort and MAY not be processed due to: (1) S
 
 1. RQ -> RS: REQUEST_STREAM
 1. RS -> RQ: PAYLOAD*
-1. RS -> RQ: ERROR
+1. RS -> RQ: ERROR[APPLICATION_ERROR|REJECTED|INVALID]
 
 or
 
@@ -998,9 +1001,9 @@ Upon receiving a CANCEL, the stream is terminated on the Responder.
 
 Upon sending a CANCEL, the stream is terminated on the Requester.
 
-Upon receiving a COMPLETE or ERROR, the stream is terminated on the Requester.
+Upon receiving a COMPLETE or ERROR[APPLICATION_ERROR|REJECTED|INVALID], the stream is terminated on the Requester.
 
-Upon sending a COMPLETE or ERROR, the stream is terminated on the Responder.
+Upon sending a COMPLETE or ERROR[APPLICATION_ERROR|REJECTED|INVALID], the stream is terminated on the Responder.
 
 <a name="stream-sequences-channel"></a>
 ### Request Channel
@@ -1020,7 +1023,7 @@ Upon sending a COMPLETE or ERROR, the stream is terminated on the Responder.
 
 1. RQ -> RS: REQUEST_CHANNEL
 1. RQ -> RS: PAYLOAD*
-1. RQ -> RS: ERROR
+1. RQ -> RS: ERROR[APPLICATION_ERROR]
 
   intermixed with 
   
@@ -1030,7 +1033,7 @@ Upon sending a COMPLETE or ERROR, the stream is terminated on the Responder.
 
 1. RQ -> RS: REQUEST_CHANNEL
 1. RQ -> RS: PAYLOAD*
-1. RQ -> RS: ERROR
+1. RQ -> RS: ERROR[APPLICATION_ERROR]
 
   intermixed with 
   
@@ -1045,7 +1048,7 @@ Upon sending a COMPLETE or ERROR, the stream is terminated on the Responder.
   intermixed with 
   
 1. RS -> RQ: PAYLOAD*
-1. RS -> RQ: ERROR
+1. RS -> RQ: ERROR[APPLICATION_ERROR|REJECTED|INVALID]
 
 #### Error from Responder, Requester already Completed
 
@@ -1056,7 +1059,7 @@ Upon sending a COMPLETE or ERROR, the stream is terminated on the Responder.
   intermixed with 
   
 1. RS -> RQ: PAYLOAD*
-1. RS -> RQ: ERROR
+1. RS -> RQ: ERROR[APPLICATION_ERROR|REJECTED|INVALID]
 
 #### Cancel from Requester, Responder terminates
 
@@ -1081,9 +1084,9 @@ Upon receiving a CANCEL, the stream is terminated on the Responder.
 
 Upon sending a CANCEL, the stream is terminated on the Requester.
 
-Upon receiving an ERROR, the stream is terminated on both Requester and Responder.
+Upon receiving an ERROR[APPLICATION_ERROR|REJECTED|INVALID], the stream is terminated on both Requester and Responder.
 
-Upon sending an ERROR, the stream is terminated on both the Requester and Responder.
+Upon sending an ERROR[APPLICATION_ERROR|REJECTED|INVALID], the stream is terminated on both the Requester and Responder.
 
 In absence of ERROR or CANCEL, the stream is terminated after both Requester and Responder have sent and received COMPLETE.
 
@@ -1127,8 +1130,7 @@ is responsible for the logic of generation and informing the Responder it should
 Requester MUST respect the LEASE contract. The Requester MUST NOT send more than __Number of Requests__ specified
 in the LEASE frame within the __Time-To-Live__ value in the LEASE.
 
-A Responder that receives a REQUEST that it can not honor due to LEASE restrictions MUST respond with an ERROR frame with error code
-of LEASE_ERROR. This includes an initial LEASE sent as part of [Connection Establishment](#connection-establishment).
+A Responder that receives a REQUEST that it can not honor due to LEASE restrictions MUST respond with an ERROR[LEASE_ERROR]. This includes an initial LEASE sent as part of [Connection Establishment](#connection-establishment).
 
 <a name="flow-control-qos"></a>
 #### QoS and Prioritization
@@ -1159,6 +1161,6 @@ assume it is set and act accordingly.
     1. Receiving a PAYLOAD on an unknown Stream ID (including 0) MUST be ignored.
     1. Receiving a METADATA_PUSH with a non-0 Stream ID MUST be ignored.
 	1. A server MUST ignore a SETUP frame after it has accepted a previous SETUP.
-	1. A server MUST ignore a SETUP_ERROR frame.
-	1. A client MUST ignore a SETUP_ERROR after it has completed connection establishment.
+	1. A server MUST ignore an ERROR[INVALID_SETUP|UNSUPPORTED_SETUP|REJECTED_SETUP|REJECTED_RESUME] frame.
+	1. A client MUST ignore an ERROR[INVALID_SETUP|UNSUPPORTED_SETUP|REJECTED_SETUP|REJECTED_RESUME] frame after it has completed connection establishment.
 	1. A client MUST ignore a SETUP frame.
