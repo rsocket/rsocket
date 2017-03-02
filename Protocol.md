@@ -347,7 +347,7 @@ The Error Data is typically an Exception message, but could include stringified 
 | __CONNECTION_ERROR__           | 0x00000101 | The connection is being terminated. Stream ID MUST be 0. Sender or Receiver of this frame MAY close the connection immediately without waiting for outstanding streams to terminate.|
 | __CONNECTION_CLOSE__           | 0x00000102 | The connection is being terminated. Stream ID MUST be 0. Sender or Receiver of this frame MUST wait for outstanding streams to terminate before closing the connection. New requests MAY not be accepted.|
 | __APPLICATION_ERROR__          | 0x00000201 | Application layer logic generating a Reactive Streams _onError_ event. Stream ID MUST be > 0. |
-| __REJECTED__                   | 0x00000202 | Despite being a valid request, the Responder decided to reject it. The Responder guarantees that it didn't process the request. The reason for the rejection is explained in the metadata section. Stream ID MUST be > 0. |
+| __REJECTED__                   | 0x00000202 | Despite being a valid request, the Responder decided to reject it. The Responder guarantees that it didn't process the request. The reason for the rejection is explained in the Error Data section. Stream ID MUST be > 0. |
 | __CANCELED__                   | 0x00000203 | The responder canceled the request but potentially have started processing it (almost identical to REJECTED but doesn't garantee that no side-effect have been started). Stream ID MUST be > 0. |
 | __INVALID__                    | 0x00000204 | The request is invalid. Stream ID MUST be > 0. |
 | __RESERVED__                   | 0xFFFFFFFF | __Reserved for Extension Use__ |
