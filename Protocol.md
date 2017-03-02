@@ -1171,7 +1171,7 @@ is responsible for the logic of generation and informing the Responder it should
 Requester MUST respect the LEASE contract. The Requester MUST NOT send more than __Number of Requests__ specified
 in the LEASE frame within the __Time-To-Live__ value in the LEASE.
 
-A Responder that receives a REQUEST that it can not honor due to LEASE restrictions MUST respond with an ERROR[LEASE_ERROR]. This includes an initial LEASE sent as part of [Connection Establishment](#connection-establishment).
+A Responder that receives a REQUEST that it can not honor due to LEASE restrictions MUST respond with an ERROR[REJECTED]. This includes an initial LEASE sent as part of [Connection Establishment](#connection-establishment).
 
 <a name="flow-control-qos"></a>
 #### QoS and Prioritization
