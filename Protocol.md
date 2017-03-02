@@ -375,15 +375,18 @@ Frame Contents
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                         Stream ID = 0                         |
     +-----------+-+-+---------------+-------------------------------+
-    |Frame Type |0|0|     Flags     |
+    |Frame Type |0|M|     Flags     |
     +-----------+-+-+---------------+-------------------------------+
     |0|                       Time-To-Live                          |
     +---------------------------------------------------------------+
     |0|                     Number of Requests                      |
     +---------------------------------------------------------------+
+                                Metadata
 ```
 
 * __Frame Type__: (6 bits = max value 63) 0x02 
+* __Flags__: (10 bits)
+     * (__M__)etadata: Metadata present
 * __Time-To-Live (TTL)__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer of Time (in milliseconds) for validity of LEASE from time of reception. Value MUST be > 0. 
 * __Number of Requests__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer of Number of Requests that may be sent until next LEASE. Value MUST be > 0. 
 
