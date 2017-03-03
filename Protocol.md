@@ -210,6 +210,10 @@ A Stream ID MUST be locally unique for a Requester in a connection.
 Stream ID generation follows general guidelines for [HTTP/2](https://tools.ietf.org/html/rfc7540) with respect
 to odd/even values. In other words, a client MUST generate odd Stream IDs and a server MUST generate even Stream IDs.
 
+Stream IDs on the client MUST start at 1 and increment by 2 sequentially, such as 1, 3, 5, 7, etc.
+
+Stream IDs on the server MUST start at 2 and increment by 2 sequentially, such as 2, 4, 6, 8, etc.
+
 #### Lifetime
 
 Stream IDs MUST be used for only one stream per connection without re-use. Once the max Stream ID has been used (2^31-1), no new streams can be created, thus a new connection MUST be established to create new streams once the max has been met. 
@@ -316,16 +320,14 @@ Frame Contents
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                           Stream ID                           |
     +-----------+-+-+---------------+-------------------------------+
-    |Frame Type |0|M|      Flags    |
+    |Frame Type |0|0|      Flags    |
     +-----------+-+-+---------------+-------------------------------+
     |                          Error Code                           |
     +---------------------------------------------------------------+
-                        Metadata & Error Data
+                               Error Data
 ```
 
 * __Frame Type__: (6 bits = max value 63) 0x0B
-* __Flags__: (10 bits)
-     * (__M__)etadata: Metadata present
 * __Error Code__: (32 bits = max value 2^31-1 = 2,147,483,647) Type of Error.
      * See list of valid Error Codes below.
 * __Error Data__: includes Payload describing error information. Error Data SHOULD be a UTF-8 encoded string. The string MUST NOT be null terminated.
@@ -346,7 +348,7 @@ The Error Data is typically an Exception message, but could include stringified 
 | __CONNECTION_ERROR__           | 0x00000101 | The connection is being terminated. Stream ID MUST be 0. Sender or Receiver of this frame MAY close the connection immediately without waiting for outstanding streams to terminate.|
 | __CONNECTION_CLOSE__           | 0x00000102 | The connection is being terminated. Stream ID MUST be 0. Sender or Receiver of this frame MUST wait for outstanding streams to terminate before closing the connection. New requests MAY not be accepted.|
 | __APPLICATION_ERROR__          | 0x00000201 | Application layer logic generating a Reactive Streams _onError_ event. Stream ID MUST be > 0. |
-| __REJECTED__                   | 0x00000202 | Despite being a valid request, the Responder decided to reject it. The Responder guarantees that it didn't process the request. The reason for the rejection is explained in the metadata section. Stream ID MUST be > 0. |
+| __REJECTED__                   | 0x00000202 | Despite being a valid request, the Responder decided to reject it. The Responder guarantees that it didn't process the request. The reason for the rejection is explained in the Error Data section. Stream ID MUST be > 0. |
 | __CANCELED__                   | 0x00000203 | The Responder canceled the request but may have started processing it (similar to REJECTED but doesn't guarantee lack of side-effects). Stream ID MUST be > 0. |
 | __INVALID__                    | 0x00000204 | The request is invalid. Stream ID MUST be > 0. |
 | __RESERVED__                   | 0xFFFFFFFF | __Reserved for Extension Use__ |
@@ -576,14 +578,11 @@ Frame Contents
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                           Stream ID                           |
     +-----------+-+-+---------------+-------------------------------+
-    |Frame Type |0|M|    Flags      |
+    |Frame Type |0|0|    Flags      |
     +-------------------------------+-------------------------------+
-                                Metadata
 ```
 
 * __Frame Type__: (6 bits = max value 63) 0x09
-* __Flags__: (10 bits)
-     * (__M__)etadata: Metadata present
 
 <a name="frame-payload"></a>
 ### PAYLOAD Frame (0x0A)
@@ -1171,7 +1170,7 @@ is responsible for the logic of generation and informing the Responder it should
 Requester MUST respect the LEASE contract. The Requester MUST NOT send more than __Number of Requests__ specified
 in the LEASE frame within the __Time-To-Live__ value in the LEASE.
 
-A Responder that receives a REQUEST that it can not honor due to LEASE restrictions MUST respond with an ERROR[LEASE_ERROR]. This includes an initial LEASE sent as part of [Connection Establishment](#connection-establishment).
+A Responder that receives a REQUEST that it can not honor due to LEASE restrictions MUST respond with an ERROR[REJECTED]. This includes an initial LEASE sent as part of [Connection Establishment](#connection-establishment).
 
 <a name="flow-control-qos"></a>
 #### QoS and Prioritization
