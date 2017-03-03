@@ -349,7 +349,7 @@ The Error Data is typically an Exception message, but could include stringified 
 | __CONNECTION_CLOSE__           | 0x00000102 | The connection is being terminated. Stream ID MUST be 0. Sender or Receiver of this frame MUST wait for outstanding streams to terminate before closing the connection. New requests MAY not be accepted.|
 | __APPLICATION_ERROR__          | 0x00000201 | Application layer logic generating a Reactive Streams _onError_ event. Stream ID MUST be > 0. |
 | __REJECTED__                   | 0x00000202 | Despite being a valid request, the Responder decided to reject it. The Responder guarantees that it didn't process the request. The reason for the rejection is explained in the Error Data section. Stream ID MUST be > 0. |
-| __CANCELED__                   | 0x00000203 | The responder canceled the request but potentially have started processing it (almost identical to REJECTED but doesn't garantee that no side-effect have been started). Stream ID MUST be > 0. |
+| __CANCELED__                   | 0x00000203 | The Responder canceled the request but may have started processing it (similar to REJECTED but doesn't guarantee lack of side-effects). Stream ID MUST be > 0. |
 | __INVALID__                    | 0x00000204 | The request is invalid. Stream ID MUST be > 0. |
 | __RESERVED__                   | 0xFFFFFFFF | __Reserved for Extension Use__ |
 
@@ -990,7 +990,7 @@ Once a stream has "terminated", the Stream ID can be "forgotten" by the Requeste
 or
 
 1. RQ -> RS: REQUEST_RESPONSE
-1. RS -> RQ: ERROR[APPLICATION_ERROR|REJECTED|INVALID]
+1. RS -> RQ: ERROR[APPLICATION_ERROR|REJECTED|CANCELED|INVALID]
 
 or
 
@@ -1003,7 +1003,7 @@ Upon receiving a CANCEL, the stream is terminated on the Responder and the respo
 
 Upon sending a CANCEL, the stream is terminated on the Requester.
 
-Upon receiving a COMPLETE or ERROR[APPLICATION_ERROR|REJECTED|INVALID], the stream is terminated on the Requester.
+Upon receiving a COMPLETE or ERROR[APPLICATION_ERROR|REJECTED|CANCELED|INVALID], the stream is terminated on the Requester.
 
 <a name="stream-sequences-fire-and-forget"></a>
 ### Request Fire-n-Forget
@@ -1021,7 +1021,7 @@ REQUEST_FNF are assumed to be best effort and MAY not be processed due to: (1) S
 
 1. RQ -> RS: REQUEST_STREAM
 1. RS -> RQ: PAYLOAD*
-1. RS -> RQ: ERROR[APPLICATION_ERROR|REJECTED|INVALID]
+1. RS -> RQ: ERROR[APPLICATION_ERROR|REJECTED|CANCELED|INVALID]
 
 or
 
@@ -1041,9 +1041,9 @@ Upon receiving a CANCEL, the stream is terminated on the Responder.
 
 Upon sending a CANCEL, the stream is terminated on the Requester.
 
-Upon receiving a COMPLETE or ERROR[APPLICATION_ERROR|REJECTED|INVALID], the stream is terminated on the Requester.
+Upon receiving a COMPLETE or ERROR[APPLICATION_ERROR|REJECTED|CANCELED|INVALID], the stream is terminated on the Requester.
 
-Upon sending a COMPLETE or ERROR[APPLICATION_ERROR|REJECTED|INVALID], the stream is terminated on the Responder.
+Upon sending a COMPLETE or ERROR[APPLICATION_ERROR|REJECTED|CANCELED|INVALID], the stream is terminated on the Responder.
 
 <a name="stream-sequences-channel"></a>
 ### Request Channel
@@ -1088,7 +1088,7 @@ Upon sending a COMPLETE or ERROR[APPLICATION_ERROR|REJECTED|INVALID], the stream
   intermixed with 
   
 1. RS -> RQ: PAYLOAD*
-1. RS -> RQ: ERROR[APPLICATION_ERROR|REJECTED|INVALID]
+1. RS -> RQ: ERROR[APPLICATION_ERROR|REJECTED|CANCELED|INVALID]
 
 #### Error from Responder, Requester already Completed
 
@@ -1099,7 +1099,7 @@ Upon sending a COMPLETE or ERROR[APPLICATION_ERROR|REJECTED|INVALID], the stream
   intermixed with 
   
 1. RS -> RQ: PAYLOAD*
-1. RS -> RQ: ERROR[APPLICATION_ERROR|REJECTED|INVALID]
+1. RS -> RQ: ERROR[APPLICATION_ERROR|REJECTED|CANCELED|INVALID]
 
 #### Cancel from Requester, Responder terminates
 
@@ -1124,9 +1124,9 @@ Upon receiving a CANCEL, the stream is terminated on the Responder.
 
 Upon sending a CANCEL, the stream is terminated on the Requester.
 
-Upon receiving an ERROR[APPLICATION_ERROR|REJECTED|INVALID], the stream is terminated on both Requester and Responder.
+Upon receiving an ERROR[APPLICATION_ERROR|REJECTED|CANCELED|INVALID], the stream is terminated on both Requester and Responder.
 
-Upon sending an ERROR[APPLICATION_ERROR|REJECTED|INVALID], the stream is terminated on both the Requester and Responder.
+Upon sending an ERROR[APPLICATION_ERROR|REJECTED|CANCELED|INVALID], the stream is terminated on both the Requester and Responder.
 
 In absence of ERROR or CANCEL, the stream is terminated after both Requester and Responder have sent and received COMPLETE.
 
