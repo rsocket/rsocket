@@ -153,7 +153,7 @@ ReactiveSocket frames begin with a ReactiveSocket Frame Header. The general layo
     +-------------------------------+
 ```
 
-* __Stream ID__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer representing the stream Identifier for this frame or 0 to indicate the entire connection. Value MUST be >= 0.
+* __Stream ID__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer representing the stream Identifier for this frame or 0 to indicate the entire connection.
   * Transport protocols that include demultiplexing, such as HTTP/2, MAY omit the Stream ID field if all parties agree. The means of negotiation and agreement is left to the transport protocol. 
 * __Frame Type__: (6 bits = max value 63) Type of Frame.
 * __Flags__: (10 bits) Any Flag bit not specifically indicated in the frame type should be set to 0 when sent and not interpreted on
@@ -757,8 +757,8 @@ RESUME frames MUST always use Stream ID 0 as they pertain to the connection.
 * __Minor Version__: (16 bits = max value 65,535) Unsigned 16-bit integer of Minor version number of the protocol.
 * __Resume Identification Token Length__: (16 bits = max value 65,535) Unsigned 16-bit integer of Resume Identification Token Length in bytes. 
 * __Resume Identification Token__: Token used for client resume identification. Same Resume Identification used in the initial SETUP by the client.
-* __Last Received Server Position__: (63 bits = max value 2^63-1) Unsigned 63-bit long of the last implied position the client received from the server. Value MUST be >= 0.
-* __First Available Client Position__: (63 bits = max value 2^63-1) Unsigned 63-bit long of the earliest position that the client can rewind back to prior to resending frames. Value MUST be >= 0.
+* __Last Received Server Position__: (63 bits = max value 2^63-1) Unsigned 63-bit long of the last implied position the client received from the server.
+* __First Available Client Position__: (63 bits = max value 2^63-1) Unsigned 63-bit long of the earliest position that the client can rewind back to prior to resending frames.
 
 <a name="frame-resume-ok"></a>
 #### RESUME_OK Frame (0x0E)
@@ -782,7 +782,7 @@ RESUME OK frames MUST always use Stream ID 0 as they pertain to the connection.
 ```
 
 * __Frame Type__: (6 bits = max value 63) 0x0E
-* __Last Received Client Position__: (63 bits = max value 2^63-1) Unsigned 63-bit long of the last implied position the server received from the client. Value MUST be >= 0.
+* __Last Received Client Position__: (63 bits = max value 2^63-1) Unsigned 63-bit long of the last implied position the server received from the client.
 
 #### Keepalive Position Field
 
