@@ -216,17 +216,19 @@ Stream IDs on the server MUST start at 2 and increment by 2 sequentially, such a
 
 #### Lifetime
 
-Once the max Stream ID has been used (2^31-1), the Requester MAY re-use Stream IDs.
+Once the max Stream ID has been used (2^31-1), the Requester MAY re-use Stream IDs. A Responder MUST assume Stream IDs will be re-used.
 
-If Stream ID re-use is not employed:
+When the max Stream ID has been used:
+
+1) If Stream ID re-use is not employed:
 
 - No new streams can be created, thus a new connection MUST be established to create new streams once the max has been met. 
 
-If Stream IDs are re-used:
+2) If Stream IDs are re-used:
 
 - The Requester MUST re-use IDs by wrapping and restarting at ID 1 for client, and ID 2 for server, and incrementing sequentially by 2s as stated above.
 - The Requester MUST skip IDs still in use. 
-- The Responder MAY choose to ERROR[REJECT] any Stream ID if it consider the ID still in use. The Requester MAY retry on the next sequential Stream ID considered unused.
+- The Responder MAY choose to ERROR[REJECT] any Stream ID if it considers the ID still in use. The Requester MAY retry on the next sequential Stream ID considered unused.
 - If all Stream IDs are concurrently in use, no new streams can be created, thus a new connection MUST be established to create new streams.
 
 It is RECOMMENDED that Stream ID re-use only be used in combination with resumability. 
