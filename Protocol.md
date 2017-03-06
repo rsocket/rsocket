@@ -280,7 +280,7 @@ Frame Contents
                           Metadata & Setup Payload
 ```
 
-* __Frame Type__: (6 bits = max value 63) 0x01
+* __Frame Type__: (6 bits) 0x01
 * __Flags__: (10 bits)
      * (__M__)etadata: Metadata present
      * (__R__)esume Enable: Client requests resume capability if possible. Resume Identification Token present.
@@ -327,7 +327,7 @@ Frame Contents
                                Error Data
 ```
 
-* __Frame Type__: (6 bits = max value 63) 0x0B
+* __Frame Type__: (6 bits) 0x0B
 * __Error Code__: (32 bits = max value 2^31-1 = 2,147,483,647) Type of Error.
      * See list of valid Error Codes below.
 * __Error Data__: includes Payload describing error information. Error Data SHOULD be a UTF-8 encoded string. The string MUST NOT be null terminated.
@@ -391,7 +391,7 @@ Frame Contents
                                 Metadata
 ```
 
-* __Frame Type__: (6 bits = max value 63) 0x02 
+* __Frame Type__: (6 bits) 0x02 
 * __Flags__: (10 bits)
      * (__M__)etadata: Metadata present
 * __Time-To-Live (TTL)__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer of Time (in milliseconds) for validity of LEASE from time of reception. Value MUST be > 0. 
@@ -435,7 +435,7 @@ Frame Contents
                                   Data
 ```
 
-* __Frame Type__: (6 bits = max value 63) 0x03
+* __Frame Type__: (6 bits) 0x03
 * __Flags__: (10 bits)
      * (__R__)espond with KEEPALIVE or not
 * __Last Received Position__: (63 bits = max value 2^63-1) Unsigned 63-bit long of Resume Last Received Position. Value MUST be > 0. (optional. Set to all 0s when not supported.)
@@ -457,7 +457,7 @@ Frame Contents
                          Metadata & Request Data
 ```
 
-* __Frame Type__: (6 bits = max value 63) 0x04
+* __Frame Type__: (6 bits) 0x04
 * __Flags__: (10 bits)
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More fragments follow this fragment.
@@ -479,7 +479,7 @@ Frame Contents
                           Metadata & Request Data
 ```
 
-* __Frame Type__: (6 bits = max value 63) 0x05
+* __Frame Type__: (6 bits) 0x05
 * __Flags__: (10 bits)
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More fragments follow this fragment.
@@ -503,7 +503,7 @@ Frame Contents
                           Metadata & Request Data
 ```
 
-* __Frame Type__: (6 bits = max value 63) 0x06
+* __Frame Type__: (6 bits) 0x06
 * __Flags__: (10 bits)
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More fragments follow this fragment.
@@ -530,7 +530,7 @@ Frame Contents
                            Metadata & Request Data
 ```
 
-* __Frame Type__: (6 bits = max value 63) 0x07
+* __Frame Type__: (6 bits) 0x07
 * __Flags__: (10 bits)
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More fragments follow this fragment.
@@ -562,7 +562,7 @@ Frame Contents
     +---------------------------------------------------------------+
 ```
 
-* __Frame Type__: (6 bits = max value 63) 0x08
+* __Frame Type__: (6 bits) 0x08
 * __Request N__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer representing the number of items to request. Value MUST be > 0.
 
 See Flow Control: Reactive Streams Semantics for more information on RequestN behavior.
@@ -582,7 +582,7 @@ Frame Contents
     +-------------------------------+-------------------------------+
 ```
 
-* __Frame Type__: (6 bits = max value 63) 0x09
+* __Frame Type__: (6 bits) 0x09
 
 <a name="frame-payload"></a>
 ### PAYLOAD Frame (0x0A)
@@ -600,7 +600,7 @@ Frame Contents
                          Metadata & Data
 ```
 
-* __Frame Type__: (6 bits = max value 63) 0x0A
+* __Frame Type__: (6 bits) 0x0A
 * __Flags__: (10 bits)
     * (__M__)etadata: Metadata Present.
     * (__F__)ollows: More fragments follow this fragment.
@@ -633,7 +633,7 @@ Frame Contents
                                 Metadata
 ```
 
-* __Frame Type__: (6 bits = max value 63) 0x0C
+* __Frame Type__: (6 bits) 0x0C
 
 <a name="frame-ext"></a>
 ### EXT (Extension) Frame (0x3F)
@@ -653,7 +653,7 @@ The general format for an extension frame is given below.
                           Depends on Extended Type...
 ```
 
-* __Frame Type__: (6 bits = max value 63) 0x3F
+* __Frame Type__: (6 bits) 0x3F
 * __Flags__: (10 bits)
     * (__I__)gnore: Can the frame be ignored if not understood?
     * (__M__)etadata: Metadata Present.
@@ -752,7 +752,7 @@ RESUME frames MUST always use Stream ID 0 as they pertain to the connection.
     +---------------------------------------------------------------+
 ```
 
-* __Frame Type__: (6 bits = max value 63) 0x0D
+* __Frame Type__: (6 bits) 0x0D
 * __Major Version__: (16 bits = max value 65,535) Unsigned 16-bit integer of Major version number of the protocol.
 * __Minor Version__: (16 bits = max value 65,535) Unsigned 16-bit integer of Minor version number of the protocol.
 * __Resume Identification Token Length__: (16 bits = max value 65,535) Unsigned 16-bit integer of Resume Identification Token Length in bytes. 
@@ -781,7 +781,7 @@ RESUME OK frames MUST always use Stream ID 0 as they pertain to the connection.
     +---------------------------------------------------------------+
 ```
 
-* __Frame Type__: (6 bits = max value 63) 0x0E
+* __Frame Type__: (6 bits) 0x0E
 * __Last Received Client Position__: (63 bits = max value 2^63-1) Unsigned 63-bit long of the last implied position the server received from the client. Value MUST be >= 0.
 
 #### Keepalive Position Field
