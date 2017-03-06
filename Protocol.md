@@ -1,6 +1,6 @@
 ## Status
 
-This protocol is currently a draft for the final specifications. 
+This protocol is currently a draft for the final specifications.
 Current version of the protocol is __0.2__ (Major Version: 0, Minor Version: 2).
 
 ## Introduction
@@ -20,8 +20,8 @@ Byte ordering is big endian for all fields.
 ## Table of Contents
 
 - [Terminology](#terminology)
-- [Versioning Scheme](#versioning-scheme) 
-- [Data and Metadata](#data-and-metadata) 
+- [Versioning Scheme](#versioning-scheme)
+- [Data and Metadata](#data-and-metadata)
 - [Framing](#framing)
   - [Transport Protocol](#transport-protocol)
   - [Framing Protocol Usage](#framing-protocol-usage)
@@ -49,7 +49,7 @@ Byte ordering is big endian for all fields.
 * __Frame__: A single message containing a request, response, or protocol processing.
 * __Fragment__: A portion of an application message that has been partitioned for inclusion in a Frame.
 See [Fragmentation and Reassembly](#fragmentation-and-reassembly).
-* __Transport__: Protocol used to carry ReactiveSocket protocol. One of WebSockets, TCP, or Aeron. The transport MUST
+* __Transport__: Protocol used to carry ReactiveSocket protocol. One of WebSockets, TCP, Aeron, or HTTP/2[HTTP/2 streams](https://http2.github.io/http2-spec/#StreamsLayer). The transport MUST
 provide capabilities mentioned in the [transport protocol](#transport-protocol) section.
 * __Stream__: Unit of operation (request/response, etc.). See [Motivations](Motivations.md).
 * __Request__: A stream request. May be one of four types. As well as request for more items or cancellation of previous request.
@@ -118,7 +118,7 @@ When using a transport protocol providing framing, the ReactiveSocket frame is s
 ```
     +-----------------------------------------------+
     |                ReactiveSocket Frame          ...
-    |                                              
+    |
     +-----------------------------------------------+
 ```
 
@@ -131,7 +131,7 @@ When using a transport protocol that does not provide compatible framing, the Fr
     |                    Frame Length               |
     +-----------------------------------------------+
     |                ReactiveSocket Frame          ...
-    |                                              
+    |
     +-----------------------------------------------+
 ```
 
@@ -154,7 +154,7 @@ ReactiveSocket frames begin with a ReactiveSocket Frame Header. The general layo
 ```
 
 * __Stream ID__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer representing the stream Identifier for this frame or 0 to indicate the entire connection.
-  * Transport protocols that include demultiplexing, such as HTTP/2, MAY omit the Stream ID field if all parties agree. The means of negotiation and agreement is left to the transport protocol. 
+  * Transport protocols that include demultiplexing, such as HTTP/2, MAY omit the Stream ID field if all parties agree. The means of negotiation and agreement is left to the transport protocol.
 * __Frame Type__: (6 bits = max value 63) Type of Frame.
 * __Flags__: (10 bits) Any Flag bit not specifically indicated in the frame type should be set to 0 when sent and not interpreted on
 reception. Flags generally depend on Frame Type, but all frame types MUST provide space for the following flags:
@@ -216,7 +216,7 @@ Stream IDs on the server MUST start at 2 and increment by 2 sequentially, such a
 
 #### Lifetime
 
-Stream IDs MUST be used for only one stream per connection without re-use. Once the max Stream ID has been used (2^31-1), no new streams can be created, thus a new connection MUST be established to create new streams once the max has been met. 
+Stream IDs MUST be used for only one stream per connection without re-use. Once the max Stream ID has been used (2^31-1), no new streams can be created, thus a new connection MUST be established to create new streams once the max has been met.
 
 ### Frame Types
 
@@ -287,10 +287,10 @@ Frame Contents
      * (__L__)ease: Will honor LEASE (or not).
 * __Major Version__: (16 bits = max value 65,535) Unsigned 16-bit integer of Major version number of the protocol.
 * __Minor Version__: (16 bits = max value 65,535) Unsigned 16-bit integer of Minor version number of the protocol.
-* __Time Between KEEPALIVE Frames__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer of Time (in milliseconds) between KEEPALIVE frames that the client will send. Value MUST be > 0. 
+* __Time Between KEEPALIVE Frames__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer of Time (in milliseconds) between KEEPALIVE frames that the client will send. Value MUST be > 0.
    * For server-to-server connections, a reasonable time interval between client KEEPALIVE frames is 500ms.
    * For mobile-to-server connections, the time interval between client KEEPALIVE frames is often > 30,000ms.
-* __Max Lifetime__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer of Time (in milliseconds) that a client will allow a server to not respond to a KEEPALIVE before it is assumed to be dead. Value MUST be > 0. 
+* __Max Lifetime__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer of Time (in milliseconds) that a client will allow a server to not respond to a KEEPALIVE before it is assumed to be dead. Value MUST be > 0.
 * __Resume Identification Token Length__: (16 bits = max value 65,535) Unsigned 16-bit integer of Resume Identification Token Length in bytes. (Not present if R flag is not set)
 * __Resume Identification Token__: Token used for client resume identification (Not present if R flag is not set)
 * __MIME Length__: Encoding MIME Type Length in bytes.
@@ -305,12 +305,12 @@ rules MAY be used for handling layout. For example, `application/x.netflix+cbor`
 * __Setup Data__: includes payload describing connection capabilities of the endpoint sending the
 Setup header.
 
-__NOTE__: A server that receives a SETUP frame that has (__R__)esume Enabled set, but does not support resuming operation, MUST reject the SETUP with an ERROR[REJECTED_SETUP]. 
+__NOTE__: A server that receives a SETUP frame that has (__R__)esume Enabled set, but does not support resuming operation, MUST reject the SETUP with an ERROR[REJECTED_SETUP].
 
 <a name="frame-error"></a>
 ### ERROR Frame (0x0B)
 
-Error frames are used for errors on individual requests/streams as well as connection errors and in response to SETUP frames. 
+Error frames are used for errors on individual requests/streams as well as connection errors and in response to SETUP frames.
 
 Frame Contents
 
@@ -334,7 +334,7 @@ Frame Contents
 
 A Stream ID of 0 means the error pertains to the connection., including connection establishment. A Stream ID > 0 means the error pertains to a given stream.
 
-The Error Data is typically an Exception message, but could include stringified stacktrace information if appropriate.  
+The Error Data is typically an Exception message, but could include stringified stacktrace information if appropriate.
 
 #### Error Codes
 
@@ -391,11 +391,11 @@ Frame Contents
                                 Metadata
 ```
 
-* __Frame Type__: (6 bits) 0x02 
+* __Frame Type__: (6 bits) 0x02
 * __Flags__: (10 bits)
      * (__M__)etadata: Metadata present
-* __Time-To-Live (TTL)__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer of Time (in milliseconds) for validity of LEASE from time of reception. Value MUST be > 0. 
-* __Number of Requests__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer of Number of Requests that may be sent until next LEASE. Value MUST be > 0. 
+* __Time-To-Live (TTL)__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer of Time (in milliseconds) for validity of LEASE from time of reception. Value MUST be > 0.
+* __Number of Requests__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer of Number of Requests that may be sent until next LEASE. Value MUST be > 0.
 
 A Responder implementation MAY stop all further requests by sending a LEASE with a value of 0 for __Number of Requests__ or __Time-To-Live__.
 
@@ -539,7 +539,7 @@ Frame Contents
 * __Initial Request N__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer representing the initial request N value for channel. Value MUST be > 0.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
-A requester MUST send only __one__ REQUEST_CHANNEL frame. Subsequent messages from requester to responder MUST be sent as PAYLOAD frames. 
+A requester MUST send only __one__ REQUEST_CHANNEL frame. Subsequent messages from requester to responder MUST be sent as PAYLOAD frames.
 
 A requester MUST __not__ send PAYLOAD frames after the REQUEST_CHANNEL frame until the responder sends a REQUEST_N frame granting credits for number of PAYLOADs able to be sent.
 
@@ -677,7 +677,7 @@ ReactiveSocket resumption exists only for specific cases. It is not intended to 
 
 ### Implied Position
 
-Resuming operation requires knowing the position of data reception of the previous connection. For this to be simplified, the underlying transport is assumed to support contiguous delivery of data on a per frame basis. In other words, partial frames are not delivered for processing nor are gaps allowed in the stream of frames sent by either the client or server. The current list of supported transports (TCP, WebSocket, and Aeron) all satisfy this requirement or can be made to do so in the case of TCP.
+Resuming operation requires knowing the position of data reception of the previous connection. For this to be simplified, the underlying transport is assumed to support contiguous delivery of data on a per frame basis. In other words, partial frames are not delivered for processing nor are gaps allowed in the stream of frames sent by either the client or server. The current list of supported transports (TCP, WebSocket, Aeron, and HTTP/2[HTTP/2 streams](https://http2.github.io/http2-spec/#StreamsLayer)) all satisfy this requirement or can be made to do so in the case of TCP.
 
 As a Requester or Responder __sends__ REQUEST, CANCEL, or PAYLOAD frames, it maintains a __position__ of that frame within the connection in that direction. This is a 64-bit value that starts at 0. As a Requester or Responder __receives__ REQUEST, CANCEL, or PAYLOAD frames, it maintains an __implied position__ of that frame within the connection in that direction. This is also a 64-bit value that starts at 0.
 
@@ -710,7 +710,7 @@ Client side resumption operation starts when the client desires to try to resume
 Server side resumption operation starts when the client sends a RESUME frame. The operation then proceeds as the following:
 
 * On receiving a RESUME frame, the server:
-    * MUST send an ERROR[REJECTED_RESUME] frame if the server does not support resuming operation. 
+    * MUST send an ERROR[REJECTED_RESUME] frame if the server does not support resuming operation.
     * use the RESUME Identification Token field to determine which client the resume pertains to. If the client is identified successfully, resumption MAY be continued. If not identified, then the server MUST send an ERROR[REJECTED_RESUME] frame.
     * if successfully identified, then the server MAY send a RESUME_OK and then:
         * MUST assume that the next REQUEST, CANCEL, ERROR, and PAYLOAD frames have an implied position commencing from the last implied positions
@@ -755,7 +755,7 @@ RESUME frames MUST always use Stream ID 0 as they pertain to the connection.
 * __Frame Type__: (6 bits) 0x0D
 * __Major Version__: (16 bits = max value 65,535) Unsigned 16-bit integer of Major version number of the protocol.
 * __Minor Version__: (16 bits = max value 65,535) Unsigned 16-bit integer of Minor version number of the protocol.
-* __Resume Identification Token Length__: (16 bits = max value 65,535) Unsigned 16-bit integer of Resume Identification Token Length in bytes. 
+* __Resume Identification Token Length__: (16 bits = max value 65,535) Unsigned 16-bit integer of Resume Identification Token Length in bytes.
 * __Resume Identification Token__: Token used for client resume identification. Same Resume Identification used in the initial SETUP by the client.
 * __Last Received Server Position__: (63 bits = max value 2^63-1) Unsigned 63-bit long of the last implied position the client received from the server.
 * __First Available Client Position__: (63 bits = max value 2^63-1) Unsigned 63-bit long of the earliest position that the client can rewind back to prior to resending frames.
@@ -808,7 +808,7 @@ __NOTE__: The semantics are similar to [TLS False Start](https://tools.ietf.org/
 
 Immediately upon successful connection, the client MUST send either a SETUP or RESUME frame with
 Stream ID of 0. Any other frame received that is NOT a SETUP|RESUME frame or a SETUP|RESUME frame with
-a Stream ID > 0, MUST cause the server to send an ERROR[INVALID_SETUP] and close the connection. 
+a Stream ID > 0, MUST cause the server to send an ERROR[INVALID_SETUP] and close the connection.
 
 See [Resume Operation](#resume-operation) for more information about resuming. The rest of this section assumes use of SETUP for establishing a connection.
 
@@ -898,7 +898,7 @@ Fragmentation does not change the request(n) or lease counts. In other words, a 
 
 When a PAYLOAD frame needs to be fragmented, a sequence of PAYLOAD frames is delivered using the (F)ollows flag.
 
-When a PAYLOAD is fragmented, the Metadata MUST be transmitted completely before the Data. 
+When a PAYLOAD is fragmented, the Metadata MUST be transmitted completely before the Data.
 
 For example, a single PAYLOAD with 20MB of Metdata and 25MB of Data that is fragmented into 3 frames:
 
@@ -930,13 +930,13 @@ Frame length = 13MB
 13MB of Data
 ```
 
-If the sender (Requester or Responder) wants to cancel sending a fragmented sequence, it MAY send a CANCEL frame without finishing delivery of the fragments. 
+If the sender (Requester or Responder) wants to cancel sending a fragmented sequence, it MAY send a CANCEL frame without finishing delivery of the fragments.
 
 #### REQUEST Frames
 
 When REQUEST_RESPONSE, REQUEST_FNF, REQUEST_STREAM, or REQUEST_CHANNEL frames need to be fragmented, the first frame is the REQUEST_* frame with the (F)ollows flag set, followed by a sequence of PAYLOAD frames.
 
-When fragmented, the Metadata MUST be transmitted completely before the Data. 
+When fragmented, the Metadata MUST be transmitted completely before the Data.
 
 For example, a single PAYLOAD with 20MB of Metdata and 25MB of Data that is fragmented into 3 frames:
 
@@ -968,7 +968,7 @@ Frame length = 13MB
 13MB of Data
 ```
 
-If the Requester wants to cancel sending a fragmented sequence, it MAY send a CANCEL frame without finishing delivery of the fragments. 
+If the Requester wants to cancel sending a fragmented sequence, it MAY send a CANCEL frame without finishing delivery of the fragments.
 
 ## Stream Sequences and Lifetimes
 
@@ -1054,8 +1054,8 @@ Upon sending a COMPLETE or ERROR[APPLICATION_ERROR|REJECTED|CANCELED|INVALID], t
 1. RQ -> RS: PAYLOAD*
 1. RQ -> RS: COMPLETE
 
-  intermixed with 
-  
+  intermixed with
+
 1. RS -> RQ: PAYLOAD*
 1. RS -> RQ: COMPLETE
 
@@ -1065,8 +1065,8 @@ Upon sending a COMPLETE or ERROR[APPLICATION_ERROR|REJECTED|CANCELED|INVALID], t
 1. RQ -> RS: PAYLOAD*
 1. RQ -> RS: ERROR[APPLICATION_ERROR]
 
-  intermixed with 
-  
+  intermixed with
+
 1. RS -> RQ: PAYLOAD*
 
 #### Error from Requester, Responder already Completed
@@ -1075,8 +1075,8 @@ Upon sending a COMPLETE or ERROR[APPLICATION_ERROR|REJECTED|CANCELED|INVALID], t
 1. RQ -> RS: PAYLOAD*
 1. RQ -> RS: ERROR[APPLICATION_ERROR]
 
-  intermixed with 
-  
+  intermixed with
+
 1. RS -> RQ: PAYLOAD*
 1. RS -> RQ: COMPLETE
 
@@ -1085,8 +1085,8 @@ Upon sending a COMPLETE or ERROR[APPLICATION_ERROR|REJECTED|CANCELED|INVALID], t
 1. RQ -> RS: REQUEST_CHANNEL
 1. RQ -> RS: PAYLOAD*
 
-  intermixed with 
-  
+  intermixed with
+
 1. RS -> RQ: PAYLOAD*
 1. RS -> RQ: ERROR[APPLICATION_ERROR|REJECTED|CANCELED|INVALID]
 
@@ -1096,8 +1096,8 @@ Upon sending a COMPLETE or ERROR[APPLICATION_ERROR|REJECTED|CANCELED|INVALID], t
 1. RQ -> RS: PAYLOAD*
 1. RQ -> RS: COMPLETE
 
-  intermixed with 
-  
+  intermixed with
+
 1. RS -> RQ: PAYLOAD*
 1. RS -> RQ: ERROR[APPLICATION_ERROR|REJECTED|CANCELED|INVALID]
 
@@ -1108,8 +1108,8 @@ Upon sending a COMPLETE or ERROR[APPLICATION_ERROR|REJECTED|CANCELED|INVALID], t
 1. RQ -> RS: COMPLETE
 1. RQ -> RS: CANCEL
 
-  intermixed with 
-  
+  intermixed with
+
 1. RS -> RQ: PAYLOAD*
 
 
@@ -1139,7 +1139,7 @@ There are multiple flow control mechanics provided by the protocol.
 <a name="flow-control-reactive-streams"></a>
 #### Reactive Streams Semantics
 
-[Reactive Streams](http://www.reactive-streams.org/) semantics are used for flow control of Streams, Subscriptions, and Channels. This is a credit-based model where the Requester grants the Responder credit for the number of PAYLOADs it can send. It is sometimes referred to as "request-n" or "request(n)". 
+[Reactive Streams](http://www.reactive-streams.org/) semantics are used for flow control of Streams, Subscriptions, and Channels. This is a credit-based model where the Requester grants the Responder credit for the number of PAYLOADs it can send. It is sometimes referred to as "request-n" or "request(n)".
 
 Credits are cumulative. Once credits are granted from Requester to Responder, they cannot be revoked. For example, sending `request(3)` and `request(2)` accumulates to a value of 5, allowing the Responder to send 5 PAYLOADs.
 
@@ -1193,7 +1193,7 @@ under [Keepalive Frame](#frame-keepalive). The decision to close a connection du
 assume it is set and act accordingly.
 1. Reassembly of PAYLOADs and REQUEST_CHANNELs MUST assume the possibility of an infinite stream.
 1. A PAYLOAD with both __F__ and __C__ flags set, implicitly ignores the __F__ flag.
-1. Flag bits not specified for a particular frame MUST be ignored. 
+1. Flag bits not specified for a particular frame MUST be ignored.
 1. All other received frames that are not accounted for in previous sections MUST be ignored. Thus, for example:
     1. Receiving a Request frame on a Stream ID that is already in use MUST be ignored.
     1. Receiving a CANCEL on an unknown Stream ID (including 0) MUST be ignored.
