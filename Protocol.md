@@ -75,7 +75,7 @@ It is up to a server to accept clients of lower versions than what it supports.
 ## Data And Metadata
 
 ReactiveSocket provides mechanisms for applications to distinguish payload into two types. Data and Metadata. The distinction
-between the types in an application is left to the application.
+between the types in an application is left to the application. 
 
 The following are features of Data and Metadata.
 
@@ -175,11 +175,12 @@ ReactiveSocket implementations may provide their own validation at the metadata 
 
 #### Metadata Optional Header
 
-Specific Frame Types MAY contain an optional metadata header that provides metadata about a frame.
-This metadata header is between the Frame Header and any payload.
+Specific Frame Types MAY contain Metadata. If that Frame Type supports both Data and Metadata, the optional Metadata header MUST be included. This metadata header is between the Frame Header and any payload.
 
 Metadata Length MUST be less than or equal to the Frame Length minus the length of the Frame Header.
 If Metadata Length is greater than this value, the entire frame MUST be ignored.
+
+On a frame with Data and Metadata:
 
 ```
      0                   1                   2                   3
@@ -192,6 +193,29 @@ If Metadata Length is greater than this value, the entire frame MUST be ignored.
     |                       Payload of Frame                       ...
     +---------------------------------------------------------------+
 ```
+
+On a frame that supports Data and Metadata, but Data length is 0:
+
+```
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |              Metadata Length                  |
+    +---------------------------------------------------------------+
+    |                       Metadata Payload                       ...
+    +---------------------------------------------------------------+
+```
+
+On a frame that only has Metadata, the Metadata length field is NOT needed:
+
+```
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                       Metadata Payload                       ...
+    +---------------------------------------------------------------+
+```
+
 
 * __Metadata Length__: (24 bits = max value 16,777,215) Unsigned 24-bit integer representing the length of Metadata in bytes. Excluding Metadata Length field.
 
@@ -415,6 +439,8 @@ Frame Contents
 A Responder implementation MAY stop all further requests by sending a LEASE with a value of 0 for __Number of Requests__ or __Time-To-Live__.
 
 When a LEASE expires due to time, the value of the __Number of Requests__ that a Requester may make is implicitly 0.
+
+This frame only supports Metadata, so the Metadata Length header MUST NOT be included, even if the (M)etadata flag is set true.
 
 <a name="frame-keepalive"></a>
 ### KEEPALIVE Frame (0x03)
@@ -649,6 +675,8 @@ Frame Contents
 ```
 
 * __Frame Type__: (6 bits) 0x0C
+
+This frame only supports Metadata, so the Metadata Length header MUST NOT be included.
 
 <a name="frame-ext"></a>
 ### EXT (Extension) Frame (0x3F)
