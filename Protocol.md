@@ -625,6 +625,21 @@ Frame Contents
        * If set, `onNext(Payload)` or equivalent will be invoked on Subscriber/Observer.
 * __Payload Data__: payload for Reactive Streams onNext.
 
+Valid combinations of (C)omplete and (N)ext flags are:
+
+- Both (C)omplete and (N)ext set meaning PAYLOAD contains data and signals stream completion.
+  - For example: An Observable stream receiving `onNext(payload)` followed by `onComplete()`.
+- Just (C)omplete set meaning PAYLOAD contains no data and only signals stream completion.
+  - For example: An Observable stream receiving `onComplete()`.
+- Just (N)ext set meaning PAYLOAD contains data stream is NOT completed.
+  - For example: An Observable stream receiving `onNext(payload)`.
+
+A PAYLOAD MUST NOT have both (C)complete and (N)ext empty (false).
+
+The reason for the (N)ext flag instead of just deriving from Data length being > 0 is that 0 length data can be considered a valid PAYLOAD resulting in a delivery to the application layer with a PAYLOAD containing 0 bytes of data. 
+
+For example: An Observable stream receiving data via `onNext(payload)` where payload contains 0 bytes of data.
+
 <a name="frame-metadata-push"></a>
 ### METADATA_PUSH Frame (0x0C)
 
