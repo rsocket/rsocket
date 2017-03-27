@@ -1,4 +1,4 @@
-# Contributing to ReactiveSocket
+# Contributing to RSocket
 
 If you would like to contribute code you can do so through GitHub by forking the repository and sending a pull request (on a branch other than `master`, `0.x`, `1.x`, or `gh-pages`).
 
