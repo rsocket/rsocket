@@ -193,19 +193,18 @@ The interaction models could be reduced to just one "request-channel". Every oth
 
 #### So why the "RSocket" name? 
 
-Isn't "Reactive" a totally [hyped](http://www.gartner.com/technology/research/methodologies/hype-cycle.jsp) buzzword? 
+It started out as ReactiveSocket, but was shortened to RSocket:
 
-This library is directly related to several projects where "Reactive" is an important part of their name and architectural pattern. Thus the choice was made to retain this relationship in the name. Specifically:
+- because it is shorter to write and speak
+- to stop overusing the word "reactive" 
 
-- [Reactive Streams]
-- [Reactive Streams IO] – proposed network protocol conforming to the Reactive Streams semantics.
-- [Reactive Extensions] with [RxJava] and [RxJS] in particular.
-- [Reactive Manifesto] – particularly the "message-driven" aspect.
+That said, the "R" still refers to "reactive" from "ReactiveSocket", so ... isn't "Reactive" a totally [hyped](http://www.gartner.com/technology/research/methodologies/hype-cycle.jsp) buzzword? 
 
-RSocket implements, uses, or follows the principles in these projects and libraries, thus the name. 
+Unfortunately the word has become quite a buzzword, and overused.
+
+However, this library is directly related to several projects where "Reactive" is an important part of their name and architectural pattern. Specifically, RSocket implements, uses, or follows the principles in these projects and libraries, thus the name. 
 
 [Reactive Streams]: http://www.reactive-streams.org
-[Reactive Streams IO]: https://github.com/reactive-streams/reactive-streams-io
 [Reactive Extensions]: http://www.reactivex.io
 [RxJava]: https://github.com/ReactiveX/RxJava
 [RxJS]: https://github.com/ReactiveX/RxJS
