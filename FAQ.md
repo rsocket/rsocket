@@ -9,13 +9,16 @@ Some of the key reasons include:
 - interaction models beyond request/response such as streaming responses and push
 - application-level flow control semantics (async pull/push of bounded batch sizes) across network boundaries
 - binary, multiplexed use of single connection
-- need of an application protocol in order to use transport protocols such as WebSockets and [Aeron]
+- support resumption of long-lived subscriptions across transport connections
+- need of an application protocol in order to use transport protocols such as WebSockets and [Aeron]: https://github.com/real-logic/Aeron
 
-[Aeron]: https://github.com/real-logic/Aeron
+#### Why not make do with XYZ?
+
+Ultimately all of the above motivations can be accomplished on top of most anything with enough effort. Those involved with starting this project desired something cleaner and more formalized. In other words, it was desired to have a solution that was not a hack. 
 
 #### Why not HTTP/2?
 
-HTTP/2 is **much** better for browsers and request/response document transfer, but unfortunately does not expose interaction models beyond request/response, nor support application-level flow control. 
+HTTP/2 is **much** better than HTTP/1 for browsers and request/response document transfer, but unfortunately does not expose interaction models beyond request/response, nor support application-level flow control. 
 
 Here are some quotes from the HTTP/2 spec and FAQ that are useful to provide context on what HTTP/2 was targeting:
 
