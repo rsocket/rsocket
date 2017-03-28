@@ -231,17 +231,3 @@ Additionally, "push promises" are focused on filling browser caches for standard
 This means we still need SSE or WebSockets (and SSE is a text protocol so requires Base64 encoding to UTF-8) for push.
 
 HTTP/2 was meant as a better HTTP/1.1, primarily for document retrieval in browsers for websites. We can do better than HTTP/2 for applications. 
-
-#### MQTT, AMQP, ZMTP
-
-- Limited or no application semantics, just messaging. Must provide a protocol.
-
-#### STOMP
-
-- No application semantics, just framing. Must provide a protocol.
-- ASCII protocol, not binary.
-
-#### Thrift
-
-- Coupled with encoding, RPC, etc
-- Synchronous request/response, no multiplexing
