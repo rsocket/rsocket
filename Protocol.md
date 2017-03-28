@@ -6,11 +6,11 @@ Current version of the protocol is __0.2__ (Major Version: 0, Minor Version: 2).
 ## Introduction
 
 Specify an application protocol for [Reactive Streams](http://www.reactive-streams.org/) semantics across an asynchronous, binary
-boundary. For more information, please see [ReactiveSocket.io](http://reactivesocket.io/).
+boundary. For more information, please see [rsocket.io](http://rsocket.io/).
 
-ReactiveSocket assumes an operating paradigm. These assumptions are:
+RSocket assumes an operating paradigm. These assumptions are:
 - one-to-one communication
-- non-proxied communication. Or if proxied, the ReactiveSocket semantics and assumptions are preserved across the proxy.
+- non-proxied communication. Or if proxied, the RSocket semantics and assumptions are preserved across the proxy.
 - no state preserved across [transport protocol](#transport-protocol) sessions by the protocol
 
 Key words used by this document conform to the meanings in [RFC 2119](https://tools.ietf.org/html/rfc2119).
@@ -49,7 +49,7 @@ Byte ordering is big endian for all fields.
 * __Frame__: A single message containing a request, response, or protocol processing.
 * __Fragment__: A portion of an application message that has been partitioned for inclusion in a Frame.
 See [Fragmentation and Reassembly](#fragmentation-and-reassembly).
-* __Transport__: Protocol used to carry ReactiveSocket protocol. One of WebSockets, TCP, or Aeron. The transport MUST
+* __Transport__: Protocol used to carry RSocket protocol. One of WebSockets, TCP, or Aeron. The transport MUST
 provide capabilities mentioned in the [transport protocol](#transport-protocol) section.
 * __Stream__: Unit of operation (request/response, etc.). See [Motivations](Motivations.md).
 * __Request__: A stream request. May be one of four types. As well as request for more items or cancellation of previous request.
@@ -64,17 +64,17 @@ provide capabilities mentioned in the [transport protocol](#transport-protocol) 
 
 ## Versioning Scheme
 
-ReactiveSocket follows a versioning scheme consisting of a numeric major version and a numeric minor version.
+RSocket follows a versioning scheme consisting of a numeric major version and a numeric minor version.
 
 ### Cross version compatibility
 
-ReactiveSocket assumes that all version changes (major and minor) are backward incompatible.
+RSocket assumes that all version changes (major and minor) are backward incompatible.
 A client can pass a version that it supports via the [Setup Frame](#frame-setup).
 It is up to a server to accept clients of lower versions than what it supports.
 
 ## Data And Metadata
 
-ReactiveSocket provides mechanisms for applications to distinguish payload into two types. Data and Metadata. The distinction
+RSocket provides mechanisms for applications to distinguish payload into two types. Data and Metadata. The distinction
 between the types in an application is left to the application. 
 
 The following are features of Data and Metadata.
@@ -88,7 +88,7 @@ The following are features of Data and Metadata.
 
 ### Transport Protocol
 
-The ReactiveSocket protocol uses a lower level transport protocol to carry ReactiveSocket frames. A transport protocol MUST provide the following:
+The RSocket protocol uses a lower level transport protocol to carry RSocket frames. A transport protocol MUST provide the following:
 
 1. Unicast [Reliable Delivery](https://en.wikipedia.org/wiki/Reliability_(computer_networking)).
 1. [Connection-Oriented](https://en.wikipedia.org/wiki/Connection-oriented_communication) and preservation of frame ordering. Frame A sent before Frame B MUST arrive in source order. i.e. if Frame A is sent by the same source as Frame B, then Frame A will always arrive before Frame B. No assumptions about ordering across sources is assumed.
@@ -96,11 +96,11 @@ The ReactiveSocket protocol uses a lower level transport protocol to carry React
 
 An implementation MAY "close" a transport connection due to protocol processing. When this occurs, it is assumed that the connection will have no further frames sent and all frames will be ignored.
 
-ReactiveSocket as specified here has been designed for and tested with TCP, WebSocket, Aeron, and [HTTP/2 streams](https://http2.github.io/http2-spec/#StreamsLayer) as transport protocols.
+RSocket as specified here has been designed for and tested with TCP, WebSocket, Aeron, and [HTTP/2 streams](https://http2.github.io/http2-spec/#StreamsLayer) as transport protocols.
 
 ### Framing Protocol Usage
 
-Some of the supported transport protocols for ReactiveSocket may not support specific framing that preserves message boundaries. For these protocols, a framing protocol MUST be used with the ReactiveSocket frame that prepends the ReactiveSocket Frame Length.
+Some of the supported transport protocols for RSocket may not support specific framing that preserves message boundaries. For these protocols, a framing protocol MUST be used with the RSocket frame that prepends the RSocket Frame Length.
 
 The frame length field MUST be omitted if the transport protocol preserves message boundaries e.g. provides compatible framing. If, however, the transport protocol only provides a stream abstraction or can merge messages without preserving boundaries, or multiple transport protocols may be used, then the frame header MUST be used.
 
@@ -113,16 +113,16 @@ The frame length field MUST be omitted if the transport protocol preserves messa
 
 ### Framing Format
 
-When using a transport protocol providing framing, the ReactiveSocket frame is simply encapsulated into the transport protocol messages directly.
+When using a transport protocol providing framing, the RSocket frame is simply encapsulated into the transport protocol messages directly.
 
 ```
     +-----------------------------------------------+
-    |                ReactiveSocket Frame          ...
+    |                RSocket Frame          ...
     |                                              
     +-----------------------------------------------+
 ```
 
-When using a transport protocol that does not provide compatible framing, the Frame Length MUST be prepended to the ReactiveSocket Frame.
+When using a transport protocol that does not provide compatible framing, the Frame Length MUST be prepended to the RSocket Frame.
 
 ```
      0                   1                   2
@@ -130,7 +130,7 @@ When using a transport protocol that does not provide compatible framing, the Fr
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                    Frame Length               |
     +-----------------------------------------------+
-    |                ReactiveSocket Frame          ...
+    |                RSocket Frame          ...
     |                                              
     +-----------------------------------------------+
 ```
@@ -141,7 +141,7 @@ __NOTE__: Byte ordering is big endian.
 
 ### Frame Header Format
 
-ReactiveSocket frames begin with a ReactiveSocket Frame Header. The general layout is given below.
+RSocket frames begin with a RSocket Frame Header. The general layout is given below.
 
 ```
      0                   1                   2                   3
@@ -171,7 +171,7 @@ connection on reception of a frame that it does not understand with this bit not
 
 #### Frame Validation
 
-ReactiveSocket implementations may provide their own validation at the metadata level for specific frames. However, this is an application concern and not necessary for protocol processing.
+RSocket implementations may provide their own validation at the metadata level for specific frames. However, this is an application concern and not necessary for protocol processing.
 
 #### Metadata Optional Header
 
@@ -719,11 +719,11 @@ The general format for an extension frame is given below.
 
 ## Resuming Operation
 
-Due to the large number of active requests for ReactiveSocket, it is often necessary to provide the ability for resuming operation on transport failure. This behavior is totally optional for operation and may be supported or not based on an implementation choice.
+Due to the large number of active requests for RSocket, it is often necessary to provide the ability for resuming operation on transport failure. This behavior is totally optional for operation and may be supported or not based on an implementation choice.
 
 ### Assumptions
 
-ReactiveSocket resumption exists only for specific cases. It is not intended to be an “always works” solution. If resuming operation is not possible, the connection should be terminated with an ERROR as specified by the protocol definition.
+RSocket resumption exists only for specific cases. It is not intended to be an “always works” solution. If resuming operation is not possible, the connection should be terminated with an ERROR as specified by the protocol definition.
 
 1. Resumption is optional behavior for implementations. But highly suggested. Clients and Servers should assume NO resumption capability by default.
 1. Resumption is an optimistic operation. It may not always succeed.
@@ -854,8 +854,8 @@ The requirements for the Resume Identification Token are implementation dependen
 
 * Tokens may be generated by the client.
 * Tokens may be generated outside the client and the server and managed externally to the protocol.
-* Tokens should uniquely identify a connection on the server. The server should not assume a generation method of the token and should consider the token opaque. This allows a client to be compatible with any ReactiveSocket implementation that supports resuming operation and allows the client full control of Identification Token generation.
-* Tokens MUST be valid for the lifetime of an individual ReactiveSocket including possible resumption.
+* Tokens should uniquely identify a connection on the server. The server should not assume a generation method of the token and should consider the token opaque. This allows a client to be compatible with any RSocket implementation that supports resuming operation and allows the client full control of Identification Token generation.
+* Tokens MUST be valid for the lifetime of an individual RSocket including possible resumption.
 * A server should not accept a SETUP with a Token that is currently already being used
 * Tokens should be resilient to replay attacks and thus should only be valid for the lifetime of an individual connection
 * Tokens should not be predictable by an attacking 3rd party
@@ -1203,7 +1203,7 @@ Credits are cumulative. Once credits are granted from Requester to Responder, th
 
 Please note that this explicitly does NOT follow rule number 17 in https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/README.md#3-subscription-code
 
-While Reactive Streams support a demand of up to 2^63-1, and treats 2^63-1 as a magic number signaling to not track demand, this is not the case for ReactiveSocket. ReactiveSocket prioritizes byte size and only uses 4 bytes instead of 8 so the magic number is unavailable.
+While Reactive Streams support a demand of up to 2^63-1, and treats 2^63-1 as a magic number signaling to not track demand, this is not the case for RSocket. RSocket prioritizes byte size and only uses 4 bytes instead of 8 so the magic number is unavailable.
 
 The Requester and the Responder MUST respect the Reactive Streams semantics.
 
