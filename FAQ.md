@@ -135,7 +135,7 @@ There are extant tools for analyzing binary protocol exchanges, and new tools an
 
 #### What tooling exists for debugging the protocol?
 
-Wireshark is the recommended tool. We don't have a plugin yet, but we plan to add one in the future.
+Wireshark is the recommended tool. The plugin is at https://github.com/rsocket/rsocket-wireshark
 
 #### Why are these different flow control approaches needed beyond what the transport layer offers?
 
