@@ -65,7 +65,7 @@ HTTP/2 and RSocket both require a stateful connection with an initial exchange.
 
 HTTP/2 [requires TCP](https://http2.github.io/http2-spec/#starting). RSocket [requires TCP, WebSockets or Aeron](https://github.com/rsocket/rsocket/blob/master/Protocol.md#terminology).
 
-We have no intention of this running over HTTP/1.1. We also do not intend on running over HTTP/2, though that could be explored and conceptually is possible (with the use of SSE).
+We have no intention of this running over HTTP/1.1. We also do not intend on running over HTTP/2 when fronted only by HTTP/1.1 APIs (as browsers expose), though that could be explored and conceptually is possible (with the use of SSE or chunked encoding). If using an HTTP/2 implementation that exposes the underlying byte streams, then HTTP/2 can be used as a transport (and this is in fact done in at least one production use of RSocket).
 
 #### Proxying
 
