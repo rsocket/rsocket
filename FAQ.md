@@ -52,10 +52,6 @@ It all comes down to what TCP is designed to do (not overrun the receiver OS buf
 
 This illustrates why every single solution that doesn't have built-in flow control at the application level (pretty much every solution mentioned aside from MQTT, AMQP, and STOMP) is not well-suited for usage, and why RSocket incorporates application-level flow control as a first-class requirement. 
 
-#### What about Session Continuation across connections?
-
-Reactivesocket is not designed to provide session continuation across connections.
-
 #### Connection Setup Requirement
 
 This is effectively the same as the HTTP/2 requirement to exchange SETTINGS frames—see:
