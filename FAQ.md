@@ -73,13 +73,15 @@ Proxies that behave correctly for HTTP/2 will behave correctly for RSocket.
 
 #### Frame Length
 
-On TCP, it will be included. On Aeron or WebSockets it is not needed. 
+It is optional depending on the transport. 
 
-If there is some reason to include it in Aeron or WebSockets we are fine with changing. 
+On TCP, it will be included. On Aeron or WebSockets it is not needed. 
 
 #### State Spanning Connections
 
 We determine this to be an unnecessary optimization at this protocol layer since the application has to be involved to make it work. Applications maintain state between connections. It is also very complex to implement for negligible gain. Many distributed systems implementations [fail to correctly handle these types of problems](https://aphyr.com/tags/jepsen).
+
+The RSocket protocol does however provide the necessary communication mechanisms for client and server to maintain state and re-establish sessions on new transport connections. 
 
 #### Future-Proofing
 
