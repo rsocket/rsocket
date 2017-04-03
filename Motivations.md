@@ -208,7 +208,7 @@ These limited application semantics generally requires an application protocol t
   - how client should behave with status codes
   - Use of SSE as persistent channel from server to client to allow server to make requests to client
 
-There is no defined mechanism for flow control from responder (typically server) to requestor (typically client). HTTP/2 does flow control at the byte level, not the application level. There is no defined mechanism for communicating requestor (typically server) availability other than failing a request (503). It does not support interaction models such as fire-and-forget, and streaming models are inefficient (chunked encoding or SSE, which is ASCII based).
+There is no defined mechanism for flow control from responder (typically server) to requestor (typically client). HTTP/2 does flow control at the byte level, not the application level. The mechanisms for communicating requestor (typically server) availability (such as failing a request) are inefficient and painful. It does not support interaction models such as fire-and-forget, and streaming models are inefficient (chunked encoding or SSE, which is ASCII based).
 
 Despite its ubiquity, REST alone is insufficient and inappropriate for defining application semantics. 
 
