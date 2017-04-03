@@ -70,7 +70,7 @@ Future<Payload> response = socketClient.requestResponse(requestPayload);
 
 ##### Request/Stream (multi-response, finite) 
 
-Extending from request/response is request/stream, which allows multiple values to be streamed back. Think of this as a "collection" or "list" response, but instead of getting back all the data as a single response, each element is streamed back in order.
+Extending from request/response is request/stream, which allows multiple messages to be streamed back. Think of this as a "collection" or "list" response, but instead of getting back all the data as a single response, each element is streamed back in order.
 
 Use cases could include things like:
 
@@ -86,7 +86,7 @@ Publisher<Payload> response = socketClient.requestStream(requestPayload);
 
 ##### Channel
 
-A channel is bi-directional, with a stream in both directions. 
+A channel is bi-directional, with a stream of messages in both directions. 
 
 An example use case that benefits from this interaction model is:
 
