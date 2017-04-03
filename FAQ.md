@@ -38,6 +38,10 @@ HTTP/2 was meant as a better HTTP/1.1, primarily for document retrieval in brows
 
 See also the RSocket [Motivations document](https://github.com/rsocket/rsocket/blob/master/Motivations.md).
 
+#### What about QUIC?
+
+QUIC isn't exposed or available enough at this point to be useful. If/when that changes, we hope to use it then.
+
 #### Why "Reactive Streams" `request(n)` Flow Control?
 
 Without application feedback in terms of work units done (not bytes), it is easy to cause "head of line blocking", overwhelm network and application buffers, and produce more data on the server than the client can handle. This is particularly bad when multiplexing multiple streams over a single connection where one stream can starve all others. Application layer `request(n)` semantics allows the consumer to signal how much it can receive on each stream, and allow the producer to interleave multiple streams together. 
