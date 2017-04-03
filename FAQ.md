@@ -102,7 +102,7 @@ Beyond those factors, TCP has existed since 1977. We do not expect it to be elim
 #### Prioritization, QoS, OOB
 
 Prioritization, QoS, OOB is allowed with metadata, app-level logic and app control of emission.
-RSocket does not enforce a queuing model, nor an emission model, nor a processing model. To be effective with QoS, it would need to control all aspects. This is not realistically possible without cooperation from the app logic as well as the underlying network layer (which would be a huge layering violation as well). It's the same reason why HTTP/2 does not go into that area either and simply provides a means to express intent. With metadata, RSocket doesn't even need to do that.
+RSocket does not enforce a queuing model, nor an emission model, nor a processing model. To be effective with QoS, it would need to control all aspects. This is not realistically possible without cooperation from the app logic as well as the underlying network layer. It's the same reason why HTTP/2 does not go into that area either and simply provides a means to express intent. With metadata, RSocket doesn't even need to do that.
 
 #### Why is cancellation required?
 
