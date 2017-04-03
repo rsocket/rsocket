@@ -145,7 +145,7 @@ Some requests don't require a response, and when it's fine to simply ignore any 
 Yes, but the tradeoff is worth it.
 
 Binary encoding makes reading messages more difficult for humans, but it also makes reading them easier for machines. There's also a significant performance gain by not decoding the content.
-Because we estimate that more than 99.99% of the messages will be read by a machine, we decided to make the reading easier for a machine.
+Because we estimate that 99.9999999%+ of the messages will be read by a machine, we decided to make the reading easier for a machine.
 
 There are extant tools for analyzing binary protocol exchanges, and new tools and extensions can readily be written to decode the binary RSocket format and present human-readable text.
 
