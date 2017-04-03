@@ -40,7 +40,19 @@ See also the RSocket [Motivations document](https://github.com/rsocket/rsocket/b
 
 #### What about QUIC?
 
-QUIC isn't exposed or available enough at this point to be useful. If/when that changes, we hope to use it then.
+QUIC isn't exposed or available enough at this point to be useful. If/when that changes, we hope to use it then as a transport layer for RSocket. 
+
+RSocket specifically is intended for layering on top of something like QUIC. QUIC offers reliable transport, congestion control, byte-level flow control, and multiplexed byte streams. RSocket layers on top of those things the binary framing and behavioral semantics of message streams (unidirectional and bidirectional), message-level flow control, resumption, etc.
+
+The RSocket spec was done with layering in mind so that on a protocol like TCP, RSocket includes frame length and stream IDs. But on something like HTTP/2 or QUIC, RSocket would skip those and use the ones offered by HTTP/2 or QUIC.
+
+See "Framing Format": https://github.com/rsocket/rsocket/blob/master/Protocol.md
+
+> When using a transport protocol that does not provide compatible framing, the Frame Length MUST be prepended to the RSocket Frame.
+
+And see "Frame Header Format": https://github.com/rsocket/rsocket/blob/master/Protocol.md…
+
+> Transport protocols that include demultiplexing, such as HTTP/2, MAY omit the Stream ID field if all parties agree. The means of negotiation and agreement is left to the transport protocol.
 
 #### Why "Reactive Streams" `request(n)` Flow Control?
 
