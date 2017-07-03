@@ -737,7 +737,7 @@ RSocket resumption exists only for specific cases. It is not intended to be an �
 
 Resuming operation requires knowing the position of data reception of the previous connection. For this to be simplified, the underlying transport is assumed to support contiguous delivery of data on a per frame basis. In other words, partial frames are not delivered for processing nor are gaps allowed in the stream of frames sent by either the client or server. The current list of supported transports (TCP, WebSocket, and Aeron) all satisfy this requirement or can be made to do so in the case of TCP.
 
-As a Requester or Responder __sends__ REQUEST, CANCEL, or PAYLOAD frames, it maintains a __position__ of that frame within the connection in that direction. This is a 64-bit value that starts at 0. As a Requester or Responder __receives__ REQUEST, CANCEL, or PAYLOAD frames, it maintains an __implied position__ of that frame within the connection in that direction. This is also a 64-bit value that starts at 0.
+As a Requester or Responder __sends__ REQUEST_FNF, REQUEST_RESPONSE, REQUEST_STREAM, REQUEST_CHANNEL, METADATA_PUSH, CANCEL, or PAYLOAD frames, it maintains a __position__ of that frame within the connection in that direction. This is a 64-bit value that starts at 0. As a Requester or Responder __receives__ REQUEST, CANCEL, or PAYLOAD frames, it maintains an __implied position__ of that frame within the connection in that direction. This is also a 64-bit value that starts at 0. Both the sender and receiver positions are the *number* of frames sent/received.
 
 The reason this is “implied” is that the position is not included in each frame and is inferred simply by the message being sent/received on the connection in relation to previous frames.
 
@@ -745,7 +745,7 @@ This position will be used to identify the location for resuming operation to be
 
 Frame types outside REQUEST, CANCEL, ERROR, and PAYLOAD do not have assigned (nor implied) positions.
 
-When a client sends a RESUME frame, it sends two implied positions: the last frame that was received from the server; the earliest frame position it still retains.  The server can make a determination on whether resumption is possible: have all frames past the client's last-received position been retained? and has the client retained all frames past the server's last-retained position.  If resumption is allowed to continue, the server sends a RESUME_OK frame, indicating its last-received position.
+When a client sends a RESUME frame, it sends two implied positions: the last frame that was received from the server and the earliest frame position it still retains.  The server can make a determination on whether resumption is possible: have all frames past the client's last-received position been retained? and has the client retained all frames past the server's last-retained position.  If resumption is allowed to continue, the server sends a RESUME_OK frame, indicating its last-received position.
 
 ### Client Lifetime Management
 
