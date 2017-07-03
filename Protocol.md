@@ -177,7 +177,7 @@ ReactiveSocket implementations may provide their own validation at the metadata 
 
 Specific Frame Types MAY contain Metadata. If that Frame Type supports both Data and Metadata, the optional Metadata header MUST be included. This metadata header is between the Frame Header and any payload.
 
-Metadata Length MUST be equal to the Frame Length minus the sum of the length of the Frame Header and the length of the Frame Payload, if present. If Metadata Length is not equal to this value, the frame is invalid. The receiver MUST send an ERROR[CONNECTION_ERROR] frame and close the underlying transport connection on reception unless the frame's IGNORE flag is set.
+Metadata Length MUST be equal to the Frame Length minus the sum of the length of the Frame Header and the length of the Frame Payload, if present. If Metadata Length is not equal to this value, the frame is invalid and the receiver MUST send an ERROR[CONNECTION_ERROR] frame and close the underlying transport connection on reception unless the frame's IGNORE flag is set.
 
 On a frame with Data and Metadata:
 
