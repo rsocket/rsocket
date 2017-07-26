@@ -885,10 +885,6 @@ immediately upon receiving a SETUP frame that it accepts if the __L__ flag is no
 If the server does NOT accept the contents of the SETUP frame, the server MUST send
 back an ERROR[INVALID_SETUP|UNSUPPORTED_SETUP] and then close the connection.
 
-The __S__ flag of the SETUP indicates the client requires the server to adhere to strict interpretation
-of the Data and Metadata of the SETUP. Anything in the Data and/or Metadata that is not understood or can
-be provided by the server should require the SETUP to be rejected.
-
 The server-side Requester mirrors the LEASE requests of the client-side Requester. If a client-side
 Requester sets the __L__ flag in the SETUP frame, the server-side Requester MUST wait for a LEASE
 frame from the client-side Responder before it can send a request. The client-side Responder MUST
