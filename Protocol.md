@@ -953,7 +953,7 @@ When a PAYLOAD frame needs to be fragmented, a sequence of PAYLOAD frames is del
 
 When a PAYLOAD is fragmented, the Metadata MUST be transmitted completely before the Data. 
 
-For example, a single PAYLOAD with 20MB of Metdata and 25MB of Data that is fragmented into 3 frames:
+For example, a single PAYLOAD with 20MB of Metadata and 25MB of Data that is fragmented into 3 frames:
 
 ```
 -- PAYLOAD frame 1
@@ -991,7 +991,7 @@ When REQUEST_RESPONSE, REQUEST_FNF, REQUEST_STREAM, or REQUEST_CHANNEL frames ne
 
 When fragmented, the Metadata MUST be transmitted completely before the Data. 
 
-For example, a single PAYLOAD with 20MB of Metdata and 25MB of Data that is fragmented into 3 frames:
+For example, a single PAYLOAD with 20MB of Metadata and 25MB of Data that is fragmented into 3 frames:
 
 ```
 -- REQUEST_RESPONSE frame 1
@@ -1216,7 +1216,7 @@ e.g. here's an example of a successful stream call with flow-control.
 <a name="flow-control-lease"></a>
 #### Lease Semantics
 
-The LEASE semantics are to control the number of indivdiual requests (all types) that a Requester may send in a given period.
+The LEASE semantics are to control the number of individual requests (all types) that a Requester may send in a given period.
 The only responsibility the protocol implementation has for the LEASE is to honor it on the Requester side. The Responder application
 is responsible for the logic of generation and informing the Responder it should send a LEASE to the peer Requester.
 
