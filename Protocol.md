@@ -399,7 +399,7 @@ For example:
 
 - ERROR[INVALID_SETUP] means the ERROR frame with the INVALID_SETUP code
 - ERROR[REJECTED] means the ERROR frame with the REJECTED code
-- ERROR[CONNECTION_ERROR|REJECTED_RESUME] means the ERROR frame either either the CONNECTION_ERROR or REJECTED_RESUME code
+- ERROR[CONNECTION_ERROR|REJECTED_RESUME] means the ERROR frame with either the CONNECTION_ERROR or REJECTED_RESUME code
 
 <a name="frame-lease"></a>
 ### LEASE Frame (0x02)
