@@ -140,7 +140,7 @@ This first form of flow control is suited to both server-to-server and server-to
 
 RSocket allows for the `request(n)` signal to be composed over network boundaries from requester to responder (typically client to server). This controls the flow of emission from responder to requestor using Reactive Streams semantics at the application level and enables use of bounded buffers so rate of flow adjusts to application consumption and not rely solely on transport and network buffering.
 
-This same data type and approach has been adopted into Java 9 in the `java.util.concurrent.Flow` [suite of types](http://download.java.net/java/jdk9/docs/api/java/util/concurrent/Flow.Subscription.html).
+This same data type and approach has been adopted into Java 9 in the `java.util.concurrent.Flow` [suite of types](https://docs.oracle.com/javase/9/docs/api/java/util/concurrent/Flow.Subscription.html).
 
 ##### Leasing
 
