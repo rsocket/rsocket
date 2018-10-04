@@ -15,8 +15,9 @@ Artifacts include:
 
 - [RSocket Protocol](Protocol.md)
 - Protocol Extensions
-  - [Well-known MIME Types](Extensions/Well-Known-MIME-Types.md)
+  - [Well-known MIME Types](Extensions/WellKnownMimeTypes.md)
   - [Composite Metdata](Extensions/CompositeMetadata.md)
+  - [Routing](Extensions/Routing.md)
   - [Tracing (Zipkin)](Extensions/Tracing-Zipkin.md)
 - [Motivation for creating this protocol](Motivations.md)
 - [Frequently Asked Questions](FAQ.md)

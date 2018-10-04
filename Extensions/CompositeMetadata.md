@@ -46,4 +46,4 @@ This metadata type is intended to be used per stream, and not per connection nor
 [rf]: https://tools.ietf.org/html/rfc2045
 [s]:  http://www.iana.org/assignments/media-type-structured-suffix/media-type-structured-suffix.xml
 [tz]: Tracing-Zipkin.md
-[wk]: Well-Known-MIME-Types.md
+[wk]: WellKnownMimeTypes.md
