@@ -9,13 +9,15 @@ It enables the following symmetric interaction models via async message passing 
 - fire-and-forget (no response)
 - channel (bi-directional streams)
 
-It also supports connection resumption to allow resuming long-lived streams across different transport connections. This is particularly useful for mobile<->server communication when network connections drop, switch, and reconnect frequently. 
+It also supports connection resumption to allow resuming long-lived streams across different transport connections. This is particularly useful for mobile<->server communication when network connections drop, switch, and reconnect frequently.
 
 Artifacts include:
 
-- [Motivations.md](https://github.com/rsocket/rsocket/blob/master/Motivations.md): Motivation for creating this protocol.
-- [FAQ.md](https://github.com/rsocket/rsocket/blob/master/FAQ.md): Frequently Asked Questions.
-- [Protocol.md](https://github.com/rsocket/rsocket/blob/master/Protocol.md): The protocol definition.
+- [RSocket Protocol](Protocol.md)
+- Protocol Extensions
+  - [Well-known MIME Types](Extensions/Well-Known-MIME-Types.md)
+- [Motivation for creating this protocol](Motivations.md)
+- [Frequently Asked Questions](FAQ.md)
 
 More information and links to various implementations can be found at http://rsocket.io
 
