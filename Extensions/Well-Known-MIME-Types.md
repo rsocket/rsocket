@@ -47,4 +47,5 @@ All well-known MIME types assume UTF-8 character encoding wherever a character s
 | `video/H265` | `36`
 | `video/VP8` | `37`
 | |
+| `message/x.rsocket.tracing-zipkin.v0` | `125`
 | `message/x.rsocket.composite-metadata.v0` | `127`

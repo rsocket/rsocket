@@ -17,6 +17,7 @@ Artifacts include:
 - Protocol Extensions
   - [Well-known MIME Types](Extensions/Well-Known-MIME-Types.md)
   - [Composite Metdata](Extensions/CompositeMetadata.md)
+  - [Tracing (Zipkin)](Extensions/Tracing-Zipkin.md)
 - [Motivation for creating this protocol](Motivations.md)
 - [Frequently Asked Questions](FAQ.md)
 
