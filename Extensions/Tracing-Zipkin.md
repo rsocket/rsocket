@@ -42,7 +42,7 @@ This metadata type is intended to be used per stream, and not per connection nor
 ```
 
 * **Flags**: (8 bits)
-  * (**T**)race Id Size: Unset indicates that the Trace Id is 64-bit. Set indicates that the Trade Id is 128-bit.
+  * (**T**)race Id Size: Unset indicates that the Trace Id is 64-bit. Set indicates that the Trace Id is 128-bit.
   * (**P**)arent Span Id: Tracing payload contains a parent span id.
   * (**S**)ampling Decision (2 bits): Tracing payload contains a sample value. (Exclusive with D flag.)
     * First bit indicates if a sampling decision is present
