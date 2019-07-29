@@ -46,6 +46,9 @@ All well-known MIME types assume UTF-8 character encoding wherever a character s
 | `video/H264` | `0x23`
 | `video/H265` | `0x24`
 | `video/VP8` | `0x25`
+| `application/x-hessian` | `0x26`
+| `application/x-java-object` | `0x27`
+| `application/cloudevents+json` | `0x28`
 | |
 | `message/x.rsocket.tracing-zipkin.v0` | `0x7D`
 | `message/x.rsocket.routing.v0` | `0x7E`
