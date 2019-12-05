@@ -1228,10 +1228,9 @@ A Responder that receives a REQUEST that it can not honor due to LEASE restricti
 <a name="flow-control-qos"></a>
 #### QoS and Prioritization
 
-Quality of Service and Prioritization of all *non Stream ID 0* streams (all application level streams) are considered application or network layer concerns and are better dealt with
-at those layers. The metadata capabilities, including METADATA_PUSH, are tools that applications can use for effective prioritization.
+Quality of Service and Prioritization of streams are considered application or network layer concerns and are better dealt with at those layers. The metadata capabilities, including METADATA_PUSH, are tools that applications can use for effective prioritization.
 
-However, all the frames within the *Stream ID 0* **SHOULD** be considered as *highly-prioritized* frames and delivered to the connection as soon as possible, since all the related frames impact directly or indirectly the stability and performance of the system in total.
+Within a single stream, the frames have to be processed in the order. However, frames with *Stream ID 0* **SHOULD** have a higher priority depending on the implementation, since all those frames impact directly or indirectly the stability and performance of the system in total.
 
 DiffServ via IP QoS are best handled by the underlying network layer protocols.
 
