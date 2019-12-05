@@ -6,10 +6,9 @@ _This extension specification is currently incubating.  While incubating the ver
 Authentication is a necessary component to any real world application. This extension specification provides a standardized mechanism for including both the type of credentials and the credentials in metadata payloads.
 
 ## Metadata Payload
-This metadata type can be used in a per connection or per stream, and not individual payloads and as such it **MUST** only be used in frame types used to initiate interactions and payloads.  This includes [`SETUP`][s], [`REQUEST_FNF`][rf], [`REQUEST_RESPONSE`][rr], [`REQUEST_STREAM`][rs], [`REQUEST_CHANNEL`][rc], and [`PAYLOAD`][p].  The Metadata MIME Type is `message/x.rsocket.authentication.v0`.
+This metadata type can be used in a per connection or per stream, and not individual payloads and as such it **MUST** only be used in frame types used to initiate interactions and payloads.  This includes [`SETUP`][s], [`REQUEST_FNF`][rf], [`REQUEST_RESPONSE`][rr], [`REQUEST_STREAM`][rs], and [`REQUEST_CHANNEL`][rc].  The Metadata MIME Type is `message/x.rsocket.authentication.v0`.
 
 [s]:  ../../Protocol.md#frame-setup
-[p]:  ../../Protocol.md#frame-payload
 [rc]: ../../Protocol.md#frame-request-channel
 [rf]: ../../Protocol.md#frame-fnf
 [rr]: ../../Protocol.md#frame-request-response
