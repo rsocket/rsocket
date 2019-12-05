@@ -10,8 +10,8 @@ All well-known Authentication Types assume UTF-8 character encoding wherever a c
 
 | Auth Type | Identifier
 | --------- | ----------
-| [`basic`][basic] | `0x00`
+| [`simple`][simple] | `0x00`
 | [`bearer`][bearer] | `0x01`
 
-[basic]: Basic.md
+[simple]: Simple.md
 [bearer]: Bearer.md
