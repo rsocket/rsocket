@@ -53,3 +53,4 @@ All well-known MIME types assume UTF-8 character encoding wherever a character s
 | `message/x.rsocket.tracing-zipkin.v0` | `0x7D`
 | `message/x.rsocket.routing.v0` | `0x7E`
 | `message/x.rsocket.composite-metadata.v0` | `0x7F`
+| `message/x.rsocket.authentication.v0` | `0x80`
