@@ -26,8 +26,8 @@ This metadata type can be used in a per connection or per stream, and not indivi
     +---------------+-----------------------------------------------+
 ```
 
-* (**A**)uthentication Type: Authentication type is a well known value represented by a unique integer.
-* **Auth ID/Length**: (7 bits = max value 2^7 = 128) Unsigned 7-bit integer.  If A flag is set, indicates a [Well-known Auth Type ID][wk].  If A flag is not set, indicates the Authentication Type Length in bytes.
+* (**A**)uthentication Type: Authentication type is a well known value represented by a unique integer.  If A flag is set (a value of `1`), indicates a [Well-known Auth Type ID][wk].  If A flag is not set (a value of `0`), indicates the Authentication Type Length in bytes.
+* **Auth ID/Length**: (7 bits = max value 2^7 = 128) Unsigned 7-bit integer.  If A flag is set (a value of `1`), indicates a [Well-known Auth Type ID][wk].  If A flag is not set (a value of `0`), indicates the Authentication Type Length in bytes.
 * **Authentication Type**: the type of authentication encoding. This SHOULD be a US-ASCII string.  The string MUST NOT be null terminated.  (Not present if A flag is set)
 * **Authentication Payload**: The authentication payload encoded as defined by the Authentication Encoding Type.
 
