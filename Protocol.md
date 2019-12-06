@@ -389,9 +389,9 @@ The Error Data is typically an Exception message, but could include stringified 
 | __REJECTED__                   | 0x00000202 | Despite being a valid request, the Responder decided to reject it. The Responder guarantees that it didn't process the request. The reason for the rejection is explained in the Error Data section. Stream ID MUST be > 0. |
 | __CANCELED__                   | 0x00000203 | The Responder canceled the request but may have started processing it (similar to REJECTED but doesn't guarantee lack of side-effects). Stream ID MUST be > 0. |
 | __INVALID__                    | 0x00000204 | The request is invalid. Stream ID MUST be > 0. |
-| __RESERVED__                   | 0xFFFFFFFF | __Reserved for Extension Use__ |
+| __RESERVED__                   | 0x7FFFFFFF | __Reserved for Extension Use__ |
 
-__NOTE__: Unsed values in the range of 0x0001 to 0x00300 are reserved for future protocol use. Values in the range of 0x00301 to 0xFFFFFFFE are reserved for application layer errors.
+__NOTE__: Unsed values in the range of 0x0001 to 0x00300 are reserved for future protocol use. Values in the range of 0x00301 to 0x7FFFFFFE are reserved for application layer errors.
 
 When this document refers to a specific Error Code as a frame, it uses this pattern: ERROR[error_code] or ERROR[error_code|error_code]
 
