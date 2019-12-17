@@ -19,6 +19,7 @@ Artifacts include:
   - [Composite Metdata](Extensions/CompositeMetadata.md)
   - [Routing](Extensions/Routing.md)
   - [Tracing (Zipkin)](Extensions/Tracing-Zipkin.md)
+  - [Authentication](Extensions/Security/Authentication.md)
 - [Motivation for creating this protocol](Motivations.md)
 - [Frequently Asked Questions](FAQ.md)
 
