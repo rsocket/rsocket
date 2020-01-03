@@ -16,7 +16,7 @@ Authentication is a necessary component to any real world application. The most 
     +---------------+-----------------------------------------------+
 ```
 
-* **Username Length**: (7 bits = max value 2^7 = 128) Unsigned 7-bit integer of Username Length in bytes.
+* **Username Length**: (8 bits = max value 2^8-1 = 255) Unsigned 8-bit integer of Username Length in bytes.
 * **Username**:  The UTF-8 encoded username.  The string MUST NOT be null terminated.
 * **Password**:  The UTF-8 encoded password.  The string MUST NOT be null terminated.
 
