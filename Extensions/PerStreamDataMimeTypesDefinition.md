@@ -60,4 +60,4 @@ This metadata type is intended to be used per stream, and not per connection nor
 [s]:  http://www.iana.org/assignments/media-type-structured-suffix/media-type-structured-suffix.xml
 [tz]: Tracing-Zipkin.md
 [wk]: WellKnownMimeTypes.md
-[cm]: CompositeMedata.md
+[cm]: CompositeMetadata.md
