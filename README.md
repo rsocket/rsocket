@@ -17,7 +17,7 @@ Artifacts include:
 - Protocol Extensions
   - [Well-known MIME Types](Extensions/WellKnownMimeTypes.md)
   - [Stream Data MIME Types Definition](Extensions/PerStreamDataMimeTypesDefinition.md)
-  - [Composite Metdata](Extensions/CompositeMetadata.md)
+  - [Composite Metadata](Extensions/CompositeMetadata.md)
   - [Routing](Extensions/Routing.md)
   - [Tracing (Zipkin)](Extensions/Tracing-Zipkin.md)
   - [Authentication](Extensions/Security/Authentication.md)
