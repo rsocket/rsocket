@@ -216,7 +216,7 @@ On a frame that only has Metadata, the Metadata length field is NOT needed:
 ```
 
 
-* __Metadata Length__: (24 bits = max value 16,777,215) Unsigned 24-bit integer representing the length of Metadata in bytes. Excluding Metadata Length field.
+* __Metadata Length__: (24 bits = max value 2^24-1 = 16,777,215) Unsigned 24-bit integer representing the length of Metadata in bytes. Excluding Metadata Length field.
 
 <a name="stream-identifiers"></a>
 ### Stream Identifiers
