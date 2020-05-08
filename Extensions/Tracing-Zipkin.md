@@ -21,7 +21,7 @@ This metadata type is intended to be used per stream, and not per connection nor
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |T|P|S  |D  |   |
+    |T|P|R|S|D|     |
     +-+-+---+---+---+-----------------------------------------------+
     |                                                               |
     +                                                               +
@@ -44,12 +44,9 @@ This metadata type is intended to be used per stream, and not per connection nor
 * **Flags**: (8 bits)
   * (**T**)race Id Size: Unset indicates that the Trace Id is 64-bit. Set indicates that the Trace Id is 128-bit.
   * (**P**)arent Span Id: Tracing payload contains a parent span id.
-  * (**S**)ampling Decision (2 bits): Tracing payload contains a sample value. (Exclusive with D flag.)
-    * First bit indicates if a sampling decision is present
-    * Second bit indicates that the span should be reported to the tracing system. (Ignored if first bit is not set)
-  * (**D**)ebug (2 bits): Tracing payload contains a debug value. (Exclusive with S flag.)
-    * First bit indicates if a debug decision is present
-    * Second bit indicates that the trace should be reported to the tracing system and also override any collection-tier sampling policy. Debug implies an accept sampling decision. (Ignored if the first bit is not set)
+  * (**R**)eject: Tracing payload should not be sampled. (Ignored when S flag is set.)
+  * (**S**)ampl: Tracing payload should be accepted for tracing. (Ignored when D flag is set.)
+  * (**D**)ebug: Tracing payload should be force traced.
 * **Trace ID**: (64 or 128 bits) Unsigned 64- or 128-bit integer ID of the trace. Every span in a trace shares this ID.
 * **Span ID**: (64 bits) Unsigned 64-bit integer ID for a particular span. This may or may not be the same as the trace id.
 * **Parent Span ID**: (64 bits) Unsigned 64-bit integer ID for a particular parent span.  This is an optional ID that will only be present on child spans. That is the span without a parent id is considered the root of the trace. (Not present if P flag is not set)
