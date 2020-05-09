@@ -21,7 +21,7 @@ This metadata type is intended to be used per stream, and not per connection nor
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |T|P|R|S|D|     |
+    |B|R|S|D|T|P|   |
     +-+-+---+---+---+-----------------------------------------------+
     |                                                               |
     +                                                               +
@@ -42,11 +42,12 @@ This metadata type is intended to be used per stream, and not per connection nor
 ```
 
 * **Flags**: (8 bits)
-  * (**T**)race Id Size: Unset indicates that the Trace Id is 64-bit. Set indicates that the Trace Id is 128-bit.
-  * (**P**)arent Span Id: Tracing payload contains a parent span id.
+  * (**B**)ody Set: Tracing payload is set. 
   * (**R**)eject: Tracing payload should not be sampled. (Ignored when S flag or D flag is set.)
   * (**S**)ample: Tracing payload should be accepted for tracing. (Ignored when D flag is set.)
   * (**D**)ebug: Tracing payload should be force traced.
+  * (**T**)race Id Size: Unset indicates that the Trace Id is 64-bit. Set indicates that the Trace Id is 128-bit.
+  * (**P**)arent Span Id: Tracing payload contains a parent span id.
 * **Trace ID**: (64 or 128 bits) Unsigned 64- or 128-bit integer ID of the trace. Every span in a trace shares this ID.
 * **Span ID**: (64 bits) Unsigned 64-bit integer ID for a particular span. This may or may not be the same as the trace id.
 * **Parent Span ID**: (64 bits) Unsigned 64-bit integer ID for a particular parent span.  This is an optional ID that will only be present on child spans. That is the span without a parent id is considered the root of the trace. (Not present if P flag is not set)
