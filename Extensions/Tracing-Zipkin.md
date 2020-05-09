@@ -21,7 +21,7 @@ This metadata type is intended to be used per stream, and not per connection nor
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |B|R|S|D|T|P|   |
+    |B|D|S|R|T|P|   |
     +-+-+---+---+---+-----------------------------------------------+
     |                                                               |
     +                                                               +
@@ -43,9 +43,9 @@ This metadata type is intended to be used per stream, and not per connection nor
 
 * **Flags**: (8 bits)
   * (**B**)ody Set: Tracing payload is set. 
-  * (**R**)eject: Tracing payload should not be sampled. (Ignored when S flag or D flag is set.)
-  * (**S**)ample: Tracing payload should be accepted for tracing. (Ignored when D flag is set.)
   * (**D**)ebug: Tracing payload should be force traced.
+  * (**S**)ample: Tracing payload should be accepted for tracing. (Ignored when D flag is set.)
+  * (**R**)eject: Tracing payload should not be sampled. (Ignored when S flag or D flag is set.)
   * (**T**)race Id Size: Unset indicates that the Trace Id is 64-bit. Set indicates that the Trace Id is 128-bit.
   * (**P**)arent Span Id: Tracing payload contains a parent span id.
 * **Trace ID**: (64 or 128 bits) Unsigned 64- or 128-bit integer ID of the trace. Every span in a trace shares this ID.
