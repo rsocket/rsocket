@@ -42,7 +42,8 @@ This metadata type is intended to be used per stream, and not per connection nor
 ```
 
 * **Flags**: (8 bits)
-  * (**B**)ody Set: Tracing payload is set. 
+  * (**I**)Ds Set: When zero, the metadata only includes sampling information and no IDs
+    * For example, a health check might set only the (**N**)ot Sampled flag without generating IDs
   * (**D**)ebug: Tracing payload should be force traced.
   * (**S**)ample: Tracing payload should be accepted for tracing. (Ignored when D flag is set.)
   * (**R**)eject: Tracing payload should not be sampled. (Ignored when S flag or D flag is set.)
