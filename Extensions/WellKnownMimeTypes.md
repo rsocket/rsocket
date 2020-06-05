@@ -26,7 +26,7 @@ All well-known MIME types assume UTF-8 character encoding wherever a character s
 | `audio/mpeg3` | `0x0F`
 | `audio/mpeg` | `0x10`
 | `audio/ogg` | `0x11`
-| `audio/opus` | `10x12`
+| `audio/opus` | `0x12`
 | `audio/vorbis` | `0x13`
 | `image/bmp` | `0x14`
 | `image/gif` | `0x15`
