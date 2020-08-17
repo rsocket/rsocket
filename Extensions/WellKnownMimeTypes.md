@@ -50,6 +50,7 @@ All well-known MIME types assume UTF-8 character encoding wherever a character s
 | `application/x-java-object` | `0x27`
 | `application/cloudevents+json` | `0x28`
 | |
+| `message/x.rsocket.supported-lease-strategies.v0` | `0x79`
 | `message/x.rsocket.mime-type.v0` | `0x7A`
 | `message/x.rsocket.accept-mime-types.v0` | `0x7b`
 | `message/x.rsocket.authentication.v0` | `0x7C`

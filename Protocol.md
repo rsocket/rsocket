@@ -412,6 +412,8 @@ The last received LEASE frame overrides all previous LEASE frame values.
 
 Lease frames MUST always use Stream ID 0 as they pertain to the Connection.
 
+Note, Lease Frame layout depends on the lease strategy specified by [Lease Strategies Extension spec](./Extensions/Leasing/Leasing.md)
+
 Frame Contents
 
 ```
@@ -432,8 +434,8 @@ Frame Contents
 * __Frame Type__: (6 bits) 0x02 
 * __Flags__: (10 bits)
      * (__M__)etadata: Metadata present
-* __Time-To-Live (TTL)__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer of Time (in milliseconds) for validity of LEASE from time of reception. Value MUST be > 0. 
-* __Number of Requests__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer of Number of Requests that may be sent until next LEASE. Value MUST be > 0. 
+* __Time-To-Live (TTL)__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer of Time (in milliseconds) for validity of LEASE from time of reception. Value MUST be >= 0. 
+* __Number of Requests__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer of Number of Requests that may be sent until next LEASE. Value MUST be >= 0. 
 
 A Responder implementation MAY stop all further requests by sending a LEASE with a value of 0 for __Number of Requests__ or __Time-To-Live__.
 
