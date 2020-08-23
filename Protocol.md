@@ -468,10 +468,18 @@ Frame Contents
     +-----------+-+-+-+-------------+-------------------------------+
     |Frame Type |0|0|R|    Flags    |
     +-----------+-+-+-+-------------+-------------------------------+
-    |0|                  Last Received Position                     |
-    +                                                               +
-    |                                                               |
-    +---------------------------------------------------------------+
+    |0|0|                   Number of Entries                       |
+    +-------------------------------+-------------------------------+
+    |0|                         Stream ID                           |
+    +-------------------------------+-------------------------------+
+    |                         Bytes To Skip                         |
+    +-------------------------------+-------------------------------+
+    |0|                         Stream ID                           |
+    +-------------------------------+-------------------------------+
+    |                         Bytes To Skip                         |
+    +-------------------------------+-------------------------------+
+    |                              ...                              |
+    +-------------------------------+-------------------------------+
                                   Data
 ```
 
@@ -491,8 +499,8 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                           Stream ID                           |
-    +-----------+-+-+-+-------------+-------------------------------+
-    |Frame Type |0|M|F|     Flags   |
+    +-----------+-+-+-+-+-+---------+-------------------------------+
+    |Frame Type |0|M|F|0|R|  Flags  |
     +-------------------------------+
                          Metadata & Request Data
 ```
@@ -501,6 +509,7 @@ Frame Contents
 * __Flags__: (10 bits)
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More fragments follow this fragment.
+    * (__R__)esume: Indicates whether a stream should be resumable. This property takes effect only if RSocket connection is resumable.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
 <a name="frame-fnf"></a>
@@ -513,8 +522,8 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                           Stream ID                           |
-    +-----------+-+-+-+-------------+-------------------------------+
-    |Frame Type |0|M|F|    Flags    |
+    +-----------+-+-+-+-+-+---------+-------------------------------+
+    |Frame Type |0|M|F|0|R|  Flags  |
     +-------------------------------+
                           Metadata & Request Data
 ```
@@ -523,6 +532,7 @@ Frame Contents
 * __Flags__: (10 bits)
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More fragments follow this fragment.
+    * (__R__)esume: Indicates whether a stream should be resumable. This property takes effect only if RSocket connection is resumable.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
 <a name="frame-request-stream"></a>
@@ -535,8 +545,8 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                           Stream ID                           |
-    +-----------+-+-+-+-------------+-------------------------------+
-    |Frame Type |0|M|F|    Flags    |
+    +-----------+-+-+-+-+-+---------+-------------------------------+
+    |Frame Type |0|M|F|0|R|  Flags  |
     +-------------------------------+-------------------------------+
     |0|                    Initial Request N                        |
     +---------------------------------------------------------------+
@@ -547,6 +557,7 @@ Frame Contents
 * __Flags__: (10 bits)
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More fragments follow this fragment.
+    * (__R__)esume: Indicates whether a stream should be resumable. This property takes effect only if RSocket connection is resumable.
 * __Initial Request N__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer representing the initial number of items to request. Value MUST be > 0.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
@@ -562,8 +573,8 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                           Stream ID                           |
-    +-----------+-+-+-+-+-----------+-------------------------------+
-    |Frame Type |0|M|F|C|  Flags    |
+    +-----------+-+-+-+-+-+---------+-------------------------------+
+    |Frame Type |0|M|F|C|R|  Flags  |
     +-------------------------------+-------------------------------+
     |0|                    Initial Request N                        |
     +---------------------------------------------------------------+
@@ -575,6 +586,7 @@ Frame Contents
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More fragments follow this fragment.
     * (__C__)omplete: bit to indicate stream completion.
+    * (__R__)esume: Indicates whether a stream should be resumable. This property takes effect only if RSocket connection is resumable.
 	   * If set, `onComplete()` or equivalent will be invoked on Subscriber/Observer.
 * __Initial Request N__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer representing the initial request N value for channel. Value MUST be > 0.
 * __Request Data__: identification of the service being requested along with parameters for the request.
