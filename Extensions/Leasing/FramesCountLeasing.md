@@ -3,7 +3,7 @@
 _This extension specification is currently incubating.  While incubating the version is 0._
 
 ## Introduction
-TODO
+Lease provides a powerful mechanism for `Server` to control its stability. However, one common strategy for Leasing may not be efficient for all cases. A common mechanism for authenticating is using a bearer token. Frame Counting is a mechanism in order to achieve stable memory consumption by controlling the number of incoming. This Lease Strategy provides a standardized negotiating mechanism allowed Frame Count using [Leasing Frame][lf].
 
 
 ### Frame Contents
@@ -33,6 +33,6 @@ A Responder implementation MAY stop all further frames by sending a LEASE with a
 
 When a LEASE expires due to time, the value of the __Number of Frames__ that a Requester may make is implicitly 0.
 
-This frame only supports Metadata, so the Metadata Length header MUST NOT be included, even if the (M)etadata flag is set true.
+This frame only supports Metadata, so the Metadata Length header MUST NOT be included, even if the (M)etadata flag is set to true.
 
 [wk]: WellKnownLeaseStrategies.md

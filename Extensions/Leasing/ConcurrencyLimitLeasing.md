@@ -3,7 +3,9 @@
 _This extension specification is currently incubating.  While incubating the version is 0._
 
 ## Introduction
-TODO
+Lease provide a powerful mechanism for `Server` to control it's stability. However, one common strategy for Leasing may not be efficient for all the cases. A common mechanism for authenticating is using a bearer token. Requests Concurrency Limit is a well-know mechanism in order to achieve optimal throughput with optimal latency. This Lease Strategy provides a standardized mechanism for negotiating Concurrency Limit using [Leasing Frame][lf].
+
+[lf]: ../../Protocol.md#frame-lease
 
 
 ### Frame Contents
