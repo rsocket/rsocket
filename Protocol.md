@@ -91,7 +91,6 @@ The following are features of Data and Metadata.
 The RSocket protocol uses a lower level transport protocol to carry RSocket frames. A transport protocol MUST provide the following:
 
 1. Unicast [Reliable Delivery](https://en.wikipedia.org/wiki/Reliability_(computer_networking)).
-1. [Connection-Oriented](https://en.wikipedia.org/wiki/Connection-oriented_communication) and preservation of frame ordering. Frame A sent before Frame B MUST arrive in source order. i.e. if Frame A is sent by the same source as Frame B, then Frame A will always arrive before Frame B. No assumptions about ordering across sources is assumed.
 1. [FCS](https://en.wikipedia.org/wiki/Frame_check_sequence) is assumed to be in use either at the transport protocol or at each MAC layer hop. But no protection against malicious corruption is assumed.
 
 An implementation MAY "close" a transport connection due to protocol processing. When this occurs, it is assumed that the connection will have no further frames sent and all frames will be ignored.
@@ -467,16 +466,16 @@ Frame Contents
     |                         Stream ID = 0                         |
     +-----------+-+-+-+-------------+-------------------------------+
     |Frame Type |0|0|R|    Flags    |
-    +-----------+-+-+-+-------------+-------------------------------+
-    |0|0|                   Number of Entries                       |
+    +-----------+-+-+-+-------------+---------------+---------------+
+    |0|0|0|            Number of Entries            |               
+    +-------------------------------+---------------+---------------+
+    |0|                         Stream ID                           |
+    +-------------------------------+-------------------------------+
+    |                       Implied Position                        |
     +-------------------------------+-------------------------------+
     |0|                         Stream ID                           |
     +-------------------------------+-------------------------------+
-    |                         Bytes To Skip                         |
-    +-------------------------------+-------------------------------+
-    |0|                         Stream ID                           |
-    +-------------------------------+-------------------------------+
-    |                         Bytes To Skip                         |
+    |                       Implied Position                        |
     +-------------------------------+-------------------------------+
     |                              ...                              |
     +-------------------------------+-------------------------------+
@@ -486,7 +485,9 @@ Frame Contents
 * __Frame Type__: (6 bits) 0x03
 * __Flags__: (10 bits)
      * (__R__)espond with KEEPALIVE or not
-* __Last Received Position__: (63 bits = max value 2^63-1) Unsigned 63-bit long of Resume Last Received Position. Value MUST be > 0. (optional. Set to all 0s when not supported.)
+* __Number of Entries__: (24 bits = max value 2^21-1 = 2,097,151) (optional. Set to all 0s when not supported.)
+* __Stream ID__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer representing the resumable stream Identifier. (present if Number of Entries > 0)
+* __Implied Position__: (32 bits = max value 2^32 = 4,294,967,296) Unsigned 32-bit integer of the individual Stream Resume Last Received Frame Position from the remote party. Value MUST be > 0. (present if Number of Entries > 0)
 * __Data__: Data attached to a KEEPALIVE.
 
 <a name="frame-request-response"></a>
@@ -499,8 +500,8 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                           Stream ID                           |
-    +-----------+-+-+-+-+-+---------+-------------------------------+
-    |Frame Type |0|M|F|0|R|  Flags  |
+    +-----------+-+-+-+-+-+-+-------+-------------------------------+
+    |Frame Type |0|M|F|0|0|R| Flags |
     +-------------------------------+
                          Metadata & Request Data
 ```
@@ -522,8 +523,8 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                           Stream ID                           |
-    +-----------+-+-+-+-+-+---------+-------------------------------+
-    |Frame Type |0|M|F|0|R|  Flags  |
+    +-----------+-+-+-+-+-+-+-------+-------------------------------+
+    |Frame Type |0|M|F|0|0|R| Flags |
     +-------------------------------+
                           Metadata & Request Data
 ```
@@ -545,8 +546,8 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                           Stream ID                           |
-    +-----------+-+-+-+-+-+---------+-------------------------------+
-    |Frame Type |0|M|F|0|R|  Flags  |
+    +-----------+-+-+-+-+-+-+-------+-------------------------------+
+    |Frame Type |0|M|F|0|0|R| Flags |
     +-------------------------------+-------------------------------+
     |0|                    Initial Request N                        |
     +---------------------------------------------------------------+
@@ -573,8 +574,8 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                           Stream ID                           |
-    +-----------+-+-+-+-+-+---------+-------------------------------+
-    |Frame Type |0|M|F|C|R|  Flags  |
+    +-----------+-+-+-+-+-+-+-------+-------------------------------+
+    |Frame Type |0|M|F|C|0|R| Flags |
     +-------------------------------+-------------------------------+
     |0|                    Initial Request N                        |
     +---------------------------------------------------------------+
@@ -586,8 +587,8 @@ Frame Contents
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More fragments follow this fragment.
     * (__C__)omplete: bit to indicate stream completion.
+	     * If set, `onComplete()` or equivalent will be invoked on Subscriber/Observer.
     * (__R__)esume: Indicates whether a stream should be resumable. This property takes effect only if RSocket connection is resumable.
-	   * If set, `onComplete()` or equivalent will be invoked on Subscriber/Observer.
 * __Initial Request N__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer representing the initial request N value for channel. Value MUST be > 0.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
@@ -607,8 +608,8 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                           Stream ID                           |
-    +-----------+-+-+---------------+-------------------------------+
-    |Frame Type |0|0|     Flags     |
+    +-----------+-+-+-+-+-+-+-------+-------------------------------+
+    |Frame Type |0|0|0|0|0|R| Flags |
     +-------------------------------+-------------------------------+
     |0|                         Request N                           |
     +---------------------------------------------------------------+
@@ -616,6 +617,8 @@ Frame Contents
 
 * __Frame Type__: (6 bits) 0x08
 * __Request N__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer representing the number of items to request. Value MUST be > 0.
+* __Flags__: (10 bits)
+    * (__R__)esume: Indicates whether a stream should be resumable. This property takes effect only if RSocket connection is resumable.
 
 See Flow Control: Reactive Streams Semantics for more information on RequestN behavior.
 
@@ -629,12 +632,14 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                           Stream ID                           |
-    +-----------+-+-+---------------+-------------------------------+
-    |Frame Type |0|0|    Flags      |
+    +-----------+-+-+-+-+-+-+-------+-------------------------------+
+    |Frame Type |0|0|0|0|0|R| Flags |
     +-------------------------------+-------------------------------+
 ```
 
 * __Frame Type__: (6 bits) 0x09
+* __Flags__: (10 bits)
+    * (__R__)esume: Indicates whether a stream should be resumable. This property takes effect only if RSocket connection is resumable.
 
 <a name="frame-payload"></a>
 ### PAYLOAD Frame (0x0A)
@@ -646,8 +651,8 @@ Frame Contents
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                           Stream ID                           |
-    +-----------+-+-+-+-+-+---------+-------------------------------+
-    |Frame Type |0|M|F|C|N|  Flags  |
+    +-----------+-+-+-+-+-+-+-------+-------------------------------+
+    |Frame Type |0|M|F|C|N|R| Flags |
     +-------------------------------+-------------------------------+
                          Metadata & Data
 ```
@@ -660,6 +665,7 @@ Frame Contents
        * If set, `onComplete()` or equivalent will be invoked on Subscriber/Observer.
     * (__N__)ext: bit to indicate Next (Payload Data and/or Metadata present).
        * If set, `onNext(Payload)` or equivalent will be invoked on Subscriber/Observer.
+    * (__R__)esume: Indicates whether a stream should be resumable. This property takes effect only if RSocket connection is resumable.
 * __Payload Data__: payload for Reactive Streams onNext.
 
 Valid combinations of (C)omplete and (N)ext flags are:
@@ -744,19 +750,34 @@ RSocket resumption exists only for specific cases. It is not intended to be an �
 1. Resumption is always initiated by the client and either allowed or denied by the server.
 1. Resumption makes no assumptions of application state for delivered frames with respect to atomicity, transactionality, etc. See above.
 
+### Resume Agreement
+
+If communication with ressumption support has been successfully initiated, the decision on whether a particular REQUEST should be resumed is done separatelly. For that purpose a Requester set (R)esume flag in the REQUEST(s) frame and if the Responder respond in the first FRAME with the (R)esume flag set, then this stream is assumed to be resumable. Otherwise, if any of the sides did not set flag (R)esume, the stream assumed to not be resumable. If a Requester has sent a REQUEST frame with the (R)esume flag set, but the connection is lost before the aggreement has made (first PAYLOAD received), such REQUEST frame has to be redelivered.
+
 ### Implied Position
 
 Resuming operation requires knowing the position of data reception of the previous connection. For this to be simplified, the underlying transport is assumed to support contiguous delivery of data on a per frame basis. In other words, partial frames are not delivered for processing nor are gaps allowed in the stream of frames sent by either the client or server. The current list of supported transports (TCP, WebSocket, and Aeron) all satisfy this requirement or can be made to do so in the case of TCP.
 
-As a Requester or Responder __sends__ REQUEST_RESPONSE, REQUEST_FNF, REQUEST_STREAM, REQUEST_CHANNEL, REQUEST_N, CANCEL, ERROR, or PAYLOAD frames, it maintains a __position__ of that frame within the connection in that direction. This is a 64-bit value that starts at 0. As a Requester or Responder __receives__ those tracked frames, it maintains an __implied position__ of that frame within the connection in that direction. This is also a 64-bit value that starts at 0.  The positions are calculated based on the length of encoded frames without the frame length field after any fragmentation is applied.
+#### For Stream 
 
-The reason this is “implied” is that the position is not included in each frame and is inferred simply by the message being sent/received on the connection in relation to previous frames.
+As a Requester or Responder __sends__ REQUEST_RESPONSE, REQUEST_FNF, REQUEST_STREAM, REQUEST_CHANNEL, REQUEST_N, CANCEL, ERROR, or PAYLOAD frames, it maintains a __position__ of that frame within an individual stream in that direction if the stream is resumable. In other words __position__ is the number of frames a Requester or Responder has sent withing a single logical stream. The __postion__ value is a 32-bit integer that starts at 0. As a Requester or Responder __receives__ those tracked frames, it maintains an __implied position__ of that frame within the stream in that direction. In other words, __implied position__ is the number of frames received by a Requester or Responder within a single logical stream. The __implied position__ is also a 32-bit value that starts at 0.  
+
+The reason this is “implied” is that the position is not included in each frame and is inferred simply by the message being sent/received within the stream in relation to previous frames in this stream.
 
 This position will be used to identify the location for resuming operation to begin.
 
 Frame types outside REQUEST(s), REQUEST_N, CANCEL, ERROR, and PAYLOAD do not have assigned (nor implied) positions.
 
-When a client sends a RESUME frame, it sends two implied positions: the last frame that was received from the server; the earliest frame position it still retains.  The server can make a determination on whether resumption is possible: have all frames past the client's last-received position been retained? and has the client retained all frames past the server's last-retained position.  If resumption is allowed to continue, the server sends a RESUME_OK frame, indicating its last-received position.
+#### For Connection
+
+As a Server __notifies__ about successfull reception of frames for resumable streams (in the way of sending __implied positions__ for every active resumable stream), the Client MUST maintan a total number of received frames by server based on the provided information. This field is so called __Last Client Available Global Position__. This value is 64-bits long calculated as a sum of all __implied positions__ received from the Server during the whole Client Lifetime.
+
+This position will be used upon receiving a RESUME frame from the Client and aimed to perform a sanity check and identify any possible gups between Client and Server states.
+
+
+Note, all the positions are counted in __number of frames__.
+
+When a client sends a RESUME frame, it sends __Last Client Available Global Position__ and a set of __implied positions__ for active resumable streams.  The server can make a determination on whether resumption is possible: have all frames past the client's last-received position been retained? and has the client retained all frames past the server's last-retained position.  If resumption is allowed to continue, the server sends a RESUME_OK frame, indicating its set of last-received position for active streams.
 
 ### Client Lifetime Management
 
@@ -768,11 +789,11 @@ All ERROR frames sent MUST be CONNECTION_ERROR or REJECTED_RESUME error code.
 
 Client side resumption operation starts when the client desires to try to resume and starts a new transport connection. The operation then proceeds as the following:
 
-* Client sends RESUME frame. The client MUST NOT send any other frame types until resumption succeeds. The RESUME Identification Token MUST be the token used in the original SETUP frame. The RESUME Last Received Position field MUST be the last successfully received implied position from the server.
+* Client sends RESUME frame.  The client MUST NOT send any other frame types until resumption succeeds.  The RESUME Identification Token MUST be the token used in the original SETUP frame.  The RESUME Total Number Of Skiped Frames field indicates the total number of frames that the Client skipped from the cache among all resumable streams during the whole session.  The RESUME Number of Entries indicates the number of active resumable streams.  Every entry in RESUME frame has a corresponding Stream ID to which this entry belongs to and Received Frame Count which indicates the total number of frames received for this particular stream on the Client side.
 * Client waits for either a RESUME_OK or ERROR[CONNECTION_ERROR|REJECTED_RESUME] frame from the server.
 * On receiving an ERROR[REJECTED_RESUME] frame, the client MUST NOT attempt resumption again.
 * On receiving a RESUME_OK, the client:
-    * MUST assume that the next REQUEST, CANCEL, ERROR, and PAYLOAD frames have an implied position commencing from the last implied positions
+    * MUST assume that the next REQUEST, CANCEL, ERROR, and PAYLOAD frames contuniously increasing their corresponding Received Frame Count 
     * MAY retransmit *all* REQUEST, CANCEL, ERROR, and PAYLOAD frames starting at the RESUME_OK Last Received Position field value from the server.
     * MAY send an ERROR[CONNECTION_ERROR|CONNECTION_CLOSE] frame indicating the end of the connection and MUST NOT attempt resumption again
 
@@ -810,24 +831,34 @@ RESUME frames MUST always use Stream ID 0 as they pertain to the connection.
     |        Major Version          |         Minor Version         |
     +-------------------------------+-------------------------------+
     |         Token Length          | Resume Identification Token  ...
-    +---------------------------------------------------------------+
-    |0|                                                             |
-    +                 Last Received Server Position                 +
+    +-------------------------------+-------------------------------+
     |                                                               |
-    +---------------------------------------------------------------+
-    |0|                                                             |
-    +                First Available Client Position                +
+    |             Last Client Available Global Position             |
     |                                                               |
-    +---------------------------------------------------------------+
+    +-------------------------------+---------------+---------------+
+    |0|               Number of Entries             |               
+    +-------------------------------+---------------+---------------+
+    |0|                         Stream ID                           |
+    +-------------------------------+-------------------------------+
+    |                       Implied Position                        |
+    +-------------------------------+-------------------------------+
+    |0|                         Stream ID                           |
+    +-------------------------------+-------------------------------+
+    |                       Implied Position                        |
+    +-------------------------------+-------------------------------+
+                                   ...                               
 ```
+
 
 * __Frame Type__: (6 bits) 0x0D
 * __Major Version__: (16 bits = max value 65,535) Unsigned 16-bit integer of Major version number of the protocol.
 * __Minor Version__: (16 bits = max value 65,535) Unsigned 16-bit integer of Minor version number of the protocol.
 * __Resume Identification Token Length__: (16 bits = max value 65,535) Unsigned 16-bit integer of Resume Identification Token Length in bytes. 
 * __Resume Identification Token__: Token used for client resume identification. Same Resume Identification used in the initial SETUP by the client.
-* __Last Received Server Position__: (63 bits = max value 2^63-1) Unsigned 63-bit long of the last implied position the client received from the server.
-* __First Available Client Position__: (63 bits = max value 2^63-1) Unsigned 63-bit long of the earliest position that the client can rewind back to prior to resending frames.
+* __Last Client Available Global Position__: (64 bits = max value 2^64 ) Unsigned 64-bit long of the total number (among all the streams) of frames removed from the client's cache. Used to apply sanity check on the server side and see whether the global total number of received frames on the server side is greater than the number of frames client has already removed from it's cache.
+* __Number of Entries__: (23 bits = max value 2,088,957) Unsigned 23-bit integer of the number of resumable streams being in progress.
+* __Stream ID__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer representing the resumable stream Identifier. (present if Number of Entries > 0)
+* __Implied Position__: (32 bits = max value 2^32 = 4,294,967,296) Unsigned 32-bit integer of the individual Stream Resume Last Received Frame Position from the remote party. Value MUST be > 0. (present if Number of Entries > 0)
 
 <a name="frame-resume-ok"></a>
 #### RESUME_OK Frame (0x0E)
@@ -843,21 +874,32 @@ RESUME OK frames MUST always use Stream ID 0 as they pertain to the connection.
     |                         Stream ID = 0                         |
     +-----------+-+-+---------------+-------------------------------+
     |Frame Type |0|0|    Flags      |
+    +-------------------------------+---------------+---------------+
+    |0|               Number of Entries             |               
+    +-------------------------------+---------------+---------------+
+    |0|                         Stream ID                           |
     +-------------------------------+-------------------------------+
-    |0|                                                             |
-    +               Last Received Client Position                   +
-    |                                                               |
-    +---------------------------------------------------------------+
+    |                       Implied Position                        |
+    +-------------------------------+-------------------------------+
+    |0|                         Stream ID                           |
+    +-------------------------------+-------------------------------+
+    |                       Implied Position                        |
+    +-------------------------------+-------------------------------+
+                                   ...                               
 ```
 
 * __Frame Type__: (6 bits) 0x0E
-* __Last Received Client Position__: (63 bits = max value 2^63-1) Unsigned 63-bit long of the last implied position the server received from the client.
+* __Number of Entries__: (23 bits = max value 2,088,957) Unsigned 23-bit integer of the number of resumable streams being in progress.
+* __Stream ID__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer representing the resumable stream Identifier.
+* __Implied Position__: (32 bits = max value 2^32 = 4,294,967,296) Unsigned 32-bit integer of the individual Stream Resume Last Received Frame Position from the remote party. Value MUST be > 0.
 
 #### Keepalive Position Field
 
-Keepalive frames include the implied position of the client (or server). When sent, they act as a means for the other end of the connection to know the position of the other side.
+Keepalive frames include the set of implied positions of the client (or server). When sent, they act as a means for the other end of the connection to know the set of positions of the other side.
 
 This information MAY be used to update state for possible retransmission, such as trimming a retransmit buffer, or possible associations with individual stream status.
+
+Note, the positions of the stream which has not changed between Keepalives, must not be exchanged to keep Keepalive Frame size as small as possible.
 
 ### Identification Token Handling
 
