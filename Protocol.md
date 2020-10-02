@@ -770,7 +770,7 @@ Frame types outside REQUEST(s), REQUEST_N, CANCEL, ERROR, and PAYLOAD do not hav
 
 #### For Connection
 
-As a Server __notifies__ about successfull reception of frames for resumable streams (in the way of sending __implied positions__ for every active resumable stream), the Client MUST maintan a total number of received frames by server based on the provided information. This field is so called __Last Client Available Global Position__. This value is 64-bits long calculated as a sum of all __implied positions__ received from the Server during the whole Client Lifetime.
+As a Server __notifies__ about successful reception of frames for resumable streams (in the way of sending __implied positions__ for every active resumable stream), the Client MUST maintan a total number of received frames by server based on the provided information. This field is so called __Last Client Available Global Position__. This value is 64-bits long calculated as a sum of all __implied positions__ received from the Server during the whole Client Lifetime.
 
 This position will be used upon receiving a RESUME frame from the Client and aimed to perform a sanity check and identify any possible gups between Client and Server states.
 
