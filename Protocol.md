@@ -793,7 +793,7 @@ Client side resumption operation starts when the client desires to try to resume
 * Client waits for either a RESUME_OK or ERROR[CONNECTION_ERROR|REJECTED_RESUME] frame from the server.
 * On receiving an ERROR[REJECTED_RESUME] frame, the client MUST NOT attempt resumption again.
 * On receiving a RESUME_OK, the client:
-    * MUST assume that the next REQUEST, CANCEL, ERROR, and PAYLOAD frames contuniously increasing their corresponding Received Frame Count 
+    * MUST assume that the next REQUEST, CANCEL, ERROR, and PAYLOAD frames continuously increasing their corresponding Received Frame Count 
     * MAY retransmit *all* REQUEST, CANCEL, ERROR, and PAYLOAD frames starting at the RESUME_OK Last Received Position field value from the server.
     * MAY send an ERROR[CONNECTION_ERROR|CONNECTION_CLOSE] frame indicating the end of the connection and MUST NOT attempt resumption again
 
