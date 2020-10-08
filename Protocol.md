@@ -510,7 +510,7 @@ Frame Contents
 * __Flags__: (10 bits)
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More fragments follow this fragment.
-    * (__R__)esume: Indicates whether a stream should be resumable. This property takes effect only if RSocket connection is resumable.
+    * (__R__)esume: Indicates whether a stream should be resumable. This property takes effect only if the RSocket connection is resumable.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
 <a name="frame-fnf"></a>
@@ -533,7 +533,7 @@ Frame Contents
 * __Flags__: (10 bits)
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More fragments follow this fragment.
-    * (__R__)esume: Indicates whether a stream should be resumable. This property takes effect only if RSocket connection is resumable.
+    * (__R__)esume: Indicates whether a stream should be resumable. This property takes effect only if the RSocket connection is resumable.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
 <a name="frame-request-stream"></a>
@@ -558,7 +558,7 @@ Frame Contents
 * __Flags__: (10 bits)
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More fragments follow this fragment.
-    * (__R__)esume: Indicates whether a stream should be resumable. This property takes effect only if RSocket connection is resumable.
+    * (__R__)esume: Indicates whether a stream should be resumable. This property takes effect only if the RSocket connection is resumable.
 * __Initial Request N__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer representing the initial number of items to request. Value MUST be > 0.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
@@ -588,7 +588,7 @@ Frame Contents
     * (__F__)ollows: More fragments follow this fragment.
     * (__C__)omplete: bit to indicate stream completion.
 	     * If set, `onComplete()` or equivalent will be invoked on Subscriber/Observer.
-    * (__R__)esume: Indicates whether a stream should be resumable. This property takes effect only if RSocket connection is resumable.
+    * (__R__)esume: Indicates whether a stream should be resumable. This property takes effect only if the RSocket connection is resumable.
 * __Initial Request N__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer representing the initial request N value for channel. Value MUST be > 0.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
@@ -618,7 +618,7 @@ Frame Contents
 * __Frame Type__: (6 bits) 0x08
 * __Request N__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer representing the number of items to request. Value MUST be > 0.
 * __Flags__: (10 bits)
-    * (__R__)esume: Indicates whether a stream should be resumable. This property takes effect only if RSocket connection is resumable.
+    * (__R__)esume: Indicates whether a stream should be resumable. This property takes effect only if the RSocket connection is resumable.
 
 See Flow Control: Reactive Streams Semantics for more information on RequestN behavior.
 
@@ -639,7 +639,7 @@ Frame Contents
 
 * __Frame Type__: (6 bits) 0x09
 * __Flags__: (10 bits)
-    * (__R__)esume: Indicates whether a stream should be resumable. This property takes effect only if RSocket connection is resumable.
+    * (__R__)esume: Indicates whether a stream should be resumable. This property takes effect only if the RSocket connection is resumable.
 
 <a name="frame-payload"></a>
 ### PAYLOAD Frame (0x0A)
@@ -665,7 +665,7 @@ Frame Contents
        * If set, `onComplete()` or equivalent will be invoked on Subscriber/Observer.
     * (__N__)ext: bit to indicate Next (Payload Data and/or Metadata present).
        * If set, `onNext(Payload)` or equivalent will be invoked on Subscriber/Observer.
-    * (__R__)esume: Indicates whether a stream should be resumable. This property takes effect only if RSocket connection is resumable.
+    * (__R__)esume: Indicates whether a stream should be resumable. This property takes effect only if the RSocket connection is resumable.
 * __Payload Data__: payload for Reactive Streams onNext.
 
 Valid combinations of (C)omplete and (N)ext flags are:
@@ -744,7 +744,7 @@ RSocket resumption exists only for specific cases. It is not intended to be an ‚
 
 1. Resumption is optional behavior for implementations. But highly suggested. Clients and Servers should assume NO resumption capability by default.
 1. Resumption is an optimistic operation. It may not always succeed.
-1. Resumption is desired to be fast and require a minimum of state to be exchanged.
+1. Resumption is desired to be fast and requires a minimum of state to be exchanged.
 1. Resumption is designed for loss of connectivity and assumes client and server state is maintained across connectivity loss. I.e. there is no assumption of loss of state by either end. This is very important as without it, all the requirements of "guaranteed messaging" come into play.
 1. Resumption assumes no changes to Lease, Data format (encoding), etc. for resuming operation. i.e. A client is not allowed to change the metadata MIME type or the data MIME type or version, etc. when resuming operation.
 1. Resumption is always initiated by the client and either allowed or denied by the server.
@@ -752,7 +752,7 @@ RSocket resumption exists only for specific cases. It is not intended to be an ‚
 
 ### Resume Agreement
 
-If communication with resumption support has been successfully initiated, the decision on whether a particular REQUEST should be resumed is done separatelly. For that purpose a Requester set (R)esume flag in the REQUEST(s) frame and if the Responder respond in the first FRAME with the (R)esume flag set, then this stream is assumed to be resumable. Otherwise, if any of the sides did not set flag (R)esume, the stream assumed to not be resumable. If a Requester has sent a REQUEST frame with the (R)esume flag set, but the connection is lost before the agreement has made (first PAYLOAD received), such REQUEST frame has to be redelivered.
+If communication with resumption support has been successfully initiated, the decision on whether a particular REQUEST should be resumed is made separately. For that purpose, a Requester set the (R)esume flag in the REQUEST(s) frame, and if the Responder responds in the first FRAME with the (R)esume flag set, then this stream is assumed to be resumable. Otherwise, if any of the sides did not set the (R)esume flag, the stream assumed to not be resumable. If a Requester has sent a REQUEST frame with the (R)esume flag set, but the connection is lost before the agreement has been made (e.g., any frames were received), such a REQUEST frame has to be redelivered unless the RESUME or RESUME_OK frame received after reconnection includes.
 
 ### Implied Position
 
@@ -760,7 +760,7 @@ Resuming operation requires knowing the position of data reception of the previo
 
 #### For Stream 
 
-As a Requester or Responder __sends__ REQUEST_RESPONSE, REQUEST_FNF, REQUEST_STREAM, REQUEST_CHANNEL, REQUEST_N, CANCEL, ERROR, or PAYLOAD frames, it maintains a __position__ of that frame within an individual stream in that direction if the stream is resumable. In other words __position__ is the number of frames a Requester or Responder has sent withing a single logical stream. The __postion__ value is a 32-bit integer that starts at 0. As a Requester or Responder __receives__ those tracked frames, it maintains an __implied position__ of that frame within the stream in that direction. In other words, __implied position__ is the number of frames received by a Requester or Responder within a single logical stream. The __implied position__ is also a 32-bit value that starts at 0.  
+As a Requester or Responder __sends__ REQUEST_RESPONSE, REQUEST_FNF, REQUEST_STREAM, REQUEST_CHANNEL, REQUEST_N, CANCEL, ERROR, or PAYLOAD frames, it maintains a __position__ of that frame within an individual stream in that direction if the stream is resumable. In other words, __position__ is the number of frames a Requester or Responder has sent withing a single logical stream. The __postion__ value is a 32-bit integer that starts at 0. As a Requester or Responder __receives__ those tracked frames, it maintains an __implied position__ of that frame within the stream in that direction. In other words, __implied position__ is the number of frames received by a Requester or Responder within a single logical stream. The __implied position__ is also a 32-bit value that starts at 0.  
 
 The reason this is ‚Äúimplied‚Äù is that the position is not included in each frame and is inferred simply by the message being sent/received within the stream in relation to previous frames in this stream.
 
@@ -770,7 +770,7 @@ Frame types outside REQUEST(s), REQUEST_N, CANCEL, ERROR, and PAYLOAD do not hav
 
 #### For Connection
 
-As a Server __notifies__ about successful reception of frames for resumable streams (in the way of sending __implied positions__ for every active resumable stream), the Client MUST maintan a total number of received frames by server based on the provided information. This field is so called __Last Client Available Global Position__. This value is 64-bits long calculated as a sum of all __implied positions__ received from the Server during the whole Client Lifetime.
+As a Server __notifies__ about successful reception of frames for resumable streams (in the way of sending __implied positions__ for every active resumable stream), the Client MUST maintain a total number of received frames by the Server based on the provided information. This field is the so-called __Last Client Available Global Position__. This value is 64-bits long calculated as a sum of all __implied positions__ received from the Server during the whole Client Lifetime.
 
 This position will be used upon receiving a RESUME frame from the Client and aimed to perform a sanity check and identify any possible gaps between Client and Server states.
 
