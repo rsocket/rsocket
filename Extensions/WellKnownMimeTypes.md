@@ -49,8 +49,8 @@ All well-known MIME types assume UTF-8 character encoding wherever a character s
 | `application/x-hessian` | `0x26`
 | `application/x-java-object` | `0x27`
 | `application/cloudevents+json` | `0x28`
-| `application/application/x-capnp` | `0x29`
-| `application/application/x-flatbuffers` | `0x2A`
+| `application/x-capnp` | `0x29`
+| `application/x-flatbuffers` | `0x2A`
 | |
 | `message/x.rsocket.mime-type.v0` | `0x7A`
 | `message/x.rsocket.accept-mime-types.v0` | `0x7b`
