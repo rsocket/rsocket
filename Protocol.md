@@ -752,7 +752,7 @@ RSocket resumption exists only for specific cases. It is not intended to be an â
 
 ### Resume Agreement
 
-If communication with resumption support has been successfully initiated, the decision on whether a particular REQUEST should be resumed is made separately. For that purpose, a Requester set the (R)esume flag in the REQUEST(s) frame, and if the Responder responds in the first FRAME with the (R)esume flag set, then this stream is assumed to be resumable. Otherwise, if any of the sides did not set the (R)esume flag, the stream assumed to not be resumable. If a Requester has sent a REQUEST frame with the (R)esume flag set, but the connection is lost before the agreement has been made (e.g., any frames were received), such a REQUEST frame has to be redelivered unless the RESUME or RESUME_OK frame received after reconnection includes.
+If communication with resumption support has been successfully initiated, the decision on whether a particular REQUEST should be resumed is made separately. For that purpose, a Requester sets the (R)esume flag on a REQUEST frame, and if the Responder responds in the first FRAME with the (R)esume flag set, then the current stream is assumed to be resumable. Otherwise, if either side did not set the (R)esume flag, the stream is not resumable. If a Requester has sent a REQUEST frame with the (R)esume flag set, but the connection is lost before the agreement has been made (i.e. no frames were received), such a REQUEST frame has to be redelivered unless the RESUME or RESUME_OK frame received after reconnection does not include the (R)esume flag.
 
 ### Implied Position
 
