@@ -747,7 +747,7 @@ RSocket resumption exists only for specific cases. It is not intended to be an â
 
 1. Resumption is optional behavior for implementations. But highly suggested. Clients and Servers should assume NO resumption capability by default.
 1. Resumption is an optimistic operation. It may not always succeed.
-1. Resumption is desired to be fast and requires a minimum of state to be exchanged.
+1. Resumption is desired to be fast and require a minimum of state to be exchanged.
 1. Resumption is designed for loss of connectivity and assumes client and server state is maintained across connectivity loss. I.e. there is no assumption of loss of state by either end. This is very important as without it, all the requirements of "guaranteed messaging" come into play.
 1. Resumption assumes no changes to Lease, Data format (encoding), etc. for resuming operation. i.e. A client is not allowed to change the metadata MIME type or the data MIME type or version, etc. when resuming operation.
 1. Resumption is always initiated by the client and either allowed or denied by the server.
