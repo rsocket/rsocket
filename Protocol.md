@@ -810,6 +810,8 @@ A Server that receives a RESUME frame after a previous RESUME frame, SHOULD send
 
 Leasing semantics are NOT assumed to carry over from previous connections when resuming. LEASE semantics MUST be restarted upon a new connection by sending a LEASE frame from the server.
 
+for more details, please see a description of possible [rsumption scenarios](./ResumptionScenarios.md)
+
 <a name="frame-resume"></a>
 #### RESUME Frame (0x0D)
 
