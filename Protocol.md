@@ -769,7 +769,7 @@ Frame types outside REQUEST(s), REQUEST_N, CANCEL, ERROR, and PAYLOAD do not hav
 
 Note, all the positions are counted in __number of frames__.
 
-When a Сlient sends a RESUME frame, it has to include a set of __implied positions__ for active resumable streams.  By the reception of the RESUME frame, the server can make a determination on whether resumption is possible: has the client retained all frames past the server's last-retained position.  If resumption is allowed to continue, the server sends a RESUME_OK frame, indicating its set of last-received position for active streams Note, the resumption may be **partially** accepted by the Server meaning that if it is impossible to resume some streams, the Server may not include them in the RESUME_OK frame. By the reception of the RESUME_OK frame, the Client MUST resume only specified streams and the other MUST be terminated immediately with the __REJECTED__ error.
+When a Сlient sends a RESUME frame, it has to include a set of __implied positions__ for active resumable streams.  Upon receiving a RESUME frame, the server can make a determination on whether resumption is possible depending on whether the client retained all frames past the server's last-retained position.  If resumption is allowed to continue, the server sends a RESUME_OK frame back, listing its set of last-received position for active streams. Note that resumption may be **partially** accepted by the Server which means that if it is impossible to resume some streams, the Server may omit them from the RESUME_OK frame. Upon receiving the RESUME_OK frame, the Client MUST resume only the specified streams and while the rest MUST be terminated immediately with the __REJECTED__ error.
 
 ### Client Lifetime Management
 
