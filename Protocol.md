@@ -640,7 +640,7 @@ Frame Contents
 
 * __Frame Type__: (6 bits) 0x09
 * __Flags__: (10 bits)
-    * (__R__)esume: Indicates whether a stream should be resumable. This property takes effect only if the RSocket connection is resumable. This flag should be set only in the REQUEST_CHANNEL scenario by the Responder side. Otherwise, flag can be ignored.
+    * (__R__)esume: Indicates whether a stream should be resumable. This property is in effect only if the RSocket connection is resumable. This flag should only be set by a responder in a REQUEST_CHANNEL interaction. Otherwise, the flag can be ignored.
 
 <a name="frame-payload"></a>
 ### PAYLOAD Frame (0x0A)
