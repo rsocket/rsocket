@@ -619,7 +619,7 @@ Frame Contents
 * __Frame Type__: (6 bits) 0x08
 * __Request N__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer representing the number of items to request. Value MUST be > 0.
 * __Flags__: (10 bits)
-    * (__R__)esume: Indicates whether a stream should be resumable. This property takes effect only if the RSocket connection is resumable. This flag should be set only in the REQUEST_CHANNEL scenario by the Responder side. Otherwise, flag can be ignored.
+    * (__R__)esume: Indicates whether a stream should be resumable. This property is in effect only if the RSocket connection is resumable. This flag should only be set by a responder in a REQUEST_CHANNEL interaction. Otherwise, the flag can be ignored.
 
 See [Flow Control: Reactive Streams Semantics](#flow-control-reactive-streams) for more information on RequestN behavior.
 
