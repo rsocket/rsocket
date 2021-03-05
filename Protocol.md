@@ -91,7 +91,7 @@ The following are features of Data and Metadata.
 The RSocket protocol uses a lower level transport protocol to carry RSocket frames. A transport protocol MUST provide the following:
 
 1. Unicast [Reliable Delivery](https://en.wikipedia.org/wiki/Reliability_(computer_networking)).
-1. Stream-Oriented (similar to [connection-oriented](https://en.wikipedia.org/wiki/Connection-oriented_communication)) preservation of frame ordering for the same stream within a multiplexed connection. Frame A sent before Frame B MUST arrive in source order for the same stream within the same connection. i.e. if Frame A is sent by the same source stream as Frame B, then Frame A will always arrive before Frame B within that stream. No assumptions about ordering across different streams within the same multiplexed connection is assumed.
+1. Stream-Oriented (similar to [connection-oriented](https://en.wikipedia.org/wiki/Connection-oriented_communication)) preservation of frame ordering for the same stream within a multiplexed connection. If frame A is sent before frame B, within the same stream, on the same connection, then frame A MUST arrive before frame B. No assumptions are made about ordering across different streams within the same multiplexed connection.
 1. [FCS](https://en.wikipedia.org/wiki/Frame_check_sequence) is assumed to be in use either at the transport protocol or at each MAC layer hop. But no protection against malicious corruption is assumed.
 
 An implementation MAY "close" a transport connection due to protocol processing. When this occurs, it is assumed that the connection will have no further frames sent and all frames will be ignored.
