@@ -781,7 +781,7 @@ All ERROR frames sent MUST be CONNECTION_ERROR or REJECTED_RESUME error code.
 
 Client side resumption operation starts when the client desires to try to resume and starts a new transport connection. The operation then proceeds as the following:
 
-* Client sends RESUME frame.  The client MUST NOT send any other frame types until resumption succeeds.  The RESUME Identification Token MUST be the token used in the original SETUP frame.  The RESUME Number of Entries indicates the number of resumable streams which Clinet wants to resume.  Every entry in RESUME frame has a corresponding Stream ID to which this entry belongs to and Implied Position which indicates the total number of frames received for this particular stream on the Client side.
+* Client sends RESUME frame.  The client MUST NOT send any other frame types until resumption succeeds.  The RESUME Identification Token MUST be the token used in the original SETUP frame.  The RESUME Number of Entries indicates the number of resumable streams which the Client wants to resume.  Every entry in the RESUME frame has a corresponding Stream ID to which the entry belongs to and an implied Position which indicates the total number of frames received for this particular stream on the Client side.
 * Client waits for either a RESUME_OK or ERROR[CONNECTION_ERROR|REJECTED_RESUME] frame from the server.
 * On receiving an ERROR[REJECTED_RESUME] frame, the client MUST NOT attempt resumption again.
 * On receiving a RESUME_OK, the client:
