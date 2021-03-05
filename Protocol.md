@@ -743,7 +743,7 @@ Due to the large number of active requests for RSocket, it is often necessary to
 
 ### Assumptions
 
-RSocket resumption exists only for specific cases. It is not intended to be an “always works” solution. If resuming operation is not possible, the connection or individual stream may be terminated with an ERROR as specified by the protocol definition.
+RSocket resumption exists only for specific cases. It is not intended to be an “always works” solution. If resuming operation is not possible, the connection or individual streams may be terminated with an ERROR as specified by the protocol definition.
 
 1. Resumption is optional behavior for implementations. But highly suggested. Clients and Servers should assume NO resumption capability by default.
 1. Resumption is an optimistic operation. It may not always succeed.
