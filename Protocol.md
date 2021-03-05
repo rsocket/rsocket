@@ -666,7 +666,7 @@ Frame Contents
        * If set, `onComplete()` or equivalent will be invoked on Subscriber/Observer.
     * (__N__)ext: bit to indicate Next (Payload Data and/or Metadata present).
        * If set, `onNext(Payload)` or equivalent will be invoked on Subscriber/Observer.
-    * (__R__)esume: Indicates whether a stream should be resumable. This property takes effect only if the RSocket connection is resumable. This flag should be set only by the Responder side. Otherwise, flag can be ignored.
+    * (__R__)esume: Indicates whether a stream should be resumable. This property takes effect only if the RSocket connection is resumable. This flag should only be set by a Responder. Otherwise, the flag can be ignored.
 * __Payload Data__: payload for Reactive Streams onNext.
 
 Valid combinations of (C)omplete and (N)ext flags are:
