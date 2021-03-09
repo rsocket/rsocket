@@ -132,7 +132,7 @@ RSocket supports session resumption, allowing a simple handshake to resume a cli
 
 RSocket supports two forms of application-level flow control to help protect both client and server resources from being overwhelmed.
 
-This protocol is designed for use both in datacenter, server-to-server, use cases, and server-to-device use cases over the internet, such as to mobile devices or browsers. 
+This protocol is designed to handle the server-server use case, and the client-server use case. This means that it can be used in data centers, in edge network devices, to call other services, over the internet with mobile devices and browsers, and more. 
 
 ##### "Reactive Streams" `request(n)` Async Pull
 
