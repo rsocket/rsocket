@@ -490,7 +490,7 @@ Frame Contents
 * __Frame Type__: (6 bits) 0x03
 * __Flags__: (10 bits)
      * (__R__)espond with KEEPALIVE or not
-* __Number of Entries__: (24 bits = max value 2^20 = 1,048,576) (optional. Set to all 0s when not supported.)
+* __Number of Entries__: (20 bits = max value 2^20 = 1,048,576) (optional. Set to all 0s when not supported.)
 * __Stream ID__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer representing the resumable stream Identifier. (present if Number of Entries > 0)
 * __Implied Position__: (64 bits = max value 2^64) Unsigned 64-bit value of the individual Stream Resume Last Received Frame Position from the remote party. Value MUST be > 0. (present if Number of Entries > 0)
 * __Data__: Data attached to a KEEPALIVE.
