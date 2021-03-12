@@ -261,7 +261,7 @@ It is RECOMMENDED that Stream ID re-use only be used in combination with resumab
 
 |  Type                          | Value  | Description |
 |:-------------------------------|:-------|:------------|
-| __RESERVED__                                     | 0x00 | __Reserved__ |
+| __RESERVED__                                     | 0x00 | __Reserved__ for any operation involving the connection. |
 | [__SETUP__](#frame-setup)                         | 0x01 | __Setup__: Sent by client to initiate protocol processing. |
 | [__LEASE__](#frame-lease)                         | 0x02 | __Lease__: Sent by Responder to grant the ability to send requests. |
 | [__KEEPALIVE__](#frame-keepalive)                 | 0x03 | __Keepalive__: Connection keepalive. |
