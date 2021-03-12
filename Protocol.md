@@ -7,17 +7,18 @@ Final testing is being done in Java and C++ implementations with goal to release
 
 ## Introduction
 
-Specify an application protocol for [Reactive Streams](http://www.reactive-streams.org/) semantics across an asynchronous, binary
-boundary. For more information, please see [rsocket.io](http://rsocket.io/).
+RSocket, as the name implies, is a socket with the [Reactive Streams](http://www.reactive-streams.org/) semantics, that is where the 'R' comes from, across an asynchronous, binary boundary. 
+
+For more information, please see [rsocket.io](http://rsocket.io/).
 
 RSocket assumes an operating paradigm. These assumptions are:
 - one-to-one communication
 - non-proxied communication. Or if proxied, the RSocket semantics and assumptions are preserved across the proxy.
 - no state preserved across [transport protocol](#transport-protocol) sessions by the protocol
 
-Key words used by this document conform to the meanings in [RFC 2119](https://tools.ietf.org/html/rfc2119).
+Keywords used by this document conform to the meanings in [RFC 2119](https://tools.ietf.org/html/rfc2119).
 
-Byte ordering is big endian for all fields.
+__Byte ordering is big endian for all fields__.
 
 ## Table of Contents
 
@@ -76,8 +77,7 @@ It is up to a server to accept clients of lower versions than what it supports.
 
 ## Data And Metadata
 
-RSocket provides mechanisms for applications to distinguish payload into two types. Data and Metadata. The distinction
-between the types in an application is left to the application. 
+RSocket provides mechanisms for applications to distinguish a payload into two types. Data and Metadata, this distinction is left to the application.
 
 The following are features of Data and Metadata.
 
