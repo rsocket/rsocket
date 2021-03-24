@@ -70,7 +70,7 @@ It is up to a server to accept clients of lower versions than what it supports.
 
 ## Data And Metadata
 
-RSocket provides mechanisms for applications to distinguish a payload into two types. Data and Metadata, this distinction is left to the application.
+RSocket provides mechanisms for applications to differentiate between two types of content within a payload, Data and Metadata, with the distinction left to applications to make use of according to their needs.
 
 The following are features of Data and Metadata.
 
