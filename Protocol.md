@@ -95,7 +95,7 @@ RSocket as specified here has been designed for and tested with TCP, WebSocket, 
 
 ### Framing Protocol Usage
 
-Some of the supported transport protocols for RSocket may not support specific framing that preserves message boundaries. For these protocols, a framing protocol MUST be used with the RSocket frame that prepends the RSocket Frame Length.
+Some supported transport protocols for RSocket may not support specific framing that preserves message boundaries. For these protocols, a framing protocol MUST be used with the RSocket frame that prepends the RSocket Frame Length.
 
 The frame length field MUST be omitted if the transport protocol preserves message boundaries e.g. provides compatible framing. If, however, the transport protocol only provides a stream abstraction or can merge messages without preserving boundaries, or multiple transport protocols may be used, then the frame header MUST be used.
 
