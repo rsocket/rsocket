@@ -1,10 +1,3 @@
-## Status
-
-This protocol is currently a __draft__ for the final specifications. 
-Current version of the protocol is __0.2__ (Major Version: __0__, Minor Version: __2__). This is currently considered a 1.0 Release Candidate. 
-
-Final testing is being done in Java and C++ implementations with goal to release 1.0 in the near future. 
-
 ## Introduction
 
 RSocket, as the name implies, is a socket with the [Reactive Streams](http://www.reactive-streams.org/) semantics, that is where the 'R' comes from, across an asynchronous, binary boundary. 
