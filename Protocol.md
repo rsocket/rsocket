@@ -85,7 +85,7 @@ The following are features of Data and Metadata.
 
 The RSocket protocol uses a lower level transport protocol to carry RSocket frames. A transport protocol MUST provide the following:
 
-1. Unicast [Reliable Delivery](https://en.wikipedia.org/wiki/Reliability_(computer_networking)) Delivery. Meaning that it's a one-to-one transmission from one point in the network to another point; that is, one sender and one receiver. In addition to being "at least once", i.e. at least one copy of the message is guaranteed to be delivered to the recipient.
+1. Unicast [Reliable Delivery](https://en.wikipedia.org/wiki/Reliability_(computer_networking)), i.e. between a single sender and a single receiver with "at least once" message delivery guarantees.
 1. [Connection-Oriented](https://en.wikipedia.org/wiki/Connection-oriented_communication) along with preservation of frame ordering. if Frame A is sent by the same source as Frame B, then Frame A will always arrive before Frame B. No assumptions about ordering across sources is assumed.
 1. Frame Check Sequence, [FCS](https://en.wikipedia.org/wiki/Frame_check_sequence) for short, is assumed to be in use either at the transport protocol or at each MAC layer hop. However, no protection against malicious corruption is assumed.
 
