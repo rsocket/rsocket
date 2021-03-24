@@ -1,6 +1,6 @@
 ## Introduction
 
-RSocket, as the name implies, is a socket with the [Reactive Streams](http://www.reactive-streams.org/) semantics, that is where the 'R' comes from, across an asynchronous, binary boundary. 
+RSocket is an application protocol that provides [Reactive Streams](http://www.reactive-streams.org/) semantics across a network, asynchronous, binary boundary.
 
 For more information, please see [rsocket.io](http://rsocket.io/).
 
