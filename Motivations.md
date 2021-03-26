@@ -4,7 +4,7 @@ Large distributed systems are often implemented in a modular fashion by differen
 
 Architectural patterns documented in the [Reactive Manifesto](http://www.reactivemanifesto.org) and implemented in libraries such as [Reactive Streams](http://www.reactive-streams.org) and [Reactive Extensions](http://reactivex.io) favor asynchronous messaging and embrace communication patterns beyond request/response. This "RSocket" protocol is a formal communication protocol that embraces the "reactive" principles.
 
-Following are motivations for defining a new protocol:
+This section discusses motivations for defining a new protocol.
 
 #### Message Driven
 
@@ -130,21 +130,32 @@ RSocket supports session resumption, allowing a simple handshake to resume a cli
 
 #### Application Flow Control
 
-RSocket supports two forms of application-level flow control to help protect both client and server resources from being overwhelmed.
+RSocket provides application-level flow control that helps to protect both clients and servers from being overwhelmed.
+It is designed both for server-to-server communication within a data center, and for device-to-server scenarios involving
+browsers, mobile phones, and others. Both scenarios can benefit from application flow control.
 
-This protocol is designed for use both in datacenter, server-to-server, use cases, as well as server-to-device use cases over the internet, such as to mobile devices or browsers. 
 
-##### "Reactive Streams" `request(n)` Async Pull
+##### "Reactive Streams" (Per-Stream) Back Pressure
 
-This first form of flow control is suited to both server-to-server and server-to-device use cases. It is inspired by the Reactive Streams [Subscription.request(n)](https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/README.md#3-subscription-code) behavior. [RxJava](https://github.com/ReactiveX/RxJava/), [Reactor](https://github.com/reactor/reactor), and [Akka Streams](http://doc.akka.io/docs/akka/2.4/scala/stream/index.html) are examples of implementations using this form of "async pull-push" flow control.
+The first form of flow control is back pressure applied on a given stream. It is a type of "async pull-push" flow control inspired by the Reactive Streams
+[Subscription.request(n)](https://github.com/reactive-streams/reactive-streams-jvm/blob/master/README.md#3-subscription-code) mechanism. 
+Reactive Streams libraries such as
+[Reactor](https://github.com/reactor/reactor), [RxJava](https://github.com/ReactiveX/RxJava/),
+[Akka Streams](http://doc.akka.io/docs/akka/2.4/scala/stream/index.html) and many others implement this back pressure mechanism.
+This mechanism enables servers and devices to push back on the flow of payloads from the remote end within a given stream. 
 
-RSocket allows for the `request(n)` signal to be composed over network boundaries from requester to responder (typically client to server). This controls the flow of emission from responder to requestor using Reactive Streams semantics at the application level and enables use of bounded buffers so rate of flow adjusts to application consumption and not rely solely on transport and network buffering.
+RSocket enables for the `request(n)` signal to be sent across the network from requester to responder (typically from client to server).
+This controls the flow of payloads from the responder to the requester based on Reactive Streams semantics at the application level,
+which enables the use of bounded buffers so the rate of flow adjusts to application consumption and does not rely solely on transport and network buffering.
 
-This same data type and approach has been adopted into Java 9 in the `java.util.concurrent.Flow` [suite of types](https://docs.oracle.com/javase/9/docs/api/java/util/concurrent/Flow.Subscription.html).
+##### Leasing (Connection-level Back Pressure)
 
-##### Leasing
+The second form of flow control is about limiting the overall number of requests and streams within a given connection.
+This can be used in any scenario where a responder wants to limit on the number of concurrent requests.
+When enabled, a responder (typically but not necessarily a server) can issue leases to the requester based on its knowledge of its own capacity in order to control request rates.
 
-The second form of flow control is primarily focused on server-to-server use cases in a data center. When enabled, a responder (typically a server) can issue leases to the requester based upon its knowledge of its capacity in order to control requests rates. On the requester side, this enables application level load balancing for sending messages only to responders (servers) that have signalled capacity. This signal from server to client allows for more intelligent routing and load balancing algorithms in data centers with clusters of machines. 
+This can also be used to enable more intelligent routing and load balancing algorithms in data centers with clusters of machines. 
+For example loadbalanced servers (responders) can signal their capacity to a proxy (requester).
 
 
 #### Polyglot Support
