@@ -1073,6 +1073,7 @@ If the Requester wants to cancel sending a fragmented sequence, it MAY send a CA
 Frame length = 16MB
 (M)etadata present = 1
 (F)ollows = 1 (fragments coming)
+(N)ext = 1
 (C)omplete = 0
 Metadata Length = 16MB
 
