@@ -1102,7 +1102,7 @@ Frame length = 13MB
 13MB of Data
 ```
 
-__Note__, `complete` flag MUST be set only in the last FRAME which does not have `follows` flag set to indicate that the whole sequence is a Request Channel with `complete` flag.
+__Note__, the `complete` flag MUST be set only in the last FRAME which does not have the `follows` flag set in order to indicate that the entire sequence is a `PAYLOAD` with `next` and `complete` both set.
 
 If the Requester wants to cancel sending a fragmented sequence, it MAY send a CANCEL frame without finishing delivery of the fragments. 
 
