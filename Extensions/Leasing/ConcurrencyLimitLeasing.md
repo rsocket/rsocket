@@ -28,7 +28,7 @@ Lease provide a powerful mechanism for `Server` to control it's stability. Howev
 * __Flags__: (10 bits)
      * (__M__)etadata: Metadata present
 * __Time-To-Live (TTL)__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer of Time (in milliseconds) for validity of LEASE from time of reception. Value MUST be > 0.
-* __Concurrency Limit__: (63 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit long of Number of Max Concurrent Requests at a time. Value MUST be >= 0. 
+* __Concurrency Limit__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit long of Number of Max Concurrent Requests at a time. Value MUST be >= 0. 
 
 A Responder implementation MAY stop all further requests by sending a LEASE with a value of 0 for __Concurrency Limit__.
 
