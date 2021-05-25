@@ -984,7 +984,7 @@ Frame length = 13MB
 
 If the sender (Requester or Responder) wants to cancel sending a fragmented sequence, it MAY send a CANCEL frame without finishing delivery of the fragments. 
 
-##### Payload with `next` and `complete` flags set
+While in a Request-Stream, `PAYLOAD` frames have only the `(N)ext` flag, in a `Request-Response` the `PAYLOAD` frame will also have a `complete` flag as shown below:
 
 ```
 -- PAYLOAD frame 1
