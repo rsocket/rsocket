@@ -6,7 +6,7 @@ _This extension specification is currently incubating.  While incubating the ver
 There are a number of situations where an arbitrary collection of discrete metadata types should be attached to frame.  For example, a request frame may want to include both routing metadata as well as tracing metadata.  This extension specification provides an interoperable structure for metadadata payloads to contain multiple discrete metadata types.  It is designed such that if a consumer of the metadata is unaware of a particular type, it can be safely skipped and the next one read.
 
 ## Metadata Payload
-This metadata type is intended to be used per stream, and not per connection nor individual payloads and as such it **MUST** only be used in frame types used to initiate interactions.  This includes [`REQUEST_FNF`][rf], [`REQUEST_RESPONSE`][rr], [`REQUEST_STREAM`][rs], and [`REQUEST_CHANNEL`][rc].  Multiple metadata payloads with the same MIME type are allowed.  The order of metadata payloads MUST be preserved when presented to responders.  The [`SETUP` Frame][s] Metadata MIME Type is `message/x.rsocket.composite-metadata.v0`.
+This metadata type is intended to be used per connection or per stream, and not per payloads. As such it **MUST** only be used in  [`SETUP` frame][s] or frame types used to initiate interactions.  This includes [`REQUEST_FNF`][rf], [`REQUEST_RESPONSE`][rr], [`REQUEST_STREAM`][rs], and [`REQUEST_CHANNEL`][rc].  Multiple metadata payloads with the same MIME type are allowed.  The order of metadata payloads MUST be preserved when presented to responders.  The [`SETUP` Frame][s] Metadata MIME Type is `message/x.rsocket.composite-metadata.v0`.
 
 [rc]: ../Protocol.md#frame-request-channel
 [rf]: ../Protocol.md#frame-fnf
