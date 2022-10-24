@@ -929,7 +929,7 @@ The possible sequences with LEASE are below.
 1. Server-side Request, Server-side __accepts__ SETUP
     * Client connects & sends SETUP with __L__ flag
     * Server accepts SETUP, sends back LEASE frame
-    * Client sends LEASE frame
+    * Client s
     * Server sends REQUEST
 1. Server-side Request, Server-side __rejects__ SETUP
     * Client connects & sends SETUP with __L__ flag
@@ -940,6 +940,9 @@ The possible sequences with LEASE are below.
 PAYLOAD frames and all REQUEST frames may represent a large object and MAY need to be fragmented to fit within the Frame Data size. When this occurs, the __F__ flag indicates if more fragments follow the current frame (or not).
 
 Fragmentation does not change the request(n) or lease counts. In other words, a fragmented PAYLOAD frame counts as a single request(n) credit, and a request counts against a single lease count, regardless of how many fragments the frame is split into.
+
+It is RECOMMENDED That when implementations request a maximum fragment size, the size provided is assumed to include the Frame Header of the frame containing the fragment.
+
 
 #### PAYLOAD Frame
 
