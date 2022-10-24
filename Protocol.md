@@ -941,6 +941,8 @@ PAYLOAD frames and all REQUEST frames may represent a large object and MAY need 
 
 Fragmentation does not change the request(n) or lease counts. In other words, a fragmented PAYLOAD frame counts as a single request(n) credit, and a request counts against a single lease count, regardless of how many fragments the frame is split into.
 
+It is RECOMMENDED That when implementations request a maximum fragment size, the size provided is assumed to include the Frame Header of the frame containing the fragment.
+
 #### PAYLOAD Frame
 
 When a PAYLOAD frame needs to be fragmented, a sequence of PAYLOAD frames is delivered using the (F)ollows flag.
