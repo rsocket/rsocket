@@ -134,6 +134,8 @@ When using a transport protocol that does not provide compatible framing, the Fr
 
 __NOTE__: Byte ordering is big endian.
 
+Regardless of whether the Frame Length field is required, all RSocket Frames (Header + Payload) have a size limit of 16,777,215 bytes.
+
 ### Frame Header Format
 
 RSocket frames begin with a RSocket Frame Header. The general layout is given below.
