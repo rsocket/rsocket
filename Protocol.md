@@ -536,7 +536,7 @@ Frame Contents
     +-----------+-+-+-+-------------+-------------------------------+
     |Frame Type |0|M|F|    Flags    |
     +-------------------------------+-------------------------------+
-    |0|                    Initial Request N                        |
+    |U|                    Initial Request N                        |
     +---------------------------------------------------------------+
                           Metadata & Request Data
 ```
@@ -546,6 +546,7 @@ Frame Contents
     * (__M__)etadata: Metadata present
     * (__F__)ollows: More fragments follow this fragment.
 * __Initial Request N__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer representing the initial number of items to request. Value MUST be > 0.
+    * if `U` bit is set, __Initial Request N__ value SHOULD be equal to max value and request is unbounded. All REQUEST_N frames SHOULD be ignored.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
 See [Flow Control: Reactive Streams Semantics](#flow-control-reactive-streams) for more information on RequestN behavior.
@@ -563,7 +564,7 @@ Frame Contents
     +-----------+-+-+-+-+-----------+-------------------------------+
     |Frame Type |0|M|F|C|  Flags    |
     +-------------------------------+-------------------------------+
-    |0|                    Initial Request N                        |
+    |U|                    Initial Request N                        |
     +---------------------------------------------------------------+
                            Metadata & Request Data
 ```
@@ -575,6 +576,7 @@ Frame Contents
     * (__C__)omplete: bit to indicate stream completion.
 	   * If set, `onComplete()` or equivalent will be invoked on Subscriber/Observer.
 * __Initial Request N__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer representing the initial request N value for channel. Value MUST be > 0.
+    * if `U` bit is set, __Initial Request N__ value SHOULD be equal to max value and request is unbounded. All REQUEST_N frames SHOULD be ignored.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
 A requester MUST send only __one__ REQUEST_CHANNEL frame. Subsequent messages from requester to responder MUST be sent as PAYLOAD frames. 
@@ -596,12 +598,13 @@ Frame Contents
     +-----------+-+-+---------------+-------------------------------+
     |Frame Type |0|0|     Flags     |
     +-------------------------------+-------------------------------+
-    |0|                         Request N                           |
+    |U|                         Request N                           |
     +---------------------------------------------------------------+
 ```
 
 * __Frame Type__: (6 bits) 0x08
 * __Request N__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer representing the number of items to request. Value MUST be > 0.
+    * if `U` bit is set, __Request N__ value SHOULD be equal to max value and request becomes unbounded. Future REQUEST_N frames SHOULD be ignored.
 
 See Flow Control: Reactive Streams Semantics for more information on RequestN behavior.
 
@@ -1194,9 +1197,9 @@ There are multiple flow control mechanics provided by the protocol.
 
 Credits are cumulative. Once credits are granted from Requester to Responder, they cannot be revoked. For example, sending `request(3)` and `request(2)` accumulates to a value of 5, allowing the Responder to send 5 PAYLOADs.
 
-Please note that this explicitly does NOT follow rule number 17 in https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/README.md#3-subscription-code
-
-While Reactive Streams support a demand of up to 2^63-1, and treats 2^63-1 as a magic number signaling to not track demand, this is not the case for RSocket. RSocket prioritizes byte size and only uses 4 bytes instead of 8 so the magic number is unavailable.
+Please note that while Reactive Streams support a demand of up to 2^63-1, and treats 2^63-1 as a magic number signaling to not track demand, this is not the case for RSocket. 
+RSocket prioritizes byte size and only uses 4 bytes instead of 8 so the magic number is unavailable.
+To overcome this, RSocket uses `U` bit in REQUEST_N, REQUEST_STREAM and REQUEST_CHANNEL frames to specify `unbounded` mode which is specified in rule number 17 in https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/README.md#3-subscription-code  
 
 The Requester and the Responder MUST respect the Reactive Streams semantics.
 
