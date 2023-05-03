@@ -953,11 +953,14 @@ When a PAYLOAD is fragmented, the Metadata MUST be transmitted completely before
 
 For example, a single PAYLOAD with 20MB of Metadata and 25MB of Data that is fragmented into 3 frames:
 
+##### Payload with `next` flag set
+
 ```
 -- PAYLOAD frame 1
 Frame length = 16MB
 (M)etadata present = 1
 (F)ollows = 1 (fragments coming)
+(N)ext = 1
 Metadata Length = 16MB
 
 16MB of METADATA
@@ -967,6 +970,7 @@ Metadata Length = 16MB
 Frame length = 16MB
 (M)etadata present = 1
 (F)ollows = 1 (fragments coming)
+(N)ext = 1
 Metadata Length = 4MB
 
 4MB of METADATA
@@ -976,10 +980,51 @@ Metadata Length = 4MB
 Frame length = 13MB
 (M)etadata present = 0
 (F)ollows = 0
+(N)ext = 1
 
 0MB of METADATA
 13MB of Data
 ```
+
+If the sender (Requester or Responder) wants to cancel sending a fragmented sequence, it MAY send a CANCEL frame without finishing delivery of the fragments. 
+
+While in a Request-Stream, `PAYLOAD` frames have only the `(N)ext` flag, in a `Request-Response` the `PAYLOAD` frame will also have a `complete` flag as shown below:
+
+```
+-- PAYLOAD frame 1
+Frame length = 16MB
+(M)etadata present = 1
+(F)ollows = 1 (fragments coming)
+(N)ext = 1
+(C)omplete = 0
+Metadata Length = 16MB
+
+16MB of METADATA
+0MB of Data
+
+-- PAYLOAD frame 2
+Frame length = 16MB
+(M)etadata present = 1
+(F)ollows = 1 (fragments coming)
+(N)ext = 1
+(C)omplete = 0
+Metadata Length = 4MB
+
+4MB of METADATA
+12MB of Data
+
+-- PAYLOAD frame 3
+Frame length = 13MB
+(M)etadata present = 0
+(F)ollows = 0
+(N)ext = 1
+(C)omplete = 1
+
+0MB of METADATA
+13MB of Data
+```
+
+__Note__, the `complete` flag MUST be set only in the last FRAME which does not have the `follows` flag set in order to indicate that the entire sequence is a `PAYLOAD` with `next` and `complete` both set.
 
 If the sender (Requester or Responder) wants to cancel sending a fragmented sequence, it MAY send a CANCEL frame without finishing delivery of the fragments. 
 
@@ -990,6 +1035,8 @@ When REQUEST_RESPONSE, REQUEST_FNF, REQUEST_STREAM, or REQUEST_CHANNEL frames ne
 When fragmented, the Metadata MUST be transmitted completely before the Data. 
 
 For example, a single PAYLOAD with 20MB of Metadata and 25MB of Data that is fragmented into 3 frames:
+
+##### Request Response
 
 ```
 -- REQUEST_RESPONSE frame 1
@@ -1005,6 +1052,7 @@ Metadata Length = 16MB
 Frame length = 16MB
 (M)etadata present = 1
 (F)ollows = 1 (fragments coming)
+(N)ext = 1
 Metadata Length = 4MB
 
 4MB of METADATA
@@ -1014,10 +1062,51 @@ Metadata Length = 4MB
 Frame length = 13MB
 (M)etadata present = 0
 (F)ollows = 0
+(N)ext = 1
 
 0MB of METADATA
 13MB of Data
 ```
+
+If the Requester wants to cancel sending a fragmented sequence, it MAY send a CANCEL frame without finishing delivery of the fragments. 
+
+##### Request Channel with `complete` flag
+
+```
+-- REQUEST_CHANNEL frame 1
+Frame length = 16MB
+(M)etadata present = 1
+(F)ollows = 1 (fragments coming)
+(N)ext = 1
+(C)omplete = 0
+Metadata Length = 16MB
+
+16MB of METADATA
+0MB of Data
+
+-- PAYLOAD frame 2
+Frame length = 16MB
+(M)etadata present = 1
+(F)ollows = 1 (fragments coming)
+(N)ext = 1
+(C)omplete = 0
+Metadata Length = 4MB
+
+4MB of METADATA
+12MB of Data
+
+-- PAYLOAD frame 3
+Frame length = 13MB
+(M)etadata present = 0
+(F)ollows = 0
+(N)ext = 1
+(C)omplete = 1
+
+0MB of METADATA
+13MB of Data
+```
+
+__Note__, the `complete` flag MUST be set only in the last FRAME which does not have the `follows` flag set in order to indicate that the entire sequence is a `PAYLOAD` with `next` and `complete` both set.
 
 If the Requester wants to cancel sending a fragmented sequence, it MAY send a CANCEL frame without finishing delivery of the fragments. 
 
